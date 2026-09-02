@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="uz">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- The same mark as the header, from the same arch construction. -->
+    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+    <meta name="description" content="Youth Capital — inson kapitalini rivojlantirish platformasi" />
+    <!-- Kept in step with the active theme by ThemeProvider. -->
+    <meta name="theme-color" content="#F5EFEB" />
+    <script>
+      // Applied before first paint: reading the stored theme inside React would
+      // flash the default palette on every reload.
+      try {
+        var stored = localStorage.getItem("yk_theme");
+        if (stored === "navy" || stored === "berry") {
+          document.documentElement.dataset.theme = stored;
+        }
+      } catch (error) {
+        /* private mode — fall back to the default theme */
+      }
+    </script>
+    <title>Youth Capital</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

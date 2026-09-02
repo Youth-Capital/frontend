@@ -1,0 +1,277 @@
+/**
+ * The deep-violet surface: the dashboard band, the landing hero, the sign-in
+ * panel.
+ *
+ * The band keeps a fixed colour in both themes, the way a hero image does —
+ * a dark block on a pale page is the whole idea, and one that followed the
+ * theme would stop being a block at all. That means its text cannot come from
+ * the ink ramp, which flips: a band that stayed dark would end up with dark
+ * text on it in the dark theme.
+ *
+ * The colour itself was measured into place. Two earlier bands were rejected
+ * from opposite ends: #221340 at 16% lightness read as too dark, #6C4AB6 at
+ * 50% as too bright across a full-bleed hero. This is brand-900 at 29% — a
+ * step already in the ramp, sitting between the two.
+ *
+ * The text is solved against the band's *lightest point*, not its base colour.
+ * That distinction matters and was missed twice: the lit corners paint the
+ * band up to #563B92, roughly 30% lighter than the base, and tones solved
+ * against the base alone fell to 3.26:1 exactly where the light lands. Solved
+ * against the worst case they hold everywhere on the surface — 4.5:1 over the
+ * brightest corner, 6.2:1 over the base — and white sits at 8.6:1 at its
+ * worst.
+ *
+ * Which also means: brighten a corner and these have to be solved again.
+ *
+ * On the old near-black band the two secondary tones could differ in
+ * lightness. On the brand purple there is not that much room, so they are told
+ * apart by saturation instead — one leans purple, one is nearly neutral — and
+ * both clear 4.5:1. Reaching for a dimmer grey would have put stage labels
+ * below the line for small text, which is where they were heading.
+ */
+
+/*
+ * Wrapped in the components layer on purpose.
+ *
+ * These are unlayered rules otherwise, and an unlayered rule beats a
+ * Tailwind utility whatever the source order — so `position: relative`
+ * here overruled `sticky` on the landing header and the bar scrolled
+ * away with the page. Inside the layer, a utility wins again.
+ */
+@layer components {
+  .deep {
+    --band: #3f2b6a;
+    --band-ink: #ffffff;
+    --band-muted: #c5b4e2;
+    --band-dim: #bfb9c8;
+    /* Markers and buttons on the band, and the text that sits inside them. */
+    --band-accent: #ffffff;
+    --band-on-accent: #3f2b6a;
+
+    /*
+     * The warm accent: the lamp in the journey, the stage you are standing on.
+     *
+     * Two tokens, because one colour cannot do both jobs in both themes.
+     * `--band-warm` is the fill — a ring, a glow, a dot — and stays the same
+     * bright amber everywhere, since a fill answers to no contrast rule.
+     * `--band-warm-ink` is the amber that may carry text, and it is solved per
+     * theme: on this ground the bright amber measures 6.98:1 and is fine as it
+     * is; on the light band it measures 1.48:1, which is not a colour, it is a
+     * suggestion of one.
+     */
+    --band-warm: #ffb86b;
+    --band-warm-ink: #ffb86b;
+
+    /*
+     * The ink ramp is rebound inside this surface.
+     *
+     * Shared controls — the language switcher, the theme toggle, the header
+     * links — are written against the ink tokens, which are solved for a pale
+     * page. Dropped on this block in the light theme they came out dark on
+     * dark. Rebinding the ramp here keeps one definition of each control
+     * instead of a second dark variant of every one of them, and the values
+     * come from the same four solved band colours as everything else.
+     */
+    --color-ink-100: color-mix(in oklab, var(--band-dim) 22%, transparent);
+    --color-ink-200: color-mix(in oklab, var(--band-dim) 45%, transparent);
+    --color-ink-300: color-mix(in oklab, var(--band-dim) 60%, transparent);
+    --color-ink-400: var(--band-dim);
+    --color-ink-500: var(--band-muted);
+    --color-ink-600: var(--band-muted);
+    --color-ink-700: var(--band-ink);
+    --color-ink-800: var(--band-ink);
+    --color-ink-900: var(--band-ink);
+
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    color: var(--band-ink);
+    /* Light thrown from behind the block, not a gradient painted on it. */
+    /* Depth from our own ramp — brand-500 lit from one corner, brand-800
+       settling at the other — rather than a second hue laid over the brand. */
+    background:
+      radial-gradient(
+        46% 120% at 14% 0%,
+        color-mix(in oklab, #5d3f9d 78%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        42% 110% at 88% 10%,
+        color-mix(in oklab, #7453bd 42%, transparent),
+        transparent 68%
+      ),
+      radial-gradient(
+        62% 95% at 50% 120%,
+        color-mix(in oklab, #2b1c4c 70%, transparent),
+        transparent 74%
+      ),
+      var(--band);
+  }
+
+  /* The rail the stages sit on. */
+  .journey-band {
+    border-radius: var(--radius-card);
+  }
+
+  .journey-rail {
+    background: color-mix(in oklab, var(--band-dim) 45%, transparent);
+  }
+
+  .journey-rail-done {
+    background: var(--band-accent);
+  }
+
+  .journey-node {
+    border: 2px solid color-mix(in oklab, var(--band-dim) 70%, transparent);
+    background: var(--band);
+    transition: transform 200ms ease;
+  }
+
+  .journey-node[data-state="done"] {
+    border-color: var(--band-accent);
+    background: var(--band-accent);
+    color: var(--band-on-accent);
+  }
+
+  .journey-node[data-state="current"] {
+    border-color: var(--band-warm);
+    background: var(--band);
+    color: var(--band-warm-ink);
+    box-shadow:
+      0 0 0 4px color-mix(in oklab, var(--band-warm) 22%, transparent),
+      0 0 22px color-mix(in oklab, var(--band-warm) 50%, transparent);
+  }
+
+  /*
+   * The track past where you have got to is dotted, not faint.
+   *
+   * A dimmer solid line says "this part is less important"; a dotted one says
+   * "not walked yet", which is the actual difference between the two halves of
+   * this rail.
+   */
+  .journey-rail-todo {
+    background-image: radial-gradient(
+      circle,
+      color-mix(in oklab, var(--band-dim) 70%, transparent) 40%,
+      transparent 40%
+    );
+    background-size: 6px 2px;
+    background-repeat: repeat-x;
+  }
+
+  /**
+   * The map panel needs its own edge.
+   *
+   * In the dark theme the card surface and the page are #3C3650 and #2A2634,
+   * and inside a card the map would sit on #3C3650 against #3B354E — 1.02:1.
+   * The panel simply vanished, and only its contents showed anything was there.
+   */
+  .skills-map {
+    background: var(--color-surface);
+    border: 1px solid color-mix(in oklab, var(--color-ink-300) 45%, transparent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .journey-node {
+      transition: none;
+    }
+  }
+}
+
+/*
+ * The light-theme experiment: the band inverted.
+ *
+ * What is violet in the dark theme becomes pale here, and what is white
+ * becomes violet.
+ *
+ * Solved against #EAE4F5 — the darkest point this band actually paints — not
+ * against its nominal colour. Measured on the rendered page the first pair
+ * came out at 4.20 and 4.30, because the gradients below darken parts of the
+ * surface: the same mistake as on the dark band, in mirror image. Against the
+ * worst point they hold 4.8:1, and better than 5:1 over the flat colour.
+ *
+ * The ink-ramp rebinding above is undone: it exists so shared controls
+ * written for a pale page survive a dark block, and on a pale block they
+ * already work as written.
+ *
+ * Written against :not([data-theme="dark"]) rather than [data-theme="light"]
+ * so it also covers the unstamped state, where nothing has chosen yet.
+ */
+:root:not([data-theme="dark"]) .deep {
+  --band: #f2edfb;
+  --band-ink: #442b70;
+  --band-muted: #744fb4;
+  --band-dim: #6a5e7d;
+  --band-accent: #6c4ab6;
+  --band-on-accent: #ffffff;
+
+  /* Same amber for the fill; a solved one for text. #8c653b is the same hue
+     walked down until it clears 4.5:1 against this band, measured, not picked. */
+  --band-warm: #ffb86b;
+  --band-warm-ink: #8c653b;
+
+  /* The light road is a solid surface, not a glow on black, so the scrim has
+     to hold much further across before it lets the picture through. */
+  --band-scrim-solid: 46%;
+  --band-scrim-mid: 72%;
+  --band-scrim-end: 95%;
+
+  --color-ink-100: initial;
+  --color-ink-200: initial;
+  --color-ink-300: initial;
+  --color-ink-400: initial;
+  --color-ink-500: initial;
+  --color-ink-600: initial;
+  --color-ink-700: initial;
+  --color-ink-800: initial;
+  --color-ink-900: initial;
+
+  background:
+    radial-gradient(
+      46% 120% at 14% 0%,
+      color-mix(in oklab, #ffffff 75%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      42% 110% at 88% 10%,
+      color-mix(in oklab, #e3d8f7 60%, transparent),
+      transparent 68%
+    ),
+    radial-gradient(
+      62% 95% at 50% 120%,
+      color-mix(in oklab, #ded2f4 55%, transparent),
+      transparent 74%
+    ),
+    var(--band);
+}
+
+/* One artwork per theme; only the matching one is ever displayed. */
+/*
+ * The scrim that keeps the copy on flat ground.
+ *
+ * How far it stays solid is a per-theme question, not a constant: the dark
+ * artwork is dark exactly where the words are, so it can release early, while
+ * the light road is a mid-violet surface that reaches much further left. With
+ * one shared setting the light theme dropped the lead paragraph to 1.89:1.
+ */
+.deep-scrim {
+  background: linear-gradient(
+    var(--band-scrim-angle, 120deg),
+    var(--band) 0%,
+    var(--band) var(--band-scrim-solid, 34%),
+    color-mix(in oklab, var(--band) 52%, transparent) var(--band-scrim-mid, 62%),
+    transparent var(--band-scrim-end, 88%)
+  );
+}
+
+.deep-art-light {
+  display: none;
+}
+
+:root:not([data-theme="dark"]) .deep-art-light {
+  display: block;
+}
+
+:root:not([data-theme="dark"]) .deep-art-dark {
+  display: none;
+}

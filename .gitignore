@@ -1,0 +1,18 @@
+# Secrets — never commit. Vite inlines anything named VITE_* into the bundle,
+# so a key in .env here would ship to the browser, not stay on a server.
+.env
+.env.*
+!.env.example
+
+# Dependencies and build output
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini

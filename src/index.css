@@ -1,0 +1,284 @@
+@import "tailwindcss";
+@import "./fonts.css";
+
+/*
+ * Design tokens.
+ *
+ * Generated from the chosen brand palette (see scripts). Tailwind emits
+ * these as CSS variables and its utilities reference them through var(), so
+ * overriding the same names under [data-theme] re-themes every utility in the
+ * product at runtime — no class rewriting, no rebuild.
+ *
+ * ink-50 is the page background and ink-200 is the border colour, which is why
+ * existing `bg-ink-50` / `border-ink-200` markup follows the theme for free.
+ */
+@theme {
+  --color-brand-50: #EDE9F5;
+  --color-brand-100: #E3DDF0;
+  --color-brand-200: #D0C5E7;
+  --color-brand-300: #B8A8DC;
+  --color-brand-400: #9B84CD;
+  --color-brand-500: #8164C0;
+  --color-brand-600: #6C4AB6;
+  --color-brand-700: #5D3F9D;
+  --color-brand-800: #4E3583;
+  --color-brand-900: #3F2B6A;
+
+  --color-ink-50: #F8F7FF;
+  --color-ink-100: #ECE8FA;
+  --color-ink-200: #DBD4F4;
+  --color-ink-300: #C9C2E1;
+  --color-ink-400: #918D99;
+  --color-ink-500: #746F7F;
+  --color-ink-600: #5D5867;
+  --color-ink-700: #4B4754;
+  --color-ink-800: #3E3A46;
+  --color-ink-900: #2F2B35;
+
+  --color-accent: #FFB86B;
+  /*
+   * The amber that may carry meaning, not just decoration.
+   *
+   * `--color-accent` is the brand amber and it is a fill for warm surfaces.
+   * The moment amber has to *encode* something — a bar whose length is the
+   * message — it answers to 3:1 against the page like any other meaningful
+   * graphic, and on this pale ground the brand amber measures 1.60:1. This is
+   * the same hue walked down until it clears, measured rather than picked.
+   */
+  --color-accent-solid: #b8854d;
+
+  /*
+   * A deep ground that stays deep in the dark theme too.
+   *
+   * The brand ramp inverts under [data-theme="dark"] — brand-900 becomes a
+   * pale lilac — so a header built from it would flip to light and take its
+   * white numeral down with it (white on #D0C2EF is 1.35:1). This one is
+   * declared identically in both themes because it is not a step on a ramp,
+   * it is a surface the design asks to be dark on purpose.
+   */
+  --color-deep: #3F2B6A;
+  --color-surface: #FFFFFF;
+  --color-on-colour: #F1F0F3;
+  --color-success: #2B7A53;
+  --color-success-soft: #E5F3EC;
+  --color-warning: #90631A;
+  --color-warning-soft: #F7EEE1;
+  --color-danger: #C03026;
+  --color-danger-soft: #F6E3E2;
+  --color-info: #7453BD;
+  --color-info-soft: #E9E5F3;
+
+  /* Manrope for the interface: geometric, wide apertures, tabular figures
+     that keep score columns aligned. Playfair Display for page titles —
+     serif against sans is the strongest typographic contrast available, and
+     it is what carries personality without touching legibility of the data. */
+  --font-sans: "Manrope", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Playfair Display", "Manrope", Georgia, "Times New Roman",
+    serif;
+
+  /* Softer corners throughout. Nested elements step down so a list row
+     inside a card does not fight the card's own radius. */
+  --radius-card: 1.25rem;
+  --radius-control: 0.75rem;
+}
+
+/* Dark — overrides the same variable names. */
+:root[data-theme="dark"] {
+  --color-brand-50: #160E2A;
+  --color-brand-100: #20133E;
+  --color-brand-200: #331D66;
+  --color-brand-300: #4A2798;
+  --color-brand-400: #693DCD;
+  --color-brand-500: #9373DB;
+  --color-brand-600: #B49EE6;
+  --color-brand-700: #BDAAE9;
+  --color-brand-800: #C6B6EC;
+  --color-brand-900: #D0C2EF;
+
+  --color-ink-50: #2A2634;
+  --color-ink-100: #3B354E;
+  --color-ink-200: #4A4364;
+  --color-ink-300: #726B88;
+  --color-ink-400: #868290;
+  --color-ink-500: #A6A2AF;
+  --color-ink-600: #C4C2CB;
+  --color-ink-700: #DFDEE3;
+  --color-ink-800: #F5F4F6;
+  --color-ink-900: #F7F7F8;
+
+  --color-accent: #FFB86B;
+  /* 8.64:1 on this ground: the brand amber needs no adjustment here. */
+  --color-accent-solid: #FFB86B;
+  /* Deliberately unchanged: a deep surface stays deep in both themes. */
+  --color-deep: #3F2B6A;
+  --color-surface: #3C3650;
+  --color-on-colour: #1F1C24;
+  --color-success: #3DAF76;
+  --color-success-soft: #193929;
+  --color-warning: #CC9024;
+  --color-warning-soft: #403012;
+  --color-danger: #E36255;
+  --color-danger-soft: #401511;
+  --color-info: #9672DC;
+  --color-info-soft: #23153D;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-ink-50 text-ink-800 antialiased;
+    font-family: var(--font-sans);
+  }
+
+  /* Display face on page titles only. Applying it to every card header
+     turned dense screens into a magazine spread. */
+  h1,
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.015em;
+  }
+
+  /* Figures line up in tables and score columns. */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Visible focus for keyboard users — accessibility, TZ §12. */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-600;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-ink-300;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-(--radius-card) border border-ink-200 bg-surface shadow-sm;
+  }
+
+  .skeleton {
+    @apply animate-pulse rounded-md bg-ink-200;
+  }
+
+  /* ----------------------------------------------------------------------
+     Landing cards.
+
+     A considered lift rather than a product-page shadow: the card rises three
+     pixels, its border warms, and a short warm rule lights along its top edge.
+     The warm line is the same signal the evidence ladder uses, so attention is
+     marked with the colour the page already spends on meaning — and it arrives
+     only on attention, which is why it does not compete at rest.
+
+     Everything here is a transform or a colour. The global reduced-motion
+     block at the bottom of this file flattens all of it to a near-zero
+     duration, so the hover still resolves for anyone who asked for less.
+     ---------------------------------------------------------------------- */
+  .yc-card {
+    position: relative;
+    transition:
+      transform 260ms cubic-bezier(0.2, 0.7, 0.3, 1),
+      border-color 260ms ease,
+      box-shadow 260ms ease;
+  }
+
+  .yc-card:hover,
+  .yc-card:focus-within {
+    transform: translateY(-3px);
+    border-color: color-mix(
+      in oklab,
+      var(--color-accent-solid) 55%,
+      var(--color-ink-200)
+    );
+    box-shadow: 0 12px 30px -14px
+      color-mix(in oklab, var(--color-brand-900) 45%, transparent);
+  }
+
+  .yc-card::after {
+    background: var(--color-accent-solid);
+    border-radius: 999px;
+    content: "";
+    height: 2px;
+    inset-inline: 1.5rem;
+    position: absolute;
+    top: -1px;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 340ms cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+
+  .yc-card:hover::after,
+  .yc-card:focus-within::after {
+    transform: scaleX(1);
+  }
+
+  /* The arch draws itself, ring by ring.
+
+     The stroke length is in viewBox units, and the outer arc of a span-100
+     two-centred arch is a little over 300 of them; 420 covers every ring with
+     room to spare, which is what a dash offset needs to start fully hidden. */
+  .yc-arch path {
+    animation: yc-arch-draw 1000ms cubic-bezier(0.3, 0.8, 0.3, 1) forwards;
+    animation-delay: var(--yc-stagger, 0ms);
+    stroke-dasharray: 420;
+    stroke-dashoffset: 420;
+  }
+
+  /* Rings inside one arch follow each other; the card's own stagger is added
+     on top so the row draws left to right rather than three at once. */
+  .yc-arch path:nth-child(2) {
+    animation-delay: calc(var(--yc-stagger, 0ms) + 170ms);
+  }
+
+  .yc-arch path:nth-child(3) {
+    animation-delay: calc(var(--yc-stagger, 0ms) + 340ms);
+  }
+
+  .yc-card:hover .yc-arch {
+    color: var(--color-accent-solid);
+  }
+
+  .yc-arch {
+    transition: color 260ms ease;
+  }
+
+  /* A bar that grows to its value instead of arriving at it. The target is
+     passed in as --fill so the number stays with the data, not the stylesheet. */
+  .yc-fill {
+    animation: yc-fill 900ms cubic-bezier(0.3, 0.8, 0.3, 1) forwards;
+    width: 0;
+  }
+}
+
+@keyframes yc-arch-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes yc-fill {
+  to {
+    width: var(--fill);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
