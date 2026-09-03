@@ -1,14 +1,16 @@
 import clsx from "clsx";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { NavLink, Outlet } from "react-router-dom";
+import { Link, NavLink, Outlet } from "react-router-dom";
 
+import { HOME_BY_ROLE, useAuth } from "@/shared/auth/AuthContext";
 import { LanguageSwitcher } from "@/shared/ui/LanguageSwitcher";
 import { NotificationBell } from "@/shared/ui/NotificationBell";
 import { ChatLauncher } from "@/features/assistant/ChatLauncher";
 import { ProfileMenu } from "./ProfileMenu";
 import { ThemeSwitcher } from "@/shared/ui/ThemeSwitcher";
 import { LogoMark } from "@/shared/ui/Logo";
+import { SkipLink } from "@/shared/ui/SkipLink";
 
 export interface NavItem {
   to: string;
@@ -25,7 +27,15 @@ interface Props {
 
 export function AppShell({ navItems, portalLabel, accent = "brand" }: Props) {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  /**
+   * The shell only ever renders behind RequireRole, so a user is present. The
+   * fallback is for the frame between a session expiring and the redirect
+   * landing — a dead href there is worse than one that points at the door.
+   */
+  const home = user ? HOME_BY_ROLE[user.role] : "/";
 
   const accents = {
     brand: "bg-brand-600",
@@ -59,14 +69,16 @@ export function AppShell({ navItems, portalLabel, accent = "brand" }: Props) {
   );
 
   return (
-    <div className="min-h-screen bg-ink-50">
+    <div className="min-h-dvh bg-ink-50">
+      <SkipLink />
+
       <header className="sticky top-0 z-30 border-b border-ink-200 bg-surface">
         <div className="flex h-14 items-center gap-3 px-4">
           <button
             type="button"
             className="rounded-md p-2 text-ink-600 hover:bg-ink-100 lg:hidden"
             onClick={() => setMobileOpen((open) => !open)}
-            aria-label="Menu"
+            aria-label={t("common.menu")}
             aria-expanded={mobileOpen}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -79,7 +91,13 @@ export function AppShell({ navItems, portalLabel, accent = "brand" }: Props) {
             </svg>
           </button>
 
-          <div className="flex min-w-0 items-center gap-2.5">
+          {/* The mark and the name are one control: the way back to the
+              dashboard from anywhere in the portal. */}
+          <Link
+            to={home}
+            onClick={() => setMobileOpen(false)}
+            className="flex min-w-0 items-center gap-2.5 rounded-xl py-1 pr-2 transition-colors hover:bg-ink-100"
+          >
             <div
               className={clsx(
                 "flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-on-colour",
@@ -96,7 +114,7 @@ export function AppShell({ navItems, portalLabel, accent = "brand" }: Props) {
                 {portalLabel}
               </p>
             </div>
-          </div>
+          </Link>
 
           <div className="ml-auto flex items-center gap-2">
             <ThemeSwitcher />
@@ -126,7 +144,7 @@ export function AppShell({ navItems, portalLabel, accent = "brand" }: Props) {
           </>
         )}
 
-        <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8">
+        <main id="main" className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-7xl">
             <Outlet />
           </div>

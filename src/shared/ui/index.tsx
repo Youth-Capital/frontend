@@ -6,8 +6,12 @@
  * like one product.
  */
 import clsx from "clsx";
+import { useTranslation } from "react-i18next";
 import {
   forwardRef,
+  useEffect,
+  useId,
+  useRef,
   type ButtonHTMLAttributes,
   type InputHTMLAttributes,
   type ReactNode,
@@ -62,7 +66,19 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       ref={ref}
       disabled={disabled || loading}
       className={clsx(
-        "inline-flex items-center justify-center rounded-(--radius-control) font-medium transition-colors",
+        "inline-flex items-center justify-center rounded-(--radius-control) font-medium",
+        /*
+         * Press had no state of its own: hover and active looked identical, so
+         * a click gave no acknowledgement until the request came back. The dip
+         * is a transform rather than a colour or a size change — transform and
+         * opacity are the two properties that do not force layout, which is
+         * what keeps this smooth on a mid-range phone.
+         *
+         * 140ms sits in the micro-feedback range; anything slower reads as lag
+         * on a control that is meant to feel immediate.
+         */
+        "transition-[color,background-color,border-color,transform] duration-140 ease-out",
+        "active:scale-[0.98] disabled:active:scale-100",
         "disabled:cursor-not-allowed",
         BUTTON_VARIANTS[variant],
         BUTTON_SIZES[size],
@@ -113,8 +129,17 @@ function FieldShell({
   );
 }
 
+/*
+ * 16px on phones, 14px from the small breakpoint up.
+ *
+ * Not a taste decision: iOS Safari zooms the whole page in when a focused
+ * input's font-size is under 16px, and it does not zoom back out. Every form in
+ * the product was 14px, so tapping a field on an iPhone threw the layout off
+ * screen and left the person pinching to find the next one. Desktop keeps the
+ * denser size, where no such rule applies.
+ */
 const CONTROL_CLASS =
-  "w-full rounded-(--radius-control) border bg-surface px-3 py-2 text-sm text-ink-800 " +
+  "w-full rounded-(--radius-control) border bg-surface px-3 py-2 text-base text-ink-800 sm:text-sm " +
   "placeholder:text-ink-400 transition-colors focus:border-brand-500 " +
   "disabled:bg-ink-100 disabled:text-ink-500";
 
@@ -509,6 +534,78 @@ export function Modal({
   /** Raise the whole dialog above a panel that sits over the normal layer. */
   overlayClassName?: string;
 }) {
+  const { t } = useTranslation();
+  const panelRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
+
+  /*
+   * What `role="dialog"` promises and the browser does not give you.
+   *
+   * The markup said "modal" while the keyboard said otherwise: focus stayed on
+   * the button behind the overlay, Tab walked straight out into the page the
+   * dialog was covering, Escape did nothing, and on close focus landed at the
+   * top of the document instead of back on the control that opened it. Someone
+   * working without a mouse could open this and then not reach it.
+   *
+   * Returning focus is the step usually left out, and it is the one people
+   * actually feel: without it every close throws you back to the start.
+   */
+  useEffect(() => {
+    if (!open) return;
+
+    const opener = document.activeElement as HTMLElement | null;
+    const panel = panelRef.current;
+    panel?.focus();
+
+    const SELECTOR =
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        event.stopPropagation();
+        onClose();
+        return;
+      }
+
+      if (event.key !== "Tab" || !panel) return;
+
+      const focusable = Array.from(
+        panel.querySelectorAll<HTMLElement>(SELECTOR),
+      ).filter((node) => node.offsetParent !== null);
+      if (focusable.length === 0) {
+        // Nothing to land on inside: keep the ring on the panel rather than
+        // letting Tab escape to the page behind.
+        event.preventDefault();
+        panel.focus();
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+
+      if (event.shiftKey && (active === first || active === panel)) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+
+    document.addEventListener("keydown", onKeyDown, true);
+
+    // The page behind a modal should not scroll under it.
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", onKeyDown, true);
+      document.body.style.overflow = previousOverflow;
+      opener?.focus?.();
+    };
+  }, [open, onClose]);
+
   if (!open) return null;
 
   const widths = { sm: "max-w-md", md: "max-w-2xl", lg: "max-w-4xl" };
@@ -519,25 +616,32 @@ export function Modal({
         "fixed inset-0 z-50 flex items-end justify-center bg-ink-900/50 p-0 sm:items-center sm:p-4",
         overlayClassName,
       )}
-      role="dialog"
-      aria-modal="true"
       onClick={onClose}
     >
       <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
         className={clsx(
-          "max-h-[92vh] w-full overflow-y-auto rounded-t-2xl bg-surface shadow-xl sm:rounded-2xl",
+          "max-h-[92vh] w-full overflow-y-auto rounded-t-2xl bg-surface shadow-xl outline-none sm:rounded-2xl",
           widths[size],
           panelClassName,
         )}
         onClick={(event) => event.stopPropagation()}
       >
         <div className="sticky top-0 flex items-center justify-between gap-4 border-b border-ink-200 bg-surface px-5 py-4">
-          <h2 className="text-base font-semibold text-ink-900">{title}</h2>
+          {/* Named, so a screen reader announces which dialog opened rather
+              than the word "dialog" on its own. */}
+          <h2 id={titleId} className="text-base font-semibold text-ink-900">
+            {title}
+          </h2>
           <button
             type="button"
             onClick={onClose}
             className="rounded-md p-1 text-ink-400 hover:bg-ink-100 hover:text-ink-700"
-            aria-label="Close"
+            aria-label={t("common.close")}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
               <path

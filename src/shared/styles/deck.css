@@ -1,0 +1,126 @@
+/**
+ * The audience deck: six flashcards fanned like a hand, each turning over on
+ * click to show what is actually behind the promise on its face.
+ *
+ * Three things had to be true at once, and they pull against each other:
+ *
+ *   - it has to look like the board — overlapping, fanned, one card lifted;
+ *   - it has to work on a phone, where a fan of overlapping cards is unusable;
+ *   - it has to work from a keyboard, where an element covered by its
+ *     neighbour is a trap.
+ *
+ * So the fan is a progressive enhancement layered on a plain grid. Below the
+ * medium breakpoint the cards are an ordinary two-column grid: no overlap, no
+ * rotation, full width, everything reachable. The fan only switches on where
+ * there is room for it, and even there a card that is focused or turned over
+ * straightens up, lifts, and rises above its neighbours, so the thing you are
+ * reading is never underneath the thing you are not.
+ *
+ * All movement is transform and opacity. Nothing here animates a width, a
+ * height or a position, so it stays smooth on a mid-range phone, and the
+ * global reduced-motion rule in index.css collapses every duration to nothing
+ * for anyone who asked for that.
+ */
+
+.yc-deck {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.yc-deck-card {
+  /* The stacking context every card needs before it can be raised. */
+  position: relative;
+  z-index: 1;
+
+  /* The depth of the turn. Larger values flatten it; this is enough to read as
+     a card turning rather than a rectangle inverting. */
+  perspective: 1400px;
+
+  border: 0;
+  padding: 0;
+  background: none;
+  text-align: start;
+  cursor: pointer;
+
+  transition: transform 320ms cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+/* The piece that actually turns. The card keeps its own transform for the fan,
+   so the rotation lives on a child — otherwise the two would overwrite each
+   other and the fan angle would be lost the moment a card was opened. */
+.yc-deck-inner {
+  position: relative;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 560ms cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.yc-deck-card[aria-expanded="true"] .yc-deck-inner {
+  transform: rotateY(180deg);
+}
+
+.yc-deck-face {
+  backface-visibility: hidden;
+  /* Safari still wants the prefix for the back of a rotated face. */
+  -webkit-backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border-radius: var(--radius-card);
+  padding: 1rem;
+}
+
+.yc-deck-back {
+  position: absolute;
+  inset: 0;
+  transform: rotateY(180deg);
+}
+
+@media (min-width: 768px) {
+  .yc-deck {
+    /* The fan. Cards sit in one row and lean on each other, which is what the
+       negative margin does; the row is centred so the overhang is even. */
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    padding-block: 1.5rem;
+  }
+
+  .yc-deck-card {
+    width: 11.5rem;
+    flex: 0 0 auto;
+
+    /* --i is the card's place in the hand, set on the element. The lean, the
+       drop and the stacking order all derive from it, so adding a seventh card
+       needs no new CSS. Later cards sit over earlier ones, which is what makes
+       the hand read left to right. */
+    transform: translateY(calc(var(--i) * 0.6rem)) rotate(calc(var(--i) * 2.4deg));
+    transform-origin: bottom center;
+    z-index: calc(1 + var(--i));
+  }
+
+  .yc-deck-card:not(:first-child) {
+    margin-inline-start: -2.75rem;
+  }
+
+  /* Straighten, lift, and come to the front — on hover, on keyboard focus, and
+     while turned over. Focus is included deliberately: a card you have tabbed
+     to must not stay buried under the next one. */
+  .yc-deck-card:hover,
+  .yc-deck-card:focus-visible,
+  .yc-deck-card[aria-expanded="true"] {
+    transform: translateY(-1.25rem) rotate(0deg);
+    z-index: 20;
+  }
+}
+
+@media (min-width: 1024px) {
+  .yc-deck-card {
+    width: 13rem;
+  }
+
+  .yc-deck-card:not(:first-child) {
+    margin-inline-start: -3.25rem;
+  }
+}

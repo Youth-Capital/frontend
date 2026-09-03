@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 import { api } from "@/shared/api/client";
 import { LanguageSwitcher } from "@/shared/ui/LanguageSwitcher";
@@ -13,6 +13,8 @@ import { Lattice, Portal } from "@/shared/ui/geometry";
 import { StagePath } from "./StagePath";
 import "@/shared/styles/deep.css";
 import { Logo } from "@/shared/ui/Logo";
+import { AudienceDeck, type DeckCard } from "./AudienceDeck";
+import { SkipLink } from "@/shared/ui/SkipLink";
 
 /**
  * Public landing page.
@@ -34,10 +36,13 @@ export default function LandingPage() {
   });
 
   return (
-    <div className="min-h-screen bg-ink-50 text-ink-800">
+    <div className="min-h-dvh bg-ink-50 text-ink-800">
+      {/* First in the DOM, so it is the first thing Tab reaches. */}
+      <SkipLink />
+
       <SiteHeader />
 
-      <main>
+      <main id="main">
         <Hero />
         <JourneySection />
         <WhatIsIt />
@@ -53,6 +58,7 @@ export default function LandingPage() {
           onAudience={setAudience}
         />
         <Faq />
+        <ClosingCta />
       </main>
 
       <SiteFooter />
@@ -62,18 +68,49 @@ export default function LandingPage() {
 
 /* ------------------------------------------------------------------ chrome */
 
+/**
+ * The mark and the name, as one control.
+ *
+ * It stays a real link to "/" so it behaves like one — middle-click, open in a
+ * new tab, and the address the browser shows on hover. But on the landing
+ * itself a link to "/" is a link to where you already are: the router sees no
+ * route change and nothing happens, which is precisely the case somebody has
+ * scrolled down and wants the top back. So on this page the click is handled
+ * here instead.
+ */
+function BrandLink({ nameClass }: { nameClass: string }) {
+  const { t } = useTranslation();
+  const { pathname } = useLocation();
+
+  function toTop(event: React.MouseEvent<HTMLAnchorElement>) {
+    if (pathname !== "/") return; // somewhere else: let the router navigate
+
+    event.preventDefault();
+    window.scrollTo({
+      top: 0,
+      // Somebody who asked the system for less motion does not want the whole
+      // page flying past them.
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth",
+    });
+  }
+
+  return (
+    <Link to="/" onClick={toTop} className="flex items-center gap-2.5">
+      <Logo size={36} />
+      <span className={nameClass}>{t("app.name")}</span>
+    </Link>
+  );
+}
+
 function SiteHeader() {
   const { t } = useTranslation();
 
   return (
     <header className="deep sticky top-0 z-30 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3 sm:px-6">
-        <Link to="/" className="flex items-center gap-2.5">
-          <Logo size={36} />
-          <span className="hidden font-semibold text-ink-900 sm:block">
-            {t("app.name")}
-          </span>
-        </Link>
+        <BrandLink nameClass="hidden font-semibold text-ink-900 sm:block" />
 
         <div className="flex-1" />
 
@@ -97,6 +134,60 @@ function SiteHeader() {
   );
 }
 
+/**
+ * The last thing on the page before the footer.
+ *
+ * The page used to end on the FAQ: the visitor finished reading the answers to
+ * their objections and then met a footer, which is a link list, not an
+ * invitation. Somebody convinced on the last question had to scroll back up to
+ * act on it.
+ *
+ * It is a deep band on purpose. The hero is the only other one, so the page
+ * opens and closes on the same ground and the promise is made twice in the
+ * same voice — and after a surface-toned FAQ the change of ground is what
+ * makes this register as a separate moment rather than one more section.
+ *
+ * One action. Nothing else on the screen.
+ */
+function ClosingCta() {
+  const { t } = useTranslation();
+
+  return (
+    <section className="deep relative overflow-hidden">
+      <Lattice
+        className="pointer-events-none absolute inset-0 hidden h-full w-full opacity-[0.07] sm:block"
+      />
+
+      <div className="relative mx-auto max-w-3xl px-4 py-20 text-center sm:px-6 sm:py-28">
+        <h2
+          className="font-display text-3xl font-semibold text-balance sm:text-4xl"
+          style={{ color: "var(--band-ink)" }}
+        >
+          {t("landing.close.title")}
+        </h2>
+        <p
+          className="mx-auto mt-4 max-w-xl text-pretty sm:text-lg"
+          style={{ color: "var(--band-muted)" }}
+        >
+          {t("landing.close.lead")}
+        </p>
+        <Link
+          to="/auth/register"
+          className="mt-8 inline-block rounded-full px-7 py-3.5 text-sm font-semibold transition-[filter] hover:brightness-95"
+          style={{
+            background: "var(--color-brand-500)",
+            color: "#FFFFFF",
+            boxShadow:
+              "0 0 26px color-mix(in oklab, var(--color-brand-400) 55%, transparent)",
+          }}
+        >
+          {t("landing.cta.createAccount")}
+        </Link>
+      </div>
+    </section>
+  );
+}
+
 function SiteFooter() {
   const { t } = useTranslation();
   const year = new Date().getFullYear();
@@ -105,10 +196,9 @@ function SiteFooter() {
     <footer className="border-t border-ink-200 bg-surface">
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-4">
         <div className="md:col-span-2">
-          <div className="flex items-center gap-2.5">
-            <Logo size={36} />
-            <span className="font-semibold text-ink-900">{t("app.name")}</span>
-          </div>
+          {/* The same control. The bottom of the page is where the way back up
+              is worth the most. */}
+          <BrandLink nameClass="font-semibold text-ink-900" />
           <p className="mt-3 max-w-sm text-sm text-ink-600">
             {t("landing.footer.blurb")}
           </p>
@@ -151,6 +241,7 @@ function Section({
   title,
   lead,
   children,
+  action,
   tone = "page",
 }: {
   id?: string;
@@ -158,27 +249,38 @@ function Section({
   title: string;
   lead?: string;
   children?: ReactNode;
+  /** Sits to the right of the heading on wide screens, under it on narrow. */
+  action?: ReactNode;
   tone?: "page" | "surface";
 }) {
   return (
     <section
       id={id}
+      /* scroll-mt keeps an anchored section clear of the sticky header, which
+         would otherwise cover its own heading on arrival. */
       className={
         tone === "surface"
-          ? "border-y border-ink-200 bg-surface py-16 sm:py-20"
-          : "py-16 sm:py-20"
+          ? "scroll-mt-24 border-y border-ink-200 bg-surface py-16 sm:py-20"
+          : "scroll-mt-24 py-16 sm:py-20"
       }
     >
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        {eyebrow && (
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand-600">
-            {eyebrow}
-          </p>
-        )}
-        <h2 className="mt-2 max-w-3xl font-display text-3xl font-semibold text-balance text-ink-900 sm:text-4xl">
-          {title}
-        </h2>
-        {lead && <p className="mt-3 max-w-2xl text-lg text-ink-600">{lead}</p>}
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0">
+            {eyebrow && (
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand-600">
+                {eyebrow}
+              </p>
+            )}
+            <h2 className="mt-2 max-w-3xl font-display text-3xl font-semibold text-balance text-ink-900 sm:text-4xl">
+              {title}
+            </h2>
+            {lead && (
+              <p className="mt-3 max-w-2xl text-lg text-ink-600">{lead}</p>
+            )}
+          </div>
+          {action}
+        </div>
         {children && <div className="mt-10">{children}</div>}
       </div>
     </section>
@@ -274,8 +376,27 @@ function RotatingHeadline() {
   return (
     <div className="mt-3">
       <div onClick={advance} className="cursor-pointer select-none">
+        {/*
+          Four lines are reserved whether or not the language needs them.
+
+          This is what was moving the hero. The English headline sets in two
+          lines and the Russian one in four, so the section was ~140px taller
+          in Russian — and everything below it, including the road behind the
+          text, sat 140px lower. Switching language looked like the photograph
+          sliding down.
+
+          The reserve is in `em`, so it follows the type size across the
+          breakpoint instead of being a pixel guess: 4 lines at the 1.08 line
+          height set below. English now carries two lines of air under the
+          headline, which is the price of the section being the same height in
+          every language.
+
+          A language that needs a fifth line would move things again. Uzbek and
+          Russian both fit in four at the sizes shipped here; raise this if a
+          longer headline is ever written.
+        */}
         <h1
-          className="grid whitespace-pre-line font-display text-4xl font-semibold leading-[1.08] text-balance sm:text-5xl"
+          className="grid min-h-[4.32em] whitespace-pre-line font-display text-4xl font-semibold leading-[1.08] text-balance sm:text-5xl"
           style={{ textShadow: "0 0 34px color-mix(in oklab, var(--color-brand-400) 55%, transparent)" }}
         >
           {phrases.map((phrase, position) => (
@@ -363,16 +484,43 @@ function Hero() {
 
   return (
     <section className="deep">
-      <img
-        src="/illustrations/hero-road.webp"
-        alt=""
-        className="deep-art-dark pointer-events-none absolute inset-0 -z-20 h-full w-full object-cover object-bottom"
-      />
-      <img
-        src="/illustrations/hero-road-light.webp"
-        alt=""
-        className="deep-art-light pointer-events-none absolute inset-0 -z-20 h-full w-full object-cover object-bottom"
-      />
+      {/*
+        The art is sized by the viewport's width, not by the section's height.
+
+        It used to be stretched across `inset-0`, so its box was the section's
+        box — and the section's height is set by the text inside it. Switching
+        language changes how many lines the headline takes, the section grows
+        or shrinks by a line, and `object-cover` re-crops to the new box: the
+        photograph visibly slides while only the words were supposed to change.
+
+        The wrapper carries the file's own aspect ratio (1800×1029), so its
+        height follows the width — which no translation can alter — and it is
+        pinned to the bottom, where the road is. `min-h-full` is the floor: on
+        a narrow screen the section is taller than that ratio allows, and there
+        the art goes back to filling it rather than leaving a gap. So it is
+        fixed wherever it can be and behaves as before where it must.
+      */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 -z-20 aspect-[1800/1029] min-h-full w-full"
+      >
+        <img
+          src="/illustrations/hero-road.webp"
+          alt=""
+          width={1800}
+          height={1029}
+          fetchPriority="high"
+          className="deep-art-dark h-full w-full object-cover object-bottom"
+        />
+        <img
+          src="/illustrations/hero-road-light.webp"
+          alt=""
+          width={1800}
+          height={1029}
+          fetchPriority="high"
+          className="deep-art-light h-full w-full object-cover object-bottom"
+        />
+      </div>
       <div aria-hidden className="deep-scrim pointer-events-none absolute inset-0 -z-10" />
       <Lattice className="pointer-events-none absolute inset-0 -z-10 hidden h-full w-full opacity-[0.09] sm:block" />
 
@@ -413,7 +561,17 @@ function Hero() {
             {t("landing.hero.lead")}
           </p>
 
-          <div className="mt-8 flex flex-wrap gap-3">
+          {/*
+            One action, one quiet way to keep reading.
+
+            There were two buttons of equal weight here, and the second one
+            pointed at /student/career — a route behind RequireRole. Every
+            visitor to this page is signed out by definition, so the most
+            prominent secondary control on the site bounced people to a login
+            form they had no reason to fill in yet. It now goes to the section
+            that answers the question it was really asking.
+          */}
+          <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
             <Link
               to="/auth/register"
               className="rounded-full px-6 py-3 text-sm font-semibold transition-[filter] hover:brightness-95"
@@ -425,16 +583,19 @@ function Hero() {
             >
               {t("landing.hero.startJourney")}
             </Link>
-            <Link
-              to="/student/career"
-              className="rounded-full px-6 py-3 text-sm font-semibold transition-colors"
-              style={{
-                border: "1px solid color-mix(in oklab, var(--band-dim) 70%, transparent)",
-                color: "var(--band-ink)",
-              }}
+            <a
+              href="#journey"
+              className="group inline-flex items-center gap-2 text-sm font-semibold underline-offset-4 hover:underline"
+              style={{ color: "var(--band-ink)" }}
             >
-              {t("landing.hero.exploreCareers")}
-            </Link>
+              {t("landing.hero.howItWorks")}
+              <span
+                aria-hidden
+                className="transition-transform duration-200 group-hover:translate-y-0.5"
+              >
+                ↓
+              </span>
+            </a>
           </div>
         </div>
 
@@ -624,37 +785,36 @@ function AudiencePanel({
   eyebrow,
   title,
   lead,
-  points,
+  cards,
   cta,
   tone,
 }: {
   eyebrow: string;
   title: string;
   lead: string;
-  points: string[];
+  cards: DeckCard[];
   cta: string;
   tone: "page" | "surface";
 }) {
   return (
-    <Section tone={tone} eyebrow={eyebrow} title={title} lead={lead}>
-      <div className="grid gap-8 lg:grid-cols-2">
-        <ul className="flex flex-col gap-3">
-          {points.map((point) => (
-            <li key={point} className="flex gap-3">
-              <span aria-hidden className="mt-0.5 text-brand-600">✓</span>
-              <span className="text-ink-700">{point}</span>
-            </li>
-          ))}
-        </ul>
-        <div className="flex items-start lg:justify-end">
-          <Link
-            to="/auth/register"
-            className="rounded-(--radius-control) bg-brand-600 px-5 py-3 text-sm font-semibold text-on-colour hover:bg-brand-700"
-          >
-            {cta}
-          </Link>
-        </div>
-      </div>
+    <Section
+      tone={tone}
+      eyebrow={eyebrow}
+      title={title}
+      lead={lead}
+      /* The call to action moved up beside the heading. It used to sit alone
+         in a second column that was otherwise empty, which spent half the
+         section's width on one button. */
+      action={
+        <Link
+          to="/auth/register"
+          className="inline-block shrink-0 rounded-(--radius-control) bg-brand-600 px-5 py-3 text-sm font-semibold text-on-colour transition-colors hover:bg-brand-700"
+        >
+          {cta}
+        </Link>
+      }
+    >
+      <AudienceDeck cards={cards} />
     </Section>
   );
 }
@@ -667,7 +827,7 @@ function ForStudents() {
       eyebrow={t("landing.students.eyebrow")}
       title={t("landing.students.title")}
       lead={t("landing.students.lead")}
-      points={t("landing.students.points", { returnObjects: true }) as string[]}
+      cards={t("landing.students.cards", { returnObjects: true }) as DeckCard[]}
       cta={t("landing.cta.createAccount")}
     />
   );
@@ -681,7 +841,7 @@ function ForEmployers() {
       eyebrow={t("landing.employers.eyebrow")}
       title={t("landing.employers.title")}
       lead={t("landing.employers.lead")}
-      points={t("landing.employers.points", { returnObjects: true }) as string[]}
+      cards={t("landing.employers.cards", { returnObjects: true }) as DeckCard[]}
       cta={t("landing.employers.cta")}
     />
   );

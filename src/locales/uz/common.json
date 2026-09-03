@@ -39,6 +39,8 @@
     "save": "Saqlash",
     "cancel": "Bekor qilish",
     "close": "Yopish",
+    "menu": "Menyu",
+    "skipToContent": "Asosiy qismga o'tish",
     "delete": "O'chirish",
     "edit": "Tahrirlash",
     "create": "Yaratish",
@@ -1170,7 +1172,12 @@
       "swap": "Boshqacha aytganda",
       "lead": "Yoshlarga yo'nalish topish, ko'nikma orttirish, tajriba yig'ish va haqiqiy karyera imkoniyatlariga chiqishga yordam beradigan raqamli ekotizim.",
       "startJourney": "Yo'lni boshlash",
-      "exploreCareers": "Kasblarni ko'rish"
+      "exploreCareers": "Kasblarni ko'rish",
+      "howItWorks": "Bu qanday ishlaydi"
+    },
+    "close": {
+      "title": "Birinchi qadam — sizdan",
+      "lead": "Qolganini platforma yig'adi: diagnostika, reja, ta'lim va ish beruvchiga chiqish."
     },
     "what": {
       "eyebrow": "Bu nima",
@@ -1221,6 +1228,32 @@
         "Avtomatik CV va portfolio",
         "Sizga mos vakansiyalar va arizalar",
         "Mentor bilan uchrashuvlar"
+      ],
+      "cards": [
+        {
+          "title": "Kasb tanlash",
+          "detail": "Diagnostika sizga nima yaqinligini ko'rsatadi va uni 90 kunlik rejaga aylantiradi."
+        },
+        {
+          "title": "Ko'nikma bo'shlig'i",
+          "detail": "Qaysi ko'nikmalar bor va tanlagan kasbingiz uchun nimasi yetishmaydi."
+        },
+        {
+          "title": "Kurslar va testlar",
+          "detail": "Test ko'nikmani tugatilgan kursdan kuchliroq tasdiqlaydi — buni ish beruvchi ko'radi."
+        },
+        {
+          "title": "CV va portfolio",
+          "detail": "Tasdiqlangan ko'nikma va tajribadan o'zi yig'iladi. Qo'lda to'ldiradigan narsa yo'q."
+        },
+        {
+          "title": "Mos vakansiyalar",
+          "detail": "Har bir moslikning sababi yozilgan: nimasi mos, nimasi yetishmaydi."
+        },
+        {
+          "title": "Mentor uchrashuvlari",
+          "detail": "Mentor rejangizni ko'rib chiqadi, uning bahosi ko'nikma tasdig'iga qo'shiladi."
+        }
       ]
     },
     "employers": {
@@ -1234,7 +1267,29 @@
         "Nomzodlar tahlili va reyting",
         "Arizalarni boshqarish"
       ],
-      "cta": "Kompaniya sifatida boshlash"
+      "cta": "Kompaniya sifatida boshlash",
+      "cards": [
+        {
+          "title": "Vakansiya va tanlov",
+          "detail": "Nomzodlar rezyumedagi so'zlar bo'yicha emas, tasdiqlangan ko'nikma bo'yicha saralanadi."
+        },
+        {
+          "title": "Aniq filtrlar",
+          "detail": "Ko'nikma, bilim va tajriba bo'yicha — har birining isboti ko'rsatilgan holda."
+        },
+        {
+          "title": "O'z test va kurslaringiz",
+          "detail": "Aynan kerakli narsani tekshiring va o'z talabingizga qarab o'qiting."
+        },
+        {
+          "title": "Nomzodlar tahlili",
+          "detail": "Kim ariza berdi, nimasi mos va qayerda bo'shliq bor — har bir ariza bo'yicha."
+        },
+        {
+          "title": "Arizalarni boshqarish",
+          "detail": "Statuslar, suhbatga taklif va belgilangan uchrashuvlar bir joyda."
+        }
+      ]
     },
     "career": {
       "eyebrow": "Karyera yo'li",

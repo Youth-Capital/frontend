@@ -1,79 +1,76 @@
 /**
- * The mark: three pointed arches on one baseline, each taller than the last.
+ * The mark: three round-topped arches on one baseline, each taller than the last.
  *
- * The previous mark was a single bridge — one deck, one arch, two piers. The
- * metaphor was right and the drawing was wrong: at the 23px the sidebar gives
- * it, four separate strokes closed up and the whole thing read as a letter A.
- * A mark that has to be explained at its most common size is not working.
+ * Built to the approved board (`design/logo/2-rising.png`), measured off it
+ * rather than reinterpreted. Two earlier deviations are the reason this file
+ * was rewritten: the arches had been drawn with the site's pointed
+ * two-centred profile, and their widths grew as fast as their heights. Both
+ * were defensible on their own and both made the mark stop looking like the
+ * thing that was signed off.
  *
- * Three arches say the same thing the bridge was trying to say, and say it at
- * 18px. They stand on one baseline — everybody starts from the same ground —
- * and they rise. The first is solid, the two behind it are open: one span
- * crossed, two still ahead.
+ * What the board actually does:
  *
- * Both dimensions grow, span as well as height. That is not decoration: three
- * shapes of equal width at increasing heights is a bar chart, and this is not
- * an analytics product.
+ *   - the top of each arch is a plain semicircle, radius = half the width;
+ *   - widths barely grow — 1 : 1.08 : 1.32 — so the rise reads as height,
+ *     not as three shapes fanning out;
+ *   - heights step 1 : 1.72 : 2.38;
+ *   - the gaps are tight, about a fifth of an arch's width;
+ *   - one baseline runs under all three at the same stroke weight;
+ *   - the first arch is filled, the two behind it are open.
  *
- * The arch profile is the site's own construction (see `geometry.tsx`):
- * two-centred, each side an arc whose radius equals the full span with its
- * centre at the opposite springing point, so the apex lands at half·√3 above
- * the springing rather than wherever a curve handle was dragged to. A round
- * top would be anybody's icon.
+ * They stand on one line — everybody starts from the same ground — and they
+ * rise. One span crossed, two still ahead.
+ *
+ * The whole mark is one colour. The board painted the leading arch amber and
+ * that shipped for a while; it is now the mark's own colour, filled. The
+ * difference between crossed and ahead is carried by fill against outline —
+ * by form — and form needs no contrast solving, so the mark reads the same on
+ * every ground it is dropped on: the role tiles in the sidebar, the dim band
+ * on the auth panel, the brand-100 avatar in the chat. A second hue would have
+ * had to be measured against each of those separately.
  */
 
 const BOX = 100;
 
-/** The shared ground, and the strokes that stand on it. */
+/** The shared ground, and the weight everything is drawn at. */
 const BASE_Y = 88;
-const STROKE = 8;
+const STROKE = 6;
 
 /**
- * One arch per element: half-span, and the height of its apex above the box's
- * top edge. The legs make up whatever the arch itself does not reach, which is
- * why the apex is given rather than derived — the rise is the design decision;
- * the curve is the construction.
+ * Centre, half-width and the height of the top above the baseline.
+ *
+ * Widths 22 / 24 / 29 with 5 between them, heights 32 / 55 / 76: the board's
+ * own ratios, scaled into the box with room for the stroke on every side.
  */
 const ARCHES = [
-  { cx: 13, half: 7.5, apexY: 58 },
-  { cx: 44, half: 10.5, apexY: 39 },
-  { cx: 81, half: 13.5, apexY: 20 },
+  { cx: 18.5, half: 11, height: 32 },
+  { cx: 46.5, half: 12, height: 55 },
+  { cx: 78, half: 14.5, height: 76 },
 ] as const;
 
-/** Where the arch springs from, so that its apex lands where we asked. */
-function springingY(half: number, apexY: number) {
-  return apexY + half * Math.sqrt(3);
-}
-
 /**
- * Legs up from the baseline, then the pointed arch, then back down. Closed, so
- * the leading shape can be filled — the fill is what survives at 18px.
+ * Legs up from the baseline, a semicircle over the top, then back down.
+ *
+ * Closed, so the leading arch can be filled — the fill is what survives at
+ * 18px, where an outline of this weight starts to close up.
  */
-function archPath(cx: number, half: number, apexY: number) {
-  const y = springingY(half, apexY).toFixed(2);
-  const r = half * 2;
+function archPath(cx: number, half: number, height: number) {
+  //: The semicircle's centre sits one radius below the top of the arch.
+  const springing = BASE_Y - height + half;
+
   return (
-    `M ${cx - half} ${BASE_Y} V ${y} ` +
-    `A ${r} ${r} 0 0 1 ${cx} ${apexY} ` +
-    `A ${r} ${r} 0 0 1 ${cx + half} ${y} ` +
+    `M ${cx - half} ${BASE_Y} ` +
+    `V ${springing} ` +
+    `A ${half} ${half} 0 0 1 ${cx + half} ${springing} ` +
     `V ${BASE_Y} Z`
   );
 }
 
 export function LogoMark({
   size = 32,
-  accent,
   className,
 }: {
   size?: number;
-  /**
-   * Colour of the leading arch. Defaults to the mark's own colour, because the
-   * mark is dropped on grounds this component cannot see — role tiles in the
-   * sidebar, a dim band on the auth panel, a brand-100 avatar in the chat. A
-   * second hue would have to be solved against every one of them. Only the
-   * lockup below, which owns its background, passes anything here.
-   */
-  accent?: string;
   className?: string;
 }) {
   const [first, ...rest] = ARCHES;
@@ -93,24 +90,19 @@ export function LogoMark({
         strokeLinecap="round"
         strokeLinejoin="round"
       >
-        {/* The ground, run between the outermost legs so the caps align. */}
+        {/* The ground, run between the outermost legs so the caps line up. */}
         <path
           d={`M ${ARCHES[0].cx - ARCHES[0].half} ${BASE_Y} H ${
             ARCHES[2].cx + ARCHES[2].half
           }`}
         />
 
-        {/* Crossed: filled, and filled is what stays visible when the strokes
-            of the other two start to close up. */}
-        <path
-          d={archPath(first.cx, first.half, first.apexY)}
-          fill={accent ?? "currentColor"}
-          stroke={accent ?? "currentColor"}
-        />
+        {/* Crossed. */}
+        <path d={archPath(first.cx, first.half, first.height)} fill="currentColor" />
 
-        {/* Still ahead: open. */}
+        {/* Still ahead. */}
         {rest.map((arch) => (
-          <path key={arch.cx} d={archPath(arch.cx, arch.half, arch.apexY)} />
+          <path key={arch.cx} d={archPath(arch.cx, arch.half, arch.height)} />
         ))}
       </g>
     </svg>
@@ -120,16 +112,16 @@ export function LogoMark({
 /**
  * The mark in its tile, as it appears in a header.
  *
- * The tile is `--color-deep`, which is the one violet that holds its value in
- * both themes. `brand-600` does not: the ramp inverts under `[data-theme]` and
- * the tile turns pale lilac, which would leave an amber arch at 1.37:1 on it —
- * the leading arch, the one carrying the meaning, would be the first thing to
- * disappear. On `--color-deep` the numbers hold in both themes: white 10.5:1,
- * amber 6.98:1. Both are literals for the same reason the ground is.
+ * The tile is the board's brand violet, written as a literal rather than taken
+ * from `brand-600`: that ramp inverts under `[data-theme="dark"]` and the tile
+ * would turn pale lilac while the mark stayed white, taking the whole thing to
+ * 2.34:1 — under the 3:1 a mark answers to. A brand ground is not a step on a
+ * ramp; it holds its value the way a cover does.
+ *
+ * White on that ground measures 6.38:1, the same in both themes.
  */
-const TILE_BG = "var(--color-deep)";
-const TILE_INK = "#F1F0F3";
-const TILE_ACCENT = "#FFB86B";
+const TILE_BG = "#6C4AB6";
+const TILE_INK = "#FFFFFF";
 
 export function Logo({
   size = 40,
@@ -146,7 +138,7 @@ export function Logo({
       ].join(" ")}
       style={{ width: size, height: size, background: TILE_BG, color: TILE_INK }}
     >
-      <LogoMark size={Math.round(size * 0.72)} accent={TILE_ACCENT} />
+      <LogoMark size={Math.round(size * 0.72)} />
     </span>
   );
 }

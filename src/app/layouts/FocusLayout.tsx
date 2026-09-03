@@ -1,6 +1,7 @@
-import { Outlet } from "react-router-dom";
+import { Link, Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
+import { HOME_BY_ROLE, useAuth } from "@/shared/auth/AuthContext";
 import { ChatLauncher } from "@/features/assistant/ChatLauncher";
 import { LanguageSwitcher } from "@/shared/ui/LanguageSwitcher";
 import { NotificationBell } from "@/shared/ui/NotificationBell";
@@ -8,6 +9,7 @@ import { ThemeSwitcher } from "@/shared/ui/ThemeSwitcher";
 
 import { ProfileMenu } from "./ProfileMenu";
 import { Logo } from "@/shared/ui/Logo";
+import { SkipLink } from "@/shared/ui/SkipLink";
 
 /**
  * A screen with nothing to click away to.
@@ -19,22 +21,30 @@ import { Logo } from "@/shared/ui/Logo";
  *
  * The header stays, minus the navigation: theme, language, notifications and
  * the profile menu are how somebody leaves, and a screen with no way out is
- * a trap rather than a focus mode. The way back to the course is inside the
- * page, next to the lesson it belongs to.
+ * a trap rather than a focus mode. The mark is the way back to the dashboard,
+ * which is where people already expect a logo to take them; the way back to
+ * the course is inside the page, next to the lesson it belongs to.
  */
 export function FocusLayout() {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const home = user ? HOME_BY_ROLE[user.role] : "/";
 
   return (
-    <div className="min-h-screen bg-ink-50">
+    <div className="min-h-dvh bg-ink-50">
+      <SkipLink />
+
       <header className="sticky top-0 z-30 border-b border-ink-200 bg-surface">
         <div className="flex h-14 items-center gap-3 px-4 sm:px-6">
-          <div className="flex min-w-0 items-center gap-2.5">
+          <Link
+            to={home}
+            className="flex min-w-0 items-center gap-2.5 rounded-xl py-1 pr-2 transition-colors hover:bg-ink-100"
+          >
             <Logo size={32} />
             <p className="truncate text-sm font-semibold leading-tight text-ink-900">
               {t("app.name")}
             </p>
-          </div>
+          </Link>
 
           <div className="ml-auto flex items-center gap-2">
             <ThemeSwitcher />
@@ -47,7 +57,7 @@ export function FocusLayout() {
         </div>
       </header>
 
-      <main className="px-4 py-6 sm:px-6 lg:px-8">
+      <main id="main" className="px-4 py-6 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           <Outlet />
         </div>

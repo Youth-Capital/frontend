@@ -26,7 +26,7 @@ export function AuthLayout() {
   const registering = location.pathname.includes("register");
 
   return (
-    <div className="grid min-h-screen items-start lg:grid-cols-2">
+    <div className="grid min-h-dvh items-start lg:grid-cols-2">
       {/*
         Pinned to the viewport rather than stretched to the grid row. The row
         is as tall as the *form*, and registration is long, so a stretched
@@ -37,7 +37,7 @@ export function AuthLayout() {
       <AuthPanel registering={registering} />
 
       <main
-        className="flex min-h-screen flex-col"
+        className="flex min-h-dvh flex-col"
         style={{
           background: "color-mix(in oklab, var(--color-accent) 9%, var(--color-surface))",
         }}

@@ -48,6 +48,22 @@
   --color-accent-solid: #b8854d;
 
   /*
+   * The amber that may carry *text*.
+   *
+   * There are now three ambers and the difference between them is the rule
+   * each one answers to. `--color-accent` is the brand fill and answers to
+   * nothing. `--color-accent-solid` is a graphic that carries meaning and
+   * answers to 3:1. This one is text and answers to 4.5:1 — the accent-solid
+   * amber measures 3.23:1 on a white card, which is fine under a bar and not
+   * fine as a label.
+   *
+   * Same hue, walked down until it cleared: 5.20:1 on a white card, 4.89:1 on
+   * the page. In the dark theme the brand amber already clears on both dark
+   * surfaces (6.71:1 and 8.64:1) and is used unchanged.
+   */
+  --color-accent-ink: #8c653b;
+
+  /*
    * A deep ground that stays deep in the dark theme too.
    *
    * The brand ramp inverts under [data-theme="dark"] — brand-900 becomes a
@@ -81,6 +97,37 @@
      inside a card does not fight the card's own radius. */
   --radius-card: 1.25rem;
   --radius-control: 0.75rem;
+
+  /*
+   * Shadows, layered and tinted.
+   *
+   * A single flat rgba(0,0,0,…) blur is the tell of an unfinished interface:
+   * real shadows have a tight contact edge and a wide soft falloff, and they
+   * take their colour from the light in the room rather than from black. The
+   * hue here is the brand violet, so a card's shadow belongs to this palette
+   * instead of greying it out.
+   *
+   * These override Tailwind's own shadow scale, so every existing `shadow-sm`
+   * and `shadow-lg` in the product picks them up without touching markup.
+   * Elevation carries meaning: a resting card is sm, a popover md, a modal lg.
+   */
+  --shadow-tint: 262 32% 16%;
+  --shadow-xs: 0 1px 2px -1px hsl(var(--shadow-tint) / 0.1);
+  --shadow-sm:
+    0 1px 2px -1px hsl(var(--shadow-tint) / 0.1),
+    0 1px 3px hsl(var(--shadow-tint) / 0.06);
+  --shadow-md:
+    0 2px 4px -2px hsl(var(--shadow-tint) / 0.1),
+    0 6px 16px -4px hsl(var(--shadow-tint) / 0.1);
+  --shadow-lg:
+    0 8px 16px -8px hsl(var(--shadow-tint) / 0.12),
+    0 24px 48px -12px hsl(var(--shadow-tint) / 0.14);
+  --shadow-xl:
+    0 12px 24px -10px hsl(var(--shadow-tint) / 0.14),
+    0 32px 64px -16px hsl(var(--shadow-tint) / 0.18);
+  --shadow-2xl:
+    0 16px 32px -12px hsl(var(--shadow-tint) / 0.16),
+    0 48px 96px -24px hsl(var(--shadow-tint) / 0.22);
 }
 
 /* Dark — overrides the same variable names. */
@@ -108,30 +155,112 @@
   --color-ink-900: #F7F7F8;
 
   --color-accent: #FFB86B;
-  /* 8.64:1 on this ground: the brand amber needs no adjustment here. */
+  /* 8.64:1 on this ground: the brand amber needs no adjustment here, and
+     the same holds for text — 6.71:1 on a card surface. */
   --color-accent-solid: #FFB86B;
+  --color-accent-ink: #FFB86B;
   /* Deliberately unchanged: a deep surface stays deep in both themes. */
   --color-deep: #3F2B6A;
   --color-surface: #3C3650;
   --color-on-colour: #1F1C24;
-  --color-success: #3DAF76;
+
+  /*
+   * Semantic colours, re-solved against the surface rather than the soft chip.
+   *
+   * The earlier values were measured on their own soft grounds, where they all
+   * cleared 4.5:1. But these are used as bare text far more often than inside a
+   * chip — `text-danger` alone appears 67 times, including on `role="alert"`
+   * error messages — and on `--color-surface` the old set measured 4.14, 4.13,
+   * 3.35 and 3.13:1. The error message was the worst of them.
+   *
+   * Each was walked up at fixed hue until it cleared 4.5:1 on the surface, then
+   * re-checked on every other ground it lands on: page 5.8:1, soft chip
+   * 5.0–6.6:1. Nothing regressed, because raising a colour on a dark ground
+   * raises it everywhere dark.
+   */
+  --color-success: #40B77B;
   --color-success-soft: #193929;
-  --color-warning: #CC9024;
+  --color-warning: #D59726;
   --color-warning-soft: #403012;
-  --color-danger: #E36255;
+  --color-danger: #EA877D;
   --color-danger-soft: #401511;
-  --color-info: #9672DC;
+  --color-info: #B095E5;
   --color-info-soft: #23153D;
+
+  /* Shadow falls away on dark grounds; depth comes from surface lightness
+     instead, so the tint stays but the opacity drops rather than doubling. */
+  --shadow-tint: 262 40% 4%;
 }
 
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
+
+    /* Reserve the scrollbar's width permanently. Without it, a page that
+       becomes short enough to lose its scrollbar widens the viewport by about
+       15px, and everything sized against the viewport jumps sideways. */
+    scrollbar-gutter: stable;
+
+    /*
+     * Tells the browser which way its own chrome should go: form control
+     * interiors, the caret, autofill backgrounds, native select popups and the
+     * default scrollbar. Without it those stayed light while the page went
+     * dark — a white autofill box in a dark form is the classic tell.
+     *
+     * The theme is applied as an attribute rather than by media query, so the
+     * value is stated per theme rather than left as `light dark`.
+     */
+    color-scheme: light;
+  }
+
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+  }
+
+  /* In-page anchors glide instead of cutting — but only for people who did not
+     ask the system for less motion. */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
   }
 
   body {
     @apply bg-ink-50 text-ink-800 antialiased;
     font-family: var(--font-sans);
+  }
+
+  /* Native checkboxes, radios, range and progress take the brand instead of
+     the operating system's blue. One declaration, every form in the product. */
+  :root {
+    accent-color: var(--color-brand-600);
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--color-brand-400) 40%, transparent);
+    color: var(--color-ink-900);
+  }
+
+  /* Headings break where the shape is even rather than leaving one word alone
+     on the last line; body copy avoids orphans the same way. */
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+  }
+
+  p,
+  li {
+    text-wrap: pretty;
+  }
+
+  /* Chrome is not content: dragging across a button label should not select
+     it. Deliberately not applied to anything a reader might want to copy. */
+  button,
+  label,
+  [role="tab"] {
+    user-select: none;
   }
 
   /* Display face on page titles only. Applying it to every card header
@@ -279,6 +408,10 @@
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    /* Anchor jumps cut instead of gliding — the smooth scroll set in the base
+       layer is exactly the kind of full-page movement this setting is about. */
+    scroll-behavior: auto !important;
   }
 }

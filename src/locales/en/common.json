@@ -39,6 +39,8 @@
     "save": "Save",
     "cancel": "Cancel",
     "close": "Close",
+    "menu": "Menu",
+    "skipToContent": "Skip to content",
     "delete": "Delete",
     "edit": "Edit",
     "create": "Create",
@@ -1170,7 +1172,12 @@
       "swap": "Put another way",
       "lead": "A digital ecosystem that helps young people find their direction, develop skills, gain experience and reach real career opportunities.",
       "startJourney": "Start your journey",
-      "exploreCareers": "Explore careers"
+      "exploreCareers": "Explore careers",
+      "howItWorks": "See how it works"
+    },
+    "close": {
+      "title": "The first step is yours",
+      "lead": "The platform assembles the rest: diagnostics, a plan, learning, and the way to an employer."
     },
     "what": {
       "eyebrow": "What this is",
@@ -1221,6 +1228,32 @@
         "CV and portfolio built for you",
         "Matching vacancies and applications",
         "Mentor sessions"
+      ],
+      "cards": [
+        {
+          "title": "Choose a direction",
+          "detail": "Diagnostics show where you fit, then turn that into a 90-day plan."
+        },
+        {
+          "title": "Skill gap",
+          "detail": "What you already have, and what is missing for the profession you picked."
+        },
+        {
+          "title": "Courses and tests",
+          "detail": "A passed test proves a skill more strongly than a finished course — and employers see that."
+        },
+        {
+          "title": "CV and portfolio",
+          "detail": "Assembled from verified skills and real experience. Nothing to fill in by hand."
+        },
+        {
+          "title": "Matching vacancies",
+          "detail": "Every match comes with the reason: what fits and what is missing."
+        },
+        {
+          "title": "Mentor sessions",
+          "detail": "A mentor reviews your plan, and their rating counts as evidence for a skill."
+        }
       ]
     },
     "employers": {
@@ -1234,7 +1267,29 @@
         "Candidate analytics and ranking",
         "Application management"
       ],
-      "cta": "Start as a company"
+      "cta": "Start as a company",
+      "cards": [
+        {
+          "title": "Vacancies and matching",
+          "detail": "Candidates are ranked by verified skills, not by words in a CV."
+        },
+        {
+          "title": "Precise filters",
+          "detail": "By skill, knowledge and experience — each with the evidence behind it."
+        },
+        {
+          "title": "Your own tests and courses",
+          "detail": "Test exactly what you need, and teach to your own requirements."
+        },
+        {
+          "title": "Candidate analytics",
+          "detail": "Who applied, what fits and where the gap is, application by application."
+        },
+        {
+          "title": "Application pipeline",
+          "detail": "Statuses, interview invitations and scheduled meetings in one place."
+        }
+      ]
     },
     "career": {
       "eyebrow": "Career path",

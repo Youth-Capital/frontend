@@ -65,7 +65,7 @@ export default function IntakePage() {
   const percent = Math.round((answered / Math.max(1, total)) * 100);
 
   return (
-    <div className="min-h-screen bg-ink-50">
+    <div className="min-h-dvh bg-ink-50">
       <header className="border-b border-ink-200 bg-surface">
         <div className="mx-auto flex max-w-2xl items-center gap-3 px-4 py-3">
           <Logo size={36} />
