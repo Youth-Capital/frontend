@@ -6,7 +6,6 @@ import { api } from "@/shared/api/client";
 import { Badge, Card, CardSkeleton, ErrorState, Tabs } from "@/shared/ui";
 import type { Course, Paginated } from "@/shared/types/api";
 
-import "./glass.css";
 
 /**
  * A frosted treatment of the course grid, shown next to the one we ship.
@@ -27,8 +26,14 @@ import "./glass.css";
 
 type Look = "current" | "glass";
 
-/** Fill only, per card. Warm violet through amber — our family, no blues. */
-const TINTS = ["#6C4AB6", "#9B7BD8", "#B45B9E", "#D26A72", "#FFB86B", "#E2A24A"];
+/**
+ * Fill only, per card — the palette's five stops, walked in order.
+ *
+ * Five rather than six: the fan is what it is, and a sixth invented to round
+ * the row out would be the one colour on the page that is not hers. The
+ * modulo at the call site already handles a card count that is not five.
+ */
+const TINTS = ["#C8B6FF", "#FFD6FF", "#BBD0FF", "#E7C6FF", "#B8C0FF"];
 
 export default function StylePreviewPage() {
   const { t } = useTranslation();
@@ -118,7 +123,7 @@ function GlassStage({ courses }: { courses: Course[] }) {
       onMouseEnter={() => setLit(true)}
       onMouseLeave={() => setLit(false)}
     >
-      <div className="glass-panel flex flex-col gap-5 rounded-3xl p-4 shadow-2xl sm:p-6">
+      <div className="glass flex flex-col gap-5 rounded-3xl p-4 shadow-2xl sm:p-6">
         <div className="glass-bar flex flex-wrap items-center gap-1 rounded-full p-1.5">
           <span className="rounded-full bg-ink-900 px-3.5 py-1.5 text-xs font-medium text-ink-50">
             {t("courses.title")}
@@ -155,7 +160,7 @@ function GlassCard({ course, tint }: { course: Course; tint: string }) {
 
   return (
     <article
-      className="glass-card relative flex flex-col gap-3 rounded-2xl p-4"
+      className="glass glass-lift relative flex flex-col gap-3 rounded-2xl p-4"
       style={{ "--tint": tint } as React.CSSProperties}
     >
       <div className="flex items-start justify-between gap-3">

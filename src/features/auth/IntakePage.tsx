@@ -65,8 +65,8 @@ export default function IntakePage() {
   const percent = Math.round((answered / Math.max(1, total)) * 100);
 
   return (
-    <div className="min-h-dvh bg-ink-50">
-      <header className="border-b border-ink-200 bg-surface">
+    <div className="min-h-dvh">
+      <header className="glass-bar border-x-0 border-t-0">
         <div className="mx-auto flex max-w-2xl items-center gap-3 px-4 py-3">
           <Logo size={36} />
           <div className="flex-1">
@@ -80,7 +80,7 @@ export default function IntakePage() {
         </div>
         <div className="h-1 bg-ink-100">
           <div
-            className="h-full bg-brand-600 transition-[width] duration-500"
+            className="h-full bg-brand-fill transition-[width] duration-500"
             style={{ width: `${percent}%` }}
             role="progressbar"
             aria-valuenow={percent}
@@ -152,7 +152,7 @@ function Bubble({ children }: { children: React.ReactNode }) {
       >
         <LogoMark size={18} />
       </span>
-      <div className="rounded-(--radius-card) rounded-tl-sm border border-ink-200 bg-surface px-4 py-3 text-ink-800">
+      <div className="glass rounded-(--radius-card) rounded-tl-sm px-4 py-3 text-ink-800">
         {children}
       </div>
     </div>
@@ -186,7 +186,7 @@ function AnswerControl({
               type="button"
               disabled={busy}
               onClick={() => onAnswer(choice.value)}
-              className="rounded-(--radius-control) border border-ink-300 bg-surface px-4 py-2.5 text-sm font-medium text-ink-800 hover:border-brand-600 hover:text-brand-700 disabled:opacity-50"
+              className="glass rounded-full px-4 py-2.5 text-sm font-medium text-ink-800 transition-colors hover:border-brand-400 hover:text-brand-700 disabled:opacity-50"
             >
               {choice.label ?? t(choice.label_key)}
             </button>
@@ -372,7 +372,7 @@ function SkillsAnswer({
               key={skill.id}
               type="button"
               onClick={() => add(skill)}
-              className="rounded-full border border-ink-300 bg-surface px-3 py-1.5 text-sm text-ink-700 hover:border-brand-600 hover:text-brand-700"
+              className="glass rounded-full px-3 py-1.5 text-sm text-ink-700 transition-colors hover:border-brand-400 hover:text-brand-700"
             >
               + {skill.name}
             </button>
@@ -381,7 +381,7 @@ function SkillsAnswer({
       )}
 
       {picked.length > 0 && (
-        <ul className="flex flex-col gap-2 rounded-(--radius-card) border border-ink-200 bg-surface p-3">
+        <ul className="card flex flex-col gap-2 p-3">
           {picked.map((item, index) => (
             <li key={item.skill} className="flex items-center gap-3">
               <span className="w-40 shrink-0 truncate text-sm text-ink-800">{item.name}</span>

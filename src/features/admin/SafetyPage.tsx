@@ -209,7 +209,7 @@ export default function SafetyPage() {
             </div>
 
             {event.reviewed_at && (
-              <div className="rounded-(--radius-card) border border-ink-200 bg-ink-50 p-3">
+              <div className="rounded-(--radius-card) border border-ink-200/70 bg-ink-100/55 p-3">
                 <p className="text-xs text-ink-500">
                   {t("admin.safetyClosedBy", {
                     who: event.reviewed_by_name ?? "—",

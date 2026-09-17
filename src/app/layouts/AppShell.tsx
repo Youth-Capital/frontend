@@ -37,14 +37,23 @@ export function AppShell({ navItems, portalLabel, accent = "brand" }: Props) {
    */
   const home = user ? HOME_BY_ROLE[user.role] : "/";
 
+  /*
+   * Ground and ink together, because they no longer agree with each other.
+   * The brand tile is a pastel and takes the dark ink solved for it; `info`
+   * and `warning` are saturated and still take the pale one. Keeping them in
+   * one map is what stops a portal being given a ground without its text.
+   */
   const accents = {
-    brand: "bg-brand-600",
-    info: "bg-info",
-    warning: "bg-warning",
+    brand: "bg-brand-fill text-on-brand",
+    info: "bg-info text-on-colour",
+    warning: "bg-warning text-on-colour",
   } as const;
 
+  /* `overscroll-contain` keeps a flick at the end of the rail from carrying on
+     into the page underneath it, which on a phone reads as the menu dragging
+     the whole app around. */
   const sidebar = (
-    <nav className="flex h-full flex-col gap-1 overflow-y-auto p-3">
+    <nav className="flex h-full flex-col gap-1 overflow-y-auto overscroll-contain p-3">
       {navItems.map((item) => (
         <NavLink
           key={item.to}
@@ -53,9 +62,14 @@ export function AppShell({ navItems, portalLabel, accent = "brand" }: Props) {
           onClick={() => setMobileOpen(false)}
           className={({ isActive }) =>
             clsx(
-              "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+              /* A pill, like every other pressable thing in the system. The
+                 filled state is the periwinkle itself carrying the dark ink
+                 solved for it — the rail is where someone checks where they
+                 are, so it gets the colour at full strength rather than a
+                 tint of it. */
+              "flex items-center gap-3 rounded-full px-3 py-2.5 text-sm font-medium transition-colors coarse:py-3",
               isActive
-                ? "bg-brand-50 text-brand-700"
+                ? "bg-brand-fill text-on-brand"
                 : "text-ink-600 hover:bg-ink-100 hover:text-ink-900",
             )
           }
@@ -68,15 +82,48 @@ export function AppShell({ navItems, portalLabel, accent = "brand" }: Props) {
     </nav>
   );
 
+  /*
+   * The shell floats.
+   *
+   * Full-bleed chrome is the one thing that would still read as an opaque app
+   * on a page built from frosted panels: the aurora has to run *past* the bar
+   * and the rail, not stop underneath them. So both are inset from the edge,
+   * rounded, and lit by the wash showing in the gap around them. The page
+   * itself carries no background — the body's aurora is the ground, and any
+   * colour painted here would hide the thing every panel is frosting.
+   *
+   * The vertical geometry is one chain of numbers and each is used in more
+   * than one place, so it is written down once here rather than re-derived at
+   * four call sites:
+   *
+   *   header inset       0.75rem   top-3 / mt-3
+   *   header height      3.5rem    h-14
+   *   header bottom      4.25rem   where the mobile scrim starts
+   *   gap under the bar  0.75rem
+   *   rail top           5rem      top-20, desktop rail and mobile drawer
+   *   rail bottom inset  0.75rem   so the rail is 100dvh − 5.75rem tall
+   *
+   * The inset is deliberately not responsive — only the horizontal margin
+   * opens up on wider screens. A breakpoint-dependent top would need a
+   * breakpoint-dependent rail offset and height to match, and those three
+   * would drift apart the first time one of them was edited.
+   *
+   * On top of that chain sits the device's own safe area. The page declares
+   * `viewport-fit=cover`, so the document now starts at the physical top of
+   * the screen rather than below the status bar, and every number above is
+   * measured from there. The status bar inset is therefore added to the
+   * wrapper's padding and to the bar's sticky offset — added, not replaced,
+   * so a phone with no notch reports zero and the geometry is unchanged.
+   */
   return (
-    <div className="min-h-dvh bg-ink-50">
+    <div className="min-h-dvh pt-[env(safe-area-inset-top)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
       <SkipLink />
 
-      <header className="sticky top-0 z-30 border-b border-ink-200 bg-surface">
-        <div className="flex h-14 items-center gap-3 px-4">
+      <header className="glass-bar sticky top-[calc(0.75rem+env(safe-area-inset-top))] z-30 mx-3 mt-3 rounded-(--radius-card) shadow-sm sm:mx-4 lg:mx-6">
+        <div className="flex h-14 items-center gap-2 px-3 sm:gap-3 sm:px-4">
           <button
             type="button"
-            className="rounded-md p-2 text-ink-600 hover:bg-ink-100 lg:hidden"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-ink-600 hover:bg-ink-100 coarse:h-11 coarse:w-11 lg:hidden"
             onClick={() => setMobileOpen((open) => !open)}
             aria-label={t("common.menu")}
             aria-expanded={mobileOpen}
@@ -96,17 +143,25 @@ export function AppShell({ navItems, portalLabel, accent = "brand" }: Props) {
           <Link
             to={home}
             onClick={() => setMobileOpen(false)}
-            className="flex min-w-0 items-center gap-2.5 rounded-xl py-1 pr-2 transition-colors hover:bg-ink-100"
+            className="flex min-h-11 min-w-0 items-center gap-2.5 rounded-full py-1 pr-3 pl-1 transition-colors hover:bg-ink-100"
           >
             <div
               className={clsx(
-                "flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-on-colour",
+                "flex h-8 w-8 shrink-0 items-center justify-center rounded-(--radius-control)",
                 accents[accent],
               )}
             >
               <LogoMark size={23} />
             </div>
-            <div className="min-w-0">
+            {/*
+              * "Youth Capital" needs 90px. On a 360px screen the bar has 91
+              * left once the menu button, the bell and the avatar have taken
+              * theirs, so it fits from there up — but at 320 it has 52, and a
+              * name cut to "Youth Ca…" reads as a bug rather than as a name.
+              * Below that width the mark carries the identity on its own,
+              * which is what a mark is for. It stays the same link either way.
+              */}
+            <div className="hidden min-w-0 min-[360px]:block">
               <p className="truncate text-sm font-semibold leading-tight text-ink-900">
                 {t("app.name")}
               </p>
@@ -116,11 +171,19 @@ export function AppShell({ navItems, portalLabel, accent = "brand" }: Props) {
             </div>
           </Link>
 
-          <div className="ml-auto flex items-center gap-2">
-            <ThemeSwitcher />
-            <LanguageSwitcher />
+          {/* Theme and language are preferences someone sets once. On a 320px
+              phone they are also the two controls that push the wordmark off
+              the bar — measured at 56px of overflow with all four present. So
+              below `sm` they move into the profile menu, where the rest of the
+              account preferences already live. The bell and the avatar stay:
+              those are read on every visit, not set once. */}
+          <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+            <div className="hidden items-center gap-2 sm:flex">
+              <ThemeSwitcher />
+              <LanguageSwitcher />
+            </div>
             <NotificationBell />
-            <div className="border-l border-ink-200 pl-2">
+            <div className="border-l border-ink-200 pl-1.5 sm:pl-2">
               <ProfileMenu />
             </div>
           </div>
@@ -128,23 +191,36 @@ export function AppShell({ navItems, portalLabel, accent = "brand" }: Props) {
       </header>
 
       <div className="flex">
-        <aside className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-60 shrink-0 border-r border-ink-200 bg-surface lg:block">
+        {/* The rail hangs under the bar rather than off the viewport: 5rem
+            down, 0.75rem left at the bottom, and `overflow-hidden` so the
+            nav's own scroll is cut by the corners instead of running past
+            them. Its left margin matches the bar's at this breakpoint, which
+            is the only one it is ever shown at. */}
+        <aside className="glass-bar sticky top-20 ml-6 hidden h-[calc(100dvh-5.75rem)] w-60 shrink-0 overflow-hidden rounded-(--radius-card) shadow-sm lg:block">
           {sidebar}
         </aside>
 
         {mobileOpen && (
           <>
+            {/* The scrim starts at the bar's bottom edge — 4.25rem, the third
+                line of the chain above — so the button that opened the drawer
+                is still the button that closes it. */}
             <div
-              className="fixed inset-0 top-14 z-20 bg-ink-900/40 lg:hidden"
+              className="fixed inset-0 top-[calc(4.25rem+env(safe-area-inset-top))] z-20 bg-ink-900/40 lg:hidden"
               onClick={() => setMobileOpen(false)}
             />
-            <aside className="fixed inset-y-14 left-0 z-30 w-64 border-r border-ink-200 bg-surface lg:hidden">
+            {/* Raised rather than barred: this one sits *over* the content it
+                covers, and a menu has to stay readable whatever is beneath.
+                It is `fixed`, so it is placed against the screen rather than
+                against the padded wrapper and has to carry the insets itself —
+                otherwise its last nav item sits under the home indicator. */}
+            <aside className="glass-raised fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom))] left-[calc(0.75rem+env(safe-area-inset-left))] top-[calc(5rem+env(safe-area-inset-top))] z-30 w-64 overflow-hidden rounded-(--radius-card) lg:hidden">
               {sidebar}
             </aside>
           </>
         )}
 
-        <main id="main" className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8">
+        <main id="main" className="min-w-0 flex-1 px-4 pt-6 pb-[calc(6rem+env(safe-area-inset-bottom))] sm:px-6 lg:px-8">
           <div className="mx-auto max-w-7xl">
             <Outlet />
           </div>
@@ -229,11 +305,6 @@ export const icons = {
       <path d="M8 3v3M16 3v3M4 8h16M5 6h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zM9 14l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   ),
-  mentors: (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path d="M16 19v-1a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v1M9.5 10a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM17 11l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  ),
   assistant: (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
       <path d="M12 3a7 7 0 0 1 7 7c0 2.5-1.4 4-2.5 5.2-.8.9-1.5 1.6-1.5 2.8v1h-6v-1c0-1.2-.7-1.9-1.5-2.8C6.4 14 5 12.5 5 10a7 7 0 0 1 7-7zM10 22h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -278,6 +349,12 @@ export const icons = {
   audit: (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
       <path d="M12 8v4l3 2M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+  reviews: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M21 12a8 8 0 0 1-8 8H7l-4 3v-4.6A8 8 0 0 1 13 4a8 8 0 0 1 8 8z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+      <path d="M9 11h8M9 15h5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
   ),
 };

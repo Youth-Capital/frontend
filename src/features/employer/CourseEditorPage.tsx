@@ -18,7 +18,12 @@ import {
 import type { Course, Paginated, SkillCategory } from "@/shared/types/api";
 
 import { LessonEditor } from "./LessonEditor";
-import { MaterialsEditor } from "./MaterialsEditor";
+import {
+  MaterialsEditor,
+  StagedMaterialsEditor,
+  materialErrorText,
+  useStagedMaterials,
+} from "./MaterialsEditor";
 
 /**
  * Building a course, on a page rather than in a box.
@@ -31,6 +36,17 @@ import { MaterialsEditor } from "./MaterialsEditor";
  * Creating first is deliberate. Modules and lessons have to hang off a course
  * id, so there is nothing to attach them to until one exists — and a draft
  * course is exactly what an unfinished course is.
+ *
+ * Materials are the exception, and they are an exception on purpose. Deciding
+ * "this course opens with that YouTube video" happens while writing the title,
+ * not after saving, and the page used to answer that with "save the course
+ * first" — which is the software telling the author about its own foreign key.
+ * So the materials block is there from the start: what is added before the
+ * course exists is held in the tab and sent the moment it does.
+ *
+ * The alternative was to create a hidden draft course as soon as somebody
+ * typed a title, which would leave an empty course in the database every time
+ * an author opened this page and changed their mind.
  */
 export default function CourseEditorPage() {
   const { courseId } = useParams<{ courseId: string }>();
@@ -40,6 +56,26 @@ export default function CourseEditorPage() {
 
   const creating = !courseId || courseId === "new";
   const [error, setError] = useState("");
+  const [materialError, setMaterialError] = useState("");
+
+  // Materials added before the course exists. Held here rather than in the
+  // block itself, because they have to outlive the switch from "creating" to
+  // "editing" that happens the instant the course is saved.
+  const { staged, stage, unstage, flush } = useStagedMaterials();
+  const [retrying, setRetrying] = useState(false);
+
+  /** Send whatever did not make it the first time, against the saved course. */
+  const retry = async () => {
+    if (!courseId) return;
+    setRetrying(true);
+    try {
+      const failure = await flush(courseId);
+      setMaterialError(failure ? materialErrorText(failure, t) : "");
+      void queryClient.invalidateQueries({ queryKey: ["course-materials"] });
+    } finally {
+      setRetrying(false);
+    }
+  };
 
   const course = useQuery({
     queryKey: ["employer-course", courseId],
@@ -96,10 +132,23 @@ export default function CourseEditorPage() {
       );
       return data;
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       setError("");
+      /*
+       * The course exists now, so anything staged has somewhere to go.
+       *
+       * Sent before navigating, so the editor that opens next already lists
+       * them. Anything that fails stays staged and says why — the course is
+       * saved either way, and silently dropping an author's upload because
+       * the third of five was rejected would be the worst possible outcome.
+       */
+      if (creating && staged.length > 0) {
+        const failure = await flush(data.id);
+        setMaterialError(failure ? materialErrorText(failure, t) : "");
+      }
       void queryClient.invalidateQueries({ queryKey: ["employer-courses"] });
       void queryClient.invalidateQueries({ queryKey: ["employer-course"] });
+      void queryClient.invalidateQueries({ queryKey: ["course-materials"] });
       if (creating) navigate(`/employer/courses/${data.id}/edit`, { replace: true });
     },
     onError: (err) => {
@@ -241,10 +290,41 @@ export default function CourseEditorPage() {
         </div>
       </Card>
 
+      {/*
+        Leftovers stay on screen after the course is saved.
+
+        Navigating flips this page from "creating" to "editing", and without
+        this the staged block would unmount taking any material that failed to
+        upload with it — the course saved, the files silently gone, and the
+        only sign of it a message that vanished with the component showing it.
+      */}
+      {!creating && staged.length > 0 && (
+        <StagedMaterialsEditor
+          staged={staged}
+          onStage={stage}
+          onUnstage={unstage}
+          error={materialError}
+          onRetry={() => void retry()}
+          retrying={retrying}
+        />
+      )}
+
       {creating ? (
-        <Card>
-          <p className="text-sm text-ink-500">{t("courses.saveFirstHint")}</p>
-        </Card>
+        <>
+          <StagedMaterialsEditor
+            staged={staged}
+            onStage={stage}
+            onUnstage={unstage}
+            error={materialError}
+          />
+          {/* Lessons still wait. A material is four fields and belongs to the
+              course; a lesson is a tree of modules with their own ids, and
+              staging one would mean rebuilding the whole editor against
+              objects that do not exist yet. */}
+          <Card>
+            <p className="text-sm text-ink-500">{t("courses.saveFirstHint")}</p>
+          </Card>
+        </>
       ) : (
         <>
           <LessonEditor courseId={courseId!} />

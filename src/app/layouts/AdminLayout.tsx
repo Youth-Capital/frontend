@@ -11,6 +11,7 @@ const NAV: NavItem[] = [
   { to: "/admin/professions", labelKey: "nav.professions", icon: icons.career },
   { to: "/admin/ai", labelKey: "nav.aiMonitor", icon: icons.assistant },
   { to: "/admin/safety", labelKey: "admin.safety", icon: icons.moderation },
+  { to: "/admin/reviews", labelKey: "nav.reviews", icon: icons.reviews },
   { to: "/admin/audit", labelKey: "nav.audit", icon: icons.audit },
 ];
 

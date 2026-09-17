@@ -152,8 +152,27 @@ function Journey({
   // track past the first and last stage, as if the journey continued.
   const inset = `${50 / STAGES.length}%`;
 
+  /*
+   * Five stages, and each label is a single long word: "Подтверждено",
+   * "Tasdiqlangan". Five equal columns across a 390px phone give each about
+   * 68px, and a word that needs 85px cannot wrap — so on a phone the labels
+   * ran into each other and "Практика" sat on top of "Подтверждено".
+   *
+   * The rail is one continuous line through five centres, so breaking it into
+   * two rows on narrow screens would break the one thing the band is for. It
+   * keeps a width where the words fit and scrolls inside its own box instead,
+   * the same bargain the skills map makes. The nodes cut off at the edge are
+   * what tell you there is more to the right.
+   *
+   * The floor holds at every width, not just on phones, because "narrow" here
+   * is not the same as "small screen": from the large breakpoint the band
+   * becomes two columns and the stages get the 1.2fr share of it, which on a
+   * 1024px iPad measured 355px — narrower than the same row on a 390px phone,
+   * and the width at which "Подтверждено" last collided with "Готов к работе".
+   */
   return (
-    <div className="relative w-full">
+    <div className="-mx-5 overflow-x-auto overscroll-x-contain px-5 sm:mx-0 sm:px-0">
+      <div className="relative w-full min-w-[27rem]">
       {/* The track: walked, then not walked. The second half is dotted rather
           than merely dimmer — the difference between the two is not one of
           importance, it is that one has happened and the other has not. */}
@@ -210,6 +229,7 @@ function Journey({
           );
         })}
       </ol>
+      </div>
     </div>
   );
 }

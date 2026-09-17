@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PageHeader } from "@/shared/ui/PageHeader";
 import { useTranslation } from "react-i18next";
@@ -17,6 +18,23 @@ import {
   StatCard,
 } from "@/shared/ui";
 import type { DevelopmentPlan, Task } from "@/shared/types/api";
+import { PERIOD_DEFAULT, PlanPeriod, isValidPeriod } from "./PlanPeriod";
+
+/*
+ * The tick beside a task, and the area you actually press.
+ *
+ * The circle is 20px and should stay 20px: it is a mark being set, not a
+ * button, and drawing it at 44px would make the checkbox the loudest thing in
+ * the row. What a fingertip needs is the target, not the drawing — so the
+ * pseudo-element extends the hit area to 44px (the 16px padding box inside
+ * the border, plus 14px on each side) around a
+ * circle that has not moved. It is the first thing in the row, so the extra
+ * area falls into the row's own padding and the gap after it, not onto
+ * anything else that can be pressed.
+ */
+const TICK_HIT =
+  "relative mt-0.5 flex h-5 w-5 shrink-0 rounded-full " +
+  "before:absolute before:-inset-3.5 before:content-['']";
 
 export default function PlanPage() {
   const { t, i18n } = useTranslation();
@@ -31,10 +49,15 @@ export default function PlanPage() {
     },
   });
 
+  //: The length the next plan will run for. One piece of state for the page,
+  //: so the control beside the header and the button inside the empty state
+  //: cannot disagree about what pressing "generate" is going to do.
+  const [periodDays, setPeriodDays] = useState(PERIOD_DEFAULT);
+
   const generate = useMutation({
     mutationFn: async () => {
       const { data } = await api.post<DevelopmentPlan>("/plan/plans/generate/", {
-        period_days: 90,
+        period_days: periodDays,
       });
       return data;
     },
@@ -66,13 +89,21 @@ export default function PlanPage() {
         title={t("plan.title")}
         subtitle={t("plan.subtitle")}
         action={
+          <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center">
+            <PlanPeriod
+              value={periodDays}
+              onChange={setPeriodDays}
+              disabled={generate.isPending}
+            />
             <Button
               variant={data ? "secondary" : "primary"}
               onClick={() => generate.mutate()}
               loading={generate.isPending}
+              disabled={!isValidPeriod(periodDays)}
             >
               {data ? t("plan.regenerate") : t("plan.generate")}
             </Button>
+          </div>
         }
       />
 
@@ -87,7 +118,11 @@ export default function PlanPage() {
           title={t("plan.noPlan")}
           description={t("plan.noPlanHint")}
           action={
-            <Button onClick={() => generate.mutate()} loading={generate.isPending}>
+            <Button
+              onClick={() => generate.mutate()}
+              loading={generate.isPending}
+              disabled={!isValidPeriod(periodDays)}
+            >
               {t("plan.generate")}
             </Button>
           }
@@ -195,7 +230,7 @@ export default function PlanPage() {
                       key={task.id}
                       className={
                         task.status === "DONE"
-                          ? "flex items-start gap-3 rounded-xl border border-ink-200 bg-ink-50 p-3 opacity-70"
+                          ? "flex items-start gap-3 rounded-xl border border-ink-200/70 bg-ink-100/55 p-3 opacity-70"
                           : "flex items-start gap-3 rounded-xl border border-ink-200 p-3"
                       }
                     >
@@ -209,8 +244,8 @@ export default function PlanPage() {
                         }
                         className={
                           task.status === "DONE"
-                            ? "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-success text-on-colour"
-                            : "mt-0.5 flex h-5 w-5 shrink-0 rounded-full border-2 border-ink-300 hover:border-success"
+                            ? `${TICK_HIT} items-center justify-center bg-success text-on-colour`
+                            : `${TICK_HIT} border-2 border-ink-300 hover:border-success`
                         }
                         aria-label={
                           task.status === "DONE" ? t("plan.markTodo") : t("plan.markDone")
@@ -267,7 +302,7 @@ export default function PlanPage() {
                       {task.ref_type === "Course" && task.ref_id && (
                         <Link
                           to={`/student/courses/${task.ref_id}`}
-                          className="shrink-0 text-sm font-medium text-brand-600 hover:text-brand-700"
+                          className="-my-3 shrink-0 py-3 text-sm font-medium text-brand-600 hover:text-brand-700"
                         >
                           {t("plan.openLinked")}
                         </Link>
@@ -275,7 +310,7 @@ export default function PlanPage() {
                       {task.ref_type === "Test" && task.ref_id && (
                         <Link
                           to={`/student/tests/${task.ref_id}/run`}
-                          className="shrink-0 text-sm font-medium text-brand-600 hover:text-brand-700"
+                          className="-my-3 shrink-0 py-3 text-sm font-medium text-brand-600 hover:text-brand-700"
                         >
                           {t("plan.openLinked")}
                         </Link>

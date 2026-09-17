@@ -6,6 +6,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { api, httpStatus } from "@/shared/api/client";
 import { matchTone } from "@/shared/lib/format";
+import { CvRatingBadge } from "@/shared/ui/CvRating";
 import {
   DataList,
   DataRow,
@@ -193,6 +194,11 @@ export default function CandidatesPage() {
                         <Badge tone="brand">{t("jobs.applied")}</Badge>
                       )}
                       {!candidate.identified && <Badge tone="neutral">🔒</Badge>}
+                      {/* Two different questions, side by side: how well they
+                          fit this role, and how well they present themselves.
+                          A strong match with a bare CV is worth knowing about
+                          before the call, not during it. */}
+                      <CvRatingBadge score={candidate.cv_rating} size="sm" />
                     </>
                   }
                 />

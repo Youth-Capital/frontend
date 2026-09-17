@@ -1,0 +1,409 @@
+/**
+ * Aurora Glass — the frosted treatment, as a system rather than a look.
+ *
+ * Two halves. The aurora is the coloured light: five radial washes painted
+ * once on the body in index.css, fixed, so it stays put while content scrolls
+ * over it. The glass is everything that sits on top of it — panels whose
+ * background is mostly transparent and whose blur turns the aurora behind
+ * them into a soft field of colour.
+ *
+ * WHY THE STRENGTHS ARE NUMBERS AND NOT TASTE
+ *
+ * A frosted panel has no colour of its own. What text lands on is the panel
+ * composited over whatever the aurora paints behind it, and that composite is
+ * darkest where the aurora is strongest. Two variables therefore decide
+ * whether the whole product passes contrast: how strong the aurora may be,
+ * and how opaque the panel is.
+ *
+ *   light:  a 68% white panel over the periwinkle composites to #EDE8FF
+ *   dark:   a 78% panel over the deepened pink composites to #362244
+ *
+ * Every ink, brand, accent and semantic token in index.css was solved against
+ * those two grounds. Weaken `--glass-alpha` or raise `--aurora-strength` and
+ * the grounds move, and the tokens have to be solved again — that is not a
+ * warning about style, it is the actual dependency.
+ *
+ * Measured at the values below, over all five aurora hues:
+ *   light  ink-400 3.07–3.38   ink-500 4.61–5.09   ink-600 6.21–6.84
+ *   dark   ink-400 3.07–3.19   ink-500 4.62–4.80   ink-600 6.24–6.48
+ *
+ * COLOURS ARE MIXED, NEVER WRITTEN OUT
+ *
+ * Every value here is mixed into a theme token, so the whole system follows
+ * the light/dark switch on its own: in the light theme a tint lands on white
+ * and reads as a pastel, in the dark theme the same tint lands on #29233B and
+ * reads as a lit surface. Writing the pastels literally would have produced
+ * bright cards floating on a dark page — the usual way this style breaks.
+ *
+ * The tints are fill only. Nothing here sets a text colour from a tint.
+ */
+
+:root {
+  /* The aurora's five stops, in the order the body paints them. */
+  --aurora-1: #FFD6FF; /* pink lace       — top left */
+  --aurora-2: #E7C6FF; /* mauve           — bottom right */
+  --aurora-3: #C8B6FF; /* periwinkle      — bottom left */
+  --aurora-4: #B8C0FF; /* blue-purple     — centre */
+  --aurora-5: #BBD0FF; /* light blue      — top right */
+
+  /* How much of each hue reaches the page. The ground the tokens were solved
+     against assumes these; see the header. */
+  --aurora-strength: 85%;
+  --aurora-mid: 42%;
+
+  /* The panel. 68% of the surface colour, 32% of whatever is behind it. */
+  --glass-alpha: 68%;
+  /* The edge: a light rim, brighter than the fill, the way a real pane
+     catches light along its cut. */
+  --glass-edge-alpha: 86%;
+  --glass-blur: 14px;
+  --glass-blur-bar: 20px;
+  --glass-blur-raised: 30px;
+  /* Tints for icon tiles and chips — how far a hue may push a surface. */
+  --glass-tint: 26%;
+  --glass-tint-edge: 40%;
+}
+
+:root[data-theme="dark"] {
+  /* The same five hues, deepened rather than swapped. A dark theme that kept
+     the pastels would have been five bright lamps behind frosted panels. */
+  --aurora-1: #652065;
+  --aurora-2: #482065;
+  --aurora-3: #312065;
+  --aurora-4: #202865;
+  --aurora-5: #203565;
+
+  --aurora-strength: 78%;
+  --aurora-mid: 40%;
+
+  --glass-alpha: 78%;
+  --glass-edge-alpha: 40%;
+
+  /* On a dark ground a tint lightens the card and takes contrast away, which
+     is the opposite of what it does on light. The ceiling is lower. */
+  --glass-tint: 17%;
+  --glass-tint-edge: 30%;
+}
+
+/*
+ * Wrapped in the components layer on purpose.
+ *
+ * These are unlayered rules otherwise, and an unlayered rule beats a Tailwind
+ * utility whatever the source order — which is how `position: relative` in an
+ * earlier stylesheet overruled `sticky` on the landing header and the bar
+ * scrolled away with the page. Inside the layer, a utility wins again.
+ */
+@layer components {
+  /*
+   * The panel. The resting surface of the whole product.
+   *
+   * `background-color` rather than a gradient, because `backdrop-filter` only
+   * blurs what is actually behind the element, and a painted gradient would
+   * sit in front of the blur instead of being lit by it.
+   */
+  .glass,
+  .card {
+    background-color: color-mix(
+      in oklab,
+      var(--color-surface) var(--glass-alpha),
+      transparent
+    );
+    border: 1px solid
+      color-mix(
+        in oklab,
+        var(--color-surface) var(--glass-edge-alpha),
+        transparent
+      );
+    backdrop-filter: blur(var(--glass-blur)) saturate(1.35);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.35);
+    /* The light catch along the top edge, which is most of what reads as
+       "pane of glass" rather than "translucent rectangle". */
+    box-shadow: inset 0 1px 0
+      color-mix(in oklab, var(--color-surface) 70%, transparent);
+  }
+
+  /*
+   * The bar: sticky headers, the sidebar, the filter rail.
+   *
+   * Blurs harder than a card because content scrolls *underneath* it rather
+   * than beside it, and a weak blur there shows the text moving through.
+   */
+  .glass-bar {
+    background-color: color-mix(
+      in oklab,
+      var(--color-surface) calc(var(--glass-alpha) + 8%),
+      transparent
+    );
+    border: 1px solid
+      color-mix(
+        in oklab,
+        var(--color-surface) var(--glass-edge-alpha),
+        transparent
+      );
+    backdrop-filter: blur(var(--glass-blur-bar)) saturate(1.3);
+    -webkit-backdrop-filter: blur(var(--glass-blur-bar)) saturate(1.3);
+  }
+
+  /*
+   * The raised surface: menus, popovers, modals, the assistant bubble.
+   *
+   * Opaque enough to read a form through — a dialog is the one place where a
+   * legible backdrop matters more than the effect, so this goes well above
+   * the panel alpha and the composite is never the limiting ground.
+   */
+  .glass-raised {
+    background-color: color-mix(
+      in oklab,
+      var(--color-surface) calc(var(--glass-alpha) + 20%),
+      transparent
+    );
+    border: 1px solid
+      color-mix(in oklab, var(--color-surface) 90%, var(--color-ink-200));
+    backdrop-filter: blur(var(--glass-blur-raised)) saturate(1.4);
+    -webkit-backdrop-filter: blur(var(--glass-blur-raised)) saturate(1.4);
+    box-shadow:
+      inset 0 1px 0 color-mix(in oklab, var(--color-surface) 80%, transparent),
+      var(--shadow-lg);
+  }
+
+  /*
+   * The pictogram tile: a saturated square of one palette hue, holding a line
+   * icon. `--tint` is set per tile; the mix is what makes it work in both
+   * themes. This is the element that carries the palette into a screen that
+   * is otherwise white panels — on the boards it is the only place the five
+   * colours appear at full strength.
+   */
+  .glass-tile {
+    background-color: color-mix(
+      in oklab,
+      var(--tint, var(--color-brand-200)) 62%,
+      var(--color-surface)
+    );
+    border: 1px solid
+      color-mix(
+        in oklab,
+        var(--tint, var(--color-brand-200)) 70%,
+        var(--color-surface)
+      );
+    border-radius: var(--radius-tile);
+    /* The icon inside takes the hue's own ink, not the tint — a tint cannot
+       carry a stroke that has to be seen. */
+    color: var(--color-ink-800);
+  }
+
+  /* A chip: a small frosted pill. Tinted at the edge only, so a row of six
+     in six hues does not turn a card into a paint chart. */
+  .glass-chip {
+    background-color: color-mix(
+      in oklab,
+      var(--color-surface) 88%,
+      transparent
+    );
+    border: 1px solid
+      color-mix(
+        in oklab,
+        var(--tint, var(--color-brand-300)) var(--glass-tint-edge),
+        var(--color-surface)
+      );
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  /*
+   * A tinted panel: a card that belongs to one hue rather than to the system.
+   * Used sparingly — a hero stat, a highlighted row. `--tint` per instance.
+   */
+  .glass-tinted {
+    background-color: color-mix(
+      in oklab,
+      var(--tint, var(--color-brand-200)) var(--glass-tint),
+      color-mix(in oklab, var(--color-surface) var(--glass-alpha), transparent)
+    );
+    border: 1px solid
+      color-mix(
+        in oklab,
+        var(--tint, var(--color-brand-200)) var(--glass-tint-edge),
+        var(--color-surface)
+      );
+    backdrop-filter: blur(var(--glass-blur)) saturate(1.35);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.35);
+  }
+
+  /*
+   * The stage: a block that carries its own aurora rather than borrowing the
+   * page's. For a hero or a feature band that needs a backdrop worth blurring
+   * even when it sits mid-page, far from the body's corner washes.
+   */
+  .glass-stage {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    border-radius: var(--radius-card);
+    background-color: var(--color-ink-100);
+    background-image:
+      radial-gradient(
+        62% 58% at 8% 4%,
+        color-mix(in oklab, var(--aurora-1) 88%, transparent),
+        transparent 68%
+      ),
+      radial-gradient(
+        58% 54% at 94% 8%,
+        color-mix(in oklab, var(--aurora-5) 84%, transparent),
+        transparent 66%
+      ),
+      radial-gradient(
+        64% 62% at 78% 100%,
+        color-mix(in oklab, var(--aurora-2) 82%, transparent),
+        transparent 68%
+      ),
+      radial-gradient(
+        54% 50% at 24% 96%,
+        color-mix(in oklab, var(--aurora-3) 78%, transparent),
+        transparent 66%
+      );
+  }
+
+  /* A highlight that follows the pointer. Set from React as --mx / --my. */
+  .glass-stage::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: radial-gradient(
+      24rem 24rem at var(--mx, 50%) var(--my, 0%),
+      color-mix(in oklab, var(--color-surface) 55%, transparent),
+      transparent 66%
+    );
+    opacity: 0;
+    transition: opacity 400ms ease;
+  }
+
+  .glass-stage[data-lit="true"]::before {
+    opacity: 1;
+  }
+
+  /*
+   * The lift.
+   *
+   * On an opaque card a hover is a shadow. On glass the more truthful signal
+   * is the pane coming *forward* — the fill firms up, the edge brightens, and
+   * the shadow spreads. Opacity and transform only, so nothing here forces a
+   * layout pass.
+   */
+  .glass-lift {
+    transition:
+      transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 220ms ease,
+      border-color 220ms ease,
+      background-color 220ms ease;
+  }
+
+  .glass-lift:hover,
+  .glass-lift:focus-within {
+    transform: translateY(-4px);
+    background-color: color-mix(
+      in oklab,
+      var(--color-surface) calc(var(--glass-alpha) + 12%),
+      transparent
+    );
+    border-color: color-mix(
+      in oklab,
+      var(--color-brand-300) 55%,
+      var(--color-surface)
+    );
+    box-shadow:
+      inset 0 1px 0 color-mix(in oklab, var(--color-surface) 85%, transparent),
+      var(--shadow-lg);
+  }
+}
+
+/*
+ * FALLBACKS — three of them, and each one is a real failure mode.
+ *
+ * 1. No backdrop-filter. Firefox had it behind a flag until recently and some
+ *    Android WebViews still do not ship it. Without a fallback the panels stay
+ *    translucent but stop blurring, so the aurora shows through as hard
+ *    coloured shapes directly under the text. The fix is to go opaque: the
+ *    layout survives, the effect does not, and the text stays readable.
+ */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass,
+  .card,
+  .glass-bar,
+  .glass-raised,
+  .glass-tinted,
+  .glass-chip {
+    background-color: var(--color-surface);
+    border-color: var(--color-ink-200);
+  }
+}
+
+/*
+ * 2. Someone asked their operating system to reduce transparency.
+ *
+ *    This is an accessibility setting, not a preference about taste — it is
+ *    switched on by people for whom text over a busy backdrop is hard to
+ *    resolve. Honouring it means the effect goes away completely: opaque
+ *    surfaces, no blur, and the aurora dropped to a flat page colour.
+ */
+@media (prefers-reduced-transparency: reduce) {
+  /* The aurora lives on body::before, not on the body itself — see the note
+     in index.css about iOS and background-attachment. */
+  body::before {
+    background-image: none;
+  }
+
+  .glass,
+  .card,
+  .glass-bar,
+  .glass-raised,
+  .glass-tinted,
+  .glass-chip {
+    background-color: var(--color-surface);
+    border-color: var(--color-ink-200);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .glass-stage {
+    background-image: none;
+    background-color: var(--color-ink-100);
+  }
+}
+
+/*
+ * 3. Reduced motion. The pointer highlight and the hover lift are decoration,
+ *    so they go away when asked; the state change itself does not, because
+ *    "which card am I on" is information.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .glass-stage::before {
+    display: none;
+  }
+
+  .glass-lift,
+  .glass-lift:hover,
+  .glass-lift:focus-within {
+    transform: none;
+    transition: none;
+  }
+}
+
+/*
+ * High contrast (forced-colors). The browser replaces every colour with the
+ * user's own set, at which point a translucent fill is a hole in the design.
+ * Borders are restated in system colours so panels keep their boundaries.
+ */
+@media (forced-colors: active) {
+  .glass,
+  .card,
+  .glass-bar,
+  .glass-raised,
+  .glass-tinted,
+  .glass-chip,
+  .glass-tile {
+    border: 1px solid CanvasText;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}

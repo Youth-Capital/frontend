@@ -13,8 +13,23 @@ import { Lattice, Portal } from "@/shared/ui/geometry";
 import { StagePath } from "./StagePath";
 import "@/shared/styles/deep.css";
 import { Logo } from "@/shared/ui/Logo";
+
 import { AudienceDeck, type DeckCard } from "./AudienceDeck";
 import { SkipLink } from "@/shared/ui/SkipLink";
+
+/*
+ * The hit area around a pagination dot.
+ *
+ * A dot is 6px tall and should stay 6px: it is a position indicator, and a
+ * 44px dot is a button. So the *target* grows instead of the drawing — 19px
+ * above and below takes it to 44, and 6px to each side is exactly half the
+ * 12px gap, which is as far as it can reach without taking presses meant for
+ * the dot next to it. The gap was widened from 8px to 12px for that reason:
+ * at 8px the narrow dot's target could only reach 20px across, and two
+ * targets that overlap trade a small target for a wrong one.
+ */
+const DOT_HIT =
+  "relative before:absolute before:-inset-x-1.5 before:-inset-y-[19px] before:content-[''] ";
 
 /**
  * Public landing page.
@@ -36,7 +51,7 @@ export default function LandingPage() {
   });
 
   return (
-    <div className="min-h-dvh bg-ink-50 text-ink-800">
+    <div className="min-h-dvh text-ink-800">
       {/* First in the DOM, so it is the first thing Tab reaches. */}
       <SkipLink />
 
@@ -97,7 +112,7 @@ function BrandLink({ nameClass }: { nameClass: string }) {
   }
 
   return (
-    <Link to="/" onClick={toTop} className="flex items-center gap-2.5">
+    <Link to="/" onClick={toTop} className="flex min-h-11 min-w-11 items-center gap-2.5">
       <Logo size={36} />
       <span className={nameClass}>{t("app.name")}</span>
     </Link>
@@ -109,23 +124,40 @@ function SiteHeader() {
 
   return (
     <header className="deep sticky top-0 z-30 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3 sm:px-6">
+      {/*
+       * Five controls do not fit across a phone.
+       *
+       * Measured at 320px: the mark, the theme toggle, three language codes,
+       * "Войти" and "Создать аккаунт" come to about 370px of controls in a
+       * 288px row. Nothing overflowed, because this header is `.deep` and
+       * `.deep` clips — so the two buttons on the right were simply cut off
+       * the screen, present in the markup and unreachable by hand.
+       *
+       * So the phone header carries the three things it needs: the mark, the
+       * language (the first choice a trilingual audience makes), and the way
+       * back in for someone who already has an account. Signing up is not
+       * lost with the button — the hero's own call to action below points at
+       * the same page, and it is the larger target of the two.
+       */}
+      <div className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-3 sm:gap-4 sm:px-6">
         <BrandLink nameClass="hidden font-semibold text-ink-900 sm:block" />
 
         <div className="flex-1" />
 
-        <ThemeSwitcher />
+        <div className="hidden sm:block">
+          <ThemeSwitcher />
+        </div>
         <LanguageSwitcher />
 
         <Link
           to="/auth/login"
-          className="rounded-(--radius-control) px-3 py-2 text-sm font-semibold text-ink-700 hover:bg-ink-100"
+          className="shrink-0 rounded-(--radius-control) px-3 py-3 text-sm font-semibold text-ink-700 hover:bg-ink-100"
         >
           {t("auth.login")}
         </Link>
         <Link
           to="/auth/register"
-          className="rounded-(--radius-control) bg-brand-600 px-4 py-2 text-sm font-semibold text-on-colour hover:bg-brand-700"
+          className="hidden shrink-0 rounded-full bg-brand-fill px-4 py-2.5 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-fill-hover coarse:py-3 sm:inline-block"
         >
           {t("landing.cta.createAccount")}
         </Link>
@@ -193,7 +225,7 @@ function SiteFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-ink-200 bg-surface">
+    <footer className="glass-bar border-x-0 border-b-0">
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-4">
         <div className="md:col-span-2">
           {/* The same control. The bottom of the page is where the way back up
@@ -309,7 +341,7 @@ function Feature({
   const [artFailed, setArtFailed] = useState(false);
 
   return (
-    <div className="overflow-hidden rounded-(--radius-card) border border-ink-200 bg-surface">
+    <div className="card overflow-hidden">
       {art && !artFailed && (
         <img
           src={`/illustrations/${art}`}
@@ -419,7 +451,7 @@ function RotatingHeadline() {
       </div>
 
       {/* The affordance. Also the keyboard route — a clickable <h1> is not one. */}
-      <div className="mt-4 flex items-center gap-2">
+      <div className="mt-4 flex items-center gap-3">
         {phrases.map((phrase, position) => (
           <button
             key={phrase}
@@ -435,8 +467,8 @@ function RotatingHeadline() {
             }}
             className={
               position === index
-                ? "h-1.5 w-8 rounded-full transition-all"
-                : "h-1.5 w-3 rounded-full transition-all"
+                ? DOT_HIT + "h-1.5 w-8 rounded-full transition-all"
+                : DOT_HIT + "h-1.5 w-3 rounded-full transition-all"
             }
           />
         ))}
@@ -585,7 +617,7 @@ function Hero() {
             </Link>
             <a
               href="#journey"
-              className="group inline-flex items-center gap-2 text-sm font-semibold underline-offset-4 hover:underline"
+              className="group -my-3 inline-flex items-center gap-2 py-3 text-sm font-semibold underline-offset-4 hover:underline"
               style={{ color: "var(--band-ink)" }}
             >
               {t("landing.hero.howItWorks")}
@@ -644,7 +676,7 @@ function JourneySection() {
           return (
             <li
               key={key}
-              className="yc-card flex flex-col rounded-(--radius-card) border border-ink-200 bg-surface p-5"
+              className="card yc-card flex flex-col p-5"
             >
               {/* The bar grows to its value on arrival rather than appearing
                   at it, so the accumulation across the row is something you
@@ -726,7 +758,7 @@ function WhatIsIt() {
         {[0, 1, 2].map((index) => (
           <article
             key={index}
-            className="yc-card flex flex-col overflow-hidden rounded-(--radius-card) border border-ink-200 bg-surface"
+            className="card yc-card flex flex-col overflow-hidden"
             // The stagger is now only in time, not in position: the arches
             // still draw left to right, but the cards line up. A rising row
             // was a nice idea and a bad one — with three different content
@@ -808,7 +840,7 @@ function AudiencePanel({
       action={
         <Link
           to="/auth/register"
-          className="inline-block shrink-0 rounded-(--radius-control) bg-brand-600 px-5 py-3 text-sm font-semibold text-on-colour transition-colors hover:bg-brand-700"
+          className="inline-block shrink-0 rounded-full bg-brand-fill px-6 py-3 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-fill-hover"
         >
           {cta}
         </Link>
@@ -873,7 +905,6 @@ function Assessment() {
     ["self", 35],
     ["course", 65],
     ["experience", 70],
-    ["mentor", 85],
     ["test", 90],
     ["employer", 100],
   ];
@@ -951,7 +982,7 @@ function Intelligence() {
         <Feature title={t("landing.ai.matching.title")} body={t("landing.ai.matching.body")} />
       </div>
 
-      <div className="mt-6 rounded-(--radius-card) border border-ink-200 bg-surface p-5">
+      <div className="card mt-6 p-5">
         <p className="text-xs font-semibold uppercase tracking-wide text-ink-500">
           {t("landing.ai.explain.title")}
         </p>
@@ -1004,8 +1035,8 @@ function Pricing({
             aria-pressed={audience === role}
             className={
               audience === role
-                ? "rounded-full bg-brand-600 px-4 py-1.5 text-sm font-semibold text-on-colour"
-                : "rounded-full px-4 py-1.5 text-sm font-semibold text-ink-600 hover:text-ink-900"
+                ? "rounded-full bg-brand-fill px-4 py-1.5 text-sm font-semibold text-on-colour coarse:py-3"
+                : "rounded-full px-4 py-1.5 text-sm font-semibold text-ink-600 hover:text-ink-900 coarse:py-3"
             }
           >
             {t(role === "STUDENT" ? "auth.roleStudent" : "auth.roleEmployer")}
@@ -1055,7 +1086,7 @@ function Pricing({
 
             <Link
               to="/auth/register"
-              className="mt-6 rounded-(--radius-control) bg-brand-600 px-4 py-2.5 text-center text-sm font-semibold text-on-colour hover:bg-brand-700"
+              className="mt-6 rounded-full bg-brand-fill px-5 py-3 text-center text-sm font-semibold text-on-brand transition-colors hover:bg-brand-fill-hover"
             >
               {t("landing.cta.createAccount")}
             </Link>
@@ -1083,9 +1114,9 @@ function Faq() {
         {items.map((item) => (
           <details
             key={item.q}
-            className="group rounded-(--radius-card) border border-ink-200 bg-ink-50 p-4"
+            className="group rounded-(--radius-card) border border-ink-200/70 bg-ink-100/55 p-4"
           >
-            <summary className="cursor-pointer list-none font-semibold text-ink-900 marker:content-['']">
+            <summary className="cursor-pointer list-none py-2.5 font-semibold text-ink-900 marker:content-['']">
               <span className="flex items-center justify-between gap-4">
                 {item.q}
                 <span

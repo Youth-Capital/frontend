@@ -15,7 +15,6 @@
     "jobs": "Vakansiyalar",
     "applications": "Arizalar",
     "plan": "Mening rejam",
-    "mentors": "Mentorlar",
     "assistant": "AI yordamchi",
     "settings": "Sozlamalar",
     "company": "Kompaniya",
@@ -33,7 +32,9 @@
     "logout": "Chiqish",
     "billing": "Tarif",
     "chat": "AI suhbat",
-    "notes": "Qaydlarim"
+    "notes": "Qaydlarim",
+    "reviews": "Sharhlar",
+    "profile": "Mening profilim"
   },
   "common": {
     "save": "Saqlash",
@@ -68,7 +69,8 @@
     "months": "{{count}} oy",
     "days": "{{count}} kun",
     "page": "Sahifa",
-    "minutesShort": "daq"
+    "minutesShort": "daq",
+    "send": "Yuborish"
   },
   "errors": {
     "generic": "Nimadir xato ketdi.",
@@ -164,8 +166,6 @@
     "roleStudentHint": "Maktab, kollej, universitet o'quvchisi, bitiruvchi yoki ish izlovchi",
     "roleEmployer": "Ish beruvchi",
     "roleEmployerHint": "Vakansiya, kurs, nomzod qidirish",
-    "roleMentor": "Mentor",
-    "roleMentorHint": "O'z sohamda yoshlarga yo'l ko'rsataman",
     "firstName": "Ism",
     "lastName": "Familiya",
     "birthDate": "Tug'ilgan sana",
@@ -201,7 +201,11 @@
     "arcCareer": {
       "title": "Karyera",
       "body": "O'zingiz orzu qilgan ish va o'sish"
-    }
+    },
+    "consentNotice": "Kabinet yaratish uchun roziligingiz kerak. Reja tuzish va vakansiyalar tanlash uchun profilingiz ma'lumotlarini — ism, tug'ilgan sana, ko'nikmalar va test natijalarini — saqlaymiz va qayta ishlaymiz. Ish beruvchi ma'lumotlaringizni faqat siz o'zingiz uning vakansiyasiga ariza berganingizda ko'radi.",
+    "consentAgree": "Foydalanish shartlari, maxfiylik siyosati va shaxsiy ma'lumotlarimni qayta ishlashga roziman",
+    "consentOptional": "Qo'shimcha — keyin sozlamalarda o'zgartirish mumkin",
+    "consentToContinue": "Davom etish uchun rozilikni belgilang"
   },
   "onboarding": {
     "title": "Profilingizni sozlaymiz",
@@ -259,7 +263,6 @@
     "title": "Karyera yo'li",
     "subtitle": "Nima bor, nima yetishmaydi, keyin nima qilish kerak",
     "readiness": "«{{profession}}» kasbiga tayyorlik",
-    "readinessHint": "{{total}} ta majburiy ko'nikmadan {{met}} tasi kerakli darajada",
     "haveSkills": "Sizda allaqachon bor",
     "partialSkills": "Talab darajasidan past",
     "missingSkills": "Yetishmaydi",
@@ -279,10 +282,7 @@
     },
     "requirement_REQUIRED": "Majburiy",
     "requirement_PREFERRED": "Ma'qul",
-    "requirement_OPTIONAL": "Ixtiyoriy",
-    "routeTo": "Yo'l",
-    "andMoreSkills_one": "va yana {{count}} ta ko'nikma",
-    "andMoreSkills_other": "va yana {{count}} ta ko'nikma"
+    "requirement_OPTIONAL": "Ixtiyoriy"
   },
   "skills": {
     "title": "Ko'nikmalar",
@@ -299,7 +299,6 @@
       "SELF": "O'z-o'zini baholash",
       "COURSE": "Kurs yakunlangan",
       "EXPERIENCE": "Ish tajribasi",
-      "MENTOR": "Mentor bahosi",
       "TEST": "Test natijasi",
       "EMPLOYER": "Ish beruvchi tasdiqlagan"
     },
@@ -401,10 +400,34 @@
     "materialFile": "Fayl",
     "materialFileHint": "PDF, hujjat, jadval, taqdimot yoki arxiv.",
     "materialBookHint": "Kitobga havola — platforma uni saqlamaydi.",
+    "materialBookFile": "Kitob fayli",
+    "materialBookFileHint": "PDF yoki EPUB, 40 MB gacha. Ish stolidan sudrab olib keling.",
+    "materialBookLink": "Yoki unga havola",
+    "titleFromFileHint": "Bo'sh qoldiring — fayl nomi olinadi.",
+    "filesChosen": "Fayllar: {{count}} — har biri alohida biriktiriladi.",
+    "addMaterials": "{{count}} ta qo'shish",
     "materialFailed": "Materialni qo'shib bo'lmadi.",
     "material_FILE": "Fayl",
     "material_LINK": "Havola",
     "material_BOOK": "Kitob",
+    "material_IMAGE": "Rasm",
+    "material_VIDEO": "Video",
+    "lessonMaterials": "Dars materiallari",
+    "lessonMaterialsHint": "Faqat shu dars uchun video, rasm, fayl va havolalar.",
+    "materialImage": "Rasm",
+    "materialImageHint": "JPEG, PNG yoki WebP. Yuklab olish emas, darsning ichida ko'rsatiladi.",
+    "materialVideoUrl": "Video havolasi",
+    "materialVideoHint": "YouTube yoki Vimeo. Plyer darsga o'rnatiladi.",
+    "materialDescription": "Tavsif",
+    "materialDescriptionHint": "Ixtiyoriy — bu nima uchunligi haqida bir qator.",
+    "noMaterialsYet": "Bu darsga hozircha hech narsa biriktirilmagan.",
+    "addMaterial": "Material qo'shish",
+    "materialPreview": "Ko'rib chiqish",
+    "stagedMaterialsHint": "Hoziroq qo'shing — kurs yaratilishi bilan biriktiriladi. Faqat shu ilovada saqlanadi: yaratishdan oldin sahifani yangilasangiz yo'qoladi.",
+    "pendingMaterial": "biriktiriladi",
+    "materialsNotSentHint": "Kurs saqlandi, ammo bu materiallar yuklanmadi. Qayta urinib ko'ring yoki o'chiring.",
+    "retryMaterials": "Qayta urinish",
+    "material_video_not_embeddable": "Bu havolani o'rnatib bo'lmaydi. YouTube yoki Vimeo manzilini joylashtiring — yoki uni oddiy havola sifatida qo'shing.",
     "recapTitle": "Qisqacha bayon",
     "recapAsk": "Bayon tayyorlash",
     "recapHint": "Darsga qaytganda asosiy fikrlarni tez eslash uchun.",
@@ -423,7 +446,16 @@
     "check_too_short": "Savol tuzish uchun matn juda kam.",
     "check_no_model": "Tekshiruv hozir mavjud emas: model ulanmagan.",
     "check_no_questions": "Bu dars bo'yicha savollar tuzilmadi.",
-    "lockedHint": "Bu darsni ochish uchun kursga yoziling."
+    "lockedHint": "Bu darsni ochish uchun kursga yoziling.",
+    "tutorTitle": "Dars bo'yicha so'rash",
+    "tutorHint": "Faqat shu darsning materiallari bo'yicha javob beradi.",
+    "tutorPlaceholder": "Nimasi tushunarsiz qoldi?",
+    "tutorAsk": "So'rash",
+    "tutorThinking": "Darsni o'qiyapman…",
+    "tutorGroundedOn": "Manba: {{sources}}",
+    "tutorNoSource": "Bu darsda javob berish uchun matn yo'q. Muallifdan konspekt yoki video matnini qo'shishni so'rang.",
+    "tutorNoModel": "Model ulanmagan — javob berib bo'lmaydi.",
+    "tutorFailed": "Javob olinmadi. Yana urinib ko'ring."
   },
   "tests": {
     "title": "Testlar",
@@ -452,7 +484,33 @@
     "incorrect": "Noto'g'ri",
     "explanation": "Izoh",
     "empty": "Mavjud testlar hali yo'q.",
-    "screeningNote": "Bu ish beruvchining skrining testi. U faqat shu arizaga ta'sir qiladi, umumiy profilingizga emas."
+    "screeningNote": "Bu ish beruvchining skrining testi. U faqat shu arizaga ta'sir qiladi, umumiy profilingizga emas.",
+    "soft": {
+      "done": "Baholash yakunlandi",
+      "doneHint": "Bu testda o'tish balli yo'q — natija sizning profilingiz.",
+      "byCompetency": "Kompetensiyalar bo'yicha",
+      "byCompetencyHint": "Har bir raqam — tanlagan harakatlaringiz shu kompetensiyani qanchalik ko'rsatgani",
+      "reviewTitle": "Javoblaringiz",
+      "pointsAwarded": "{{points}} ball",
+      "noRightAnswer": "To'g'ri javob yo'q — o'zingiz haqiqatan qanday yo'l tutishingizni tanlang."
+    },
+    "leaveTitle": "Testdan chiqasizmi?",
+    "leaveHint": "Javoblar hali saqlanmagan — ular serverga faqat topshirilganda yuboriladi. Chiqsangiz, javoblar yo'qoladi, taymer esa davom etadi.",
+    "leaveStay": "Qolish",
+    "leaveAnyway": "Baribir chiqish",
+    "leaveAnswered": "{{total}} tadan {{answered}} tasiga javob berilgan",
+    "tabTodo": "Topshirilmagan",
+    "tabPassed": "Topshirilgan",
+    "tabResults": "Natijalar",
+    "emptyTodo": "Barcha mavjud testlar topshirilgan.",
+    "emptyPassed": "Hozircha topshirilgan test yo'q.",
+    "emptyResults": "Hozircha natija yo'q — ular birinchi topshirishdan keyin paydo bo'ladi.",
+    "completed": "O'tildi",
+    "expired": "Vaqt tugadi",
+    "noPassMark": "O'tish balli yo'q",
+    "date": "Sana",
+    "attempt": "Urinish",
+    "outcome": "Natija"
   },
   "experience": {
     "title": "Tajriba",
@@ -549,7 +607,7 @@
     "provenSkills": "Tasdiqlangan ko'nikma",
     "passedTests": "Topshirilgan test",
     "verifiedSkills": "Tasdiqlangan ko'nikmalar",
-    "noVerifiedSkills": "Hali tasdiqlangan ko'nikma yo'q. Test topshiring yoki mentordan tasdiq oling."
+    "noVerifiedSkills": "Hali tasdiqlangan ko'nikma yo'q. Ko'nikmani tasdiqlash uchun test topshiring."
   },
   "jobs": {
     "title": "Vakansiyalar",
@@ -597,7 +655,12 @@
     "noBreakdown": "Hozircha taqqoslash uchun ma'lumot yo'q",
     "thisMatch": "Moslik tahlili",
     "youHaveCandidate": "Nomzodda bor",
-    "youMissCandidate": "Yetishmaydi"
+    "youMissCandidate": "Yetishmaydi",
+    "why_target_profession": "Siz maqsad qilgan kasbga mos keladi",
+    "why_shares_target_skills": "Maqsadli kasbingiz bilan bir xil ko'nikmalar",
+    "why_declared_interest": "Siz belgilagan sohada",
+    "why_outside_declared_interests": "Siz aytgan sohalardan tashqarida",
+    "why_no_interests_declared": ""
   },
   "applications": {
     "title": "Arizalar",
@@ -640,7 +703,7 @@
     "dueOn": "Muddat: {{date}}",
     "estimate": "~{{count}} daq",
     "openLinked": "Ochish",
-    "reviews": "Mentor sharhlari",
+    "reviews": "Reja tarixi",
     "milestone": {
       "foundation": "1-oy — poydevor",
       "build": "2-oy — amaliyot",
@@ -657,7 +720,6 @@
       "TEST": "Test",
       "PROJECT": "Loyiha",
       "APPLICATION": "Ariza",
-      "MENTOR_SESSION": "Mentor sessiyasi",
       "PROFILE": "Profil",
       "CUSTOM": "Vazifa"
     },
@@ -669,33 +731,10 @@
       "close_gap": "{{skill}} bo'yicha bo'shliqni yopadi.",
       "reach_level": "{{skill}} bo'yicha {{level}}-darajaga chiqing.",
       "portfolio": "O'rganganingizni qo'llang va portfolioga qo'shing."
-    }
-  },
-  "mentors": {
-    "title": "Mentorlar",
-    "subtitle": "Siz bormoqchi bo'lgan yo'lni bosib o'tgan odamlar",
-    "request": "Sessiya so'rash",
-    "mySessions": "Mening sessiyalarim",
-    "topic": "Mavzu",
-    "agenda": "Nimani muhokama qilmoqchisiz",
-    "expertise": "Ekspertiza",
-    "yearsExperience": "tajriba: {{count}} yil",
-    "sessions": "sessiyalar: {{count}}",
-    "free": "Bepul",
-    "empty": "Mentorlar topilmadi.",
-    "sessionsEmpty": "Sessiyalar hali yo'q.",
-    "accept": "Qabul qilish",
-    "decline": "Rad etish",
-    "complete": "Yakunlandi deb belgilash",
-    "meetingLink": "Uchrashuv havolasi",
-    "status": {
-      "REQUESTED": "So'ralgan",
-      "ACCEPTED": "Qabul qilingan",
-      "DECLINED": "Rad etilgan",
-      "COMPLETED": "Yakunlangan",
-      "CANCELLED": "Bekor qilingan",
-      "NO_SHOW": "Kelmadi"
-    }
+    },
+    "periodLabel": "Reja muddati, kun",
+    "periodCustom": "O'zim",
+    "periodRange": "{{min}} dan {{max}} gacha"
   },
   "assistant": {
     "title": "AI yordamchi",
@@ -715,8 +754,7 @@
       "needs_verification": "E'lon qilingan, lekin tasdiqlanmagan: {{skills}}. Test ularga vazn beradi.",
       "profession_readiness": "{{required_total}} majburiy ko'nikmadan {{required_met}} tasi bajarilgan.",
       "closes_skill_gap": "«{{profession}}» uchun {{skills}} ni yopadi.",
-      "match_score": "Mos keldi: {{matched}}. Yetishmaydi: {{missing}}.",
-      "mentor_expertise_match": "Sizga yetishmayotgan sohada ishlaydi."
+      "match_score": "Mos keldi: {{matched}}. Yetishmaydi: {{missing}}."
     },
     "disclaimer": "Tavsiyalar profil ma'lumotlaringiz asosida tuziladi. Bu qaror emas, taklif — tibbiy, huquqiy va moliyaviy masalalarda malakali mutaxassisga murojaat qiling."
   },
@@ -839,14 +877,14 @@
     "inviteAwaitingReply": "Taklif yuborilgan, javob hali yo'q.",
     "inviteDeclined": "Nomzod taklifni rad etdi.",
     "openCourse": "Kursni ochish",
-    "averageScore": "O'rtacha ball"
+    "averageScore": "O'rtacha ball",
+    "hiddenUntilApply": "Ariza berilgunga qadar yopiq"
   },
   "admin": {
     "dashboard": "Platforma ko'rinishi",
     "totalUsers": "Jami foydalanuvchilar",
     "students": "O'quvchilar",
     "employers": "Ish beruvchilar",
-    "mentors": "Mentorlar",
     "activeUsers": "Faol (30 kun)",
     "funnel": "Konversiya voronkasi",
     "funnelHint": "Ro'yxatdan o'tishdan ishga joylashishgacha",
@@ -934,7 +972,25 @@
     "consentsHint": "Ixtiyoriy roziliklarni istalgan vaqtda qaytarib olish mumkin.",
     "notifications": "Bildirishnomalar",
     "visibility": "Profil ko'rinishi",
-    "danger": "Xavfli zona"
+    "danger": "Xavfli zona",
+    "assistant": "AI-yordamchi",
+    "assistantHint": "U allaqachon sizning holatingizga moslashadi. Faqat noto'g'ri tushunsa o'zgartiring.",
+    "assistantAuto": "Avtomatik",
+    "assistantStage_new": "Hozir u sizni endi kelgan deb hisoblaydi: atamalarni tushuntiradi va bittadan qadam beradi.",
+    "assistantStage_starting": "Hozir u sizni boshlayotgan deb hisoblaydi: tasdiqlangan ko'nikmagacha eng qisqa yo'lni ko'rsatadi.",
+    "assistantStage_building": "Hozir u sizni yo'lda deb hisoblaydi: platformani tushuntirmaydi, mohiyatga o'tadi.",
+    "assistantStage_ready": "Hozir u sizni ishga yaqin deb hisoblaydi: moslik va yo'qotilayotgan ballar haqida aniq gapiradi.",
+    "assistantDetail": "Javob uzunligi",
+    "assistantDetail_BRIEF": "Qisqa",
+    "assistantDetail_NORMAL": "Odatiy",
+    "assistantDetail_DETAILED": "Batafsil",
+    "assistantTone": "Ohang",
+    "assistantTone_WARM": "Qo'llab-quvvatlovchi",
+    "assistantTone_NEUTRAL": "Neytral",
+    "assistantTone_DIRECT": "To'g'ridan-to'g'ri",
+    "assistantTerms": "Platforma atamalari",
+    "assistantTerms_true": "Tushuntirilsin",
+    "assistantTerms_false": "Tushuntirilmasin"
   },
   "notifications": {
     "title": "Bildirishnomalar",
@@ -981,16 +1037,6 @@
         "body": "«{{vacancy}}» — {{scheduled_at}}."
       }
     },
-    "mentor": {
-      "request": {
-        "title": "Sessiya so'rovi",
-        "body": "Mavzu: {{topic}}."
-      },
-      "response": {
-        "title": "Mentor javob berdi",
-        "body": "«{{topic}}»."
-      }
-    },
     "moderation": {
       "course": {
         "title": "Kurs moderatsiyasi natijasi",
@@ -1013,6 +1059,16 @@
       "declined": {
         "title": "Nomzod taklifni rad etdi",
         "body": "«{{vacancy}}» bo'yicha taklif rad etildi."
+      }
+    },
+    "review": {
+      "request": {
+        "title": "Fikringiz kerak",
+        "body": "Platforma haqidagi fikringizni bir necha daqiqada bildiring."
+      },
+      "answered": {
+        "title": "Sharhingizga javob berildi",
+        "body": "{{response}}"
       }
     }
   },
@@ -1049,7 +1105,6 @@
   "role": {
     "STUDENT": "O'quvchi",
     "EMPLOYER": "Ish beruvchi",
-    "MENTOR": "Mentor",
     "ADMIN": "Administrator"
   },
   "capital": {
@@ -1062,7 +1117,7 @@
     "notTracked": "hozircha o'lchanmaydi",
     "unlockTitle": "Qanday ochish mumkin",
     "unlockHint": "Bo'sh o'qlar — bu past ball emas, hali dalil yo'q. Quyidagi qadam uni ochadi.",
-    "explainer": "Har bir o'q sizning dalillaringizdan hisoblanadi: tasdiqlangan ko'nikmalar, yakunlangan kurslar, tajriba, mentor sessiyalari. Dalil bo'lmasa — o'q nol emas, bo'sh.",
+    "explainer": "Har bir o'q sizning dalillaringizdan hisoblanadi: tasdiqlangan ko'nikmalar, yakunlangan kurslar, tajriba, loyihalar. Dalil bo'lmasa — o'q nol emas, bo'sh.",
     "axis": {
       "KNOWLEDGE": "Bilim",
       "PROFESSIONAL": "Kasbiy",
@@ -1079,7 +1134,6 @@
       "passed_tests": "test topshiring",
       "work_experience_months": "ish tajribasini qo'shing",
       "verified_skills": "ko'nikmani tasdiqlang",
-      "mentor_sessions": "mentor sessiyasini o'tkazing",
       "recommendations": "tavsiya oling",
       "projects": "loyiha qo'shing",
       "competitions": "tanlovda qatnashing",
@@ -1227,7 +1281,7 @@
         "Kurslar, testlar va tasdiqlangan natijalar",
         "Avtomatik CV va portfolio",
         "Sizga mos vakansiyalar va arizalar",
-        "Mentor bilan uchrashuvlar"
+        "Siz bilan birga o'zgaradigan reja"
       ],
       "cards": [
         {
@@ -1251,8 +1305,8 @@
           "detail": "Har bir moslikning sababi yozilgan: nimasi mos, nimasi yetishmaydi."
         },
         {
-          "title": "Mentor uchrashuvlari",
-          "detail": "Mentor rejangizni ko'rib chiqadi, uning bahosi ko'nikma tasdig'iga qo'shiladi."
+          "title": "AI-yordamchi",
+          "detail": "Sizning ma'lumotlaringiz asosida javob beradi va hozirgi holatingizga moslashadi."
         }
       ]
     },
@@ -1321,7 +1375,6 @@
         "self": "O'zim yozdim",
         "course": "Kurs tugatildi",
         "experience": "Ish tajribasi",
-        "mentor": "Mentor tasdiqladi",
         "test": "Test topshirildi",
         "employer": "Ish beruvchi tasdiqladi"
       }
@@ -1381,7 +1434,7 @@
         },
         {
           "q": "Ko'nikma qanday tasdiqlanadi?",
-          "a": "Test, kurs, ish tajribasi, mentor yoki ish beruvchi orqali. Har birining og'irligi turlicha."
+          "a": "Test, kurs, ish tajribasi yoki ish beruvchi orqali. Har birining og'irligi turlicha."
         }
       ]
     },
@@ -1437,10 +1490,10 @@
       },
       "1": {
         "title": "Tasdiqlangan ko'nikma va bilim",
-        "body": "Test, mentor yoki ish beruvchi bergan dalil o'zingiz aytgan gapdan og'irroq turadi.",
+        "body": "Test yoki ish beruvchi bergan dalil o'zingiz aytgan gapdan og'irroq turadi.",
         "points": [
           "Test natijalari ko'nikma darajasini oshiradi",
-          "Mentor tasdig'i alohida vaznga ega",
+          "Ish beruvchi tasdig'i eng katta vaznga ega",
           "Ish beruvchi dalilni ko'radi, va'dani emas"
         ]
       },
@@ -1542,7 +1595,8 @@
     "switchToLight": "Kunduzgi rejimga o'tish",
     "followingSystem": "Tizim sozlamasiga ergashmoqda",
     "light": "Yorug'",
-    "dark": "Tungi"
+    "dark": "Tungi",
+    "title": "Mavzu"
   },
   "chat": {
     "title": "AI yordamchi",
@@ -1628,7 +1682,6 @@
     "SELF": "O'z bahoyingiz",
     "COURSE": "Kurs",
     "EXPERIENCE": "Ish tajribasi",
-    "MENTOR": "Mentor tasdiqladi",
     "TEST": "Test",
     "EMPLOYER": "Ish beruvchi tasdiqladi"
   },
@@ -1719,14 +1772,15 @@
       "map": "Ko'nikmalar xaritasi"
     },
     "mapTitle": "Ko'nikmalar xaritasi",
-    "mapHint": "Guruhiga yaqin — daraja yetgan. Chetda — hali boshlanmagan.",
+    "mapHint": "Ko'nikma atrofidagi yoy kerakli darajaning qancha qismi yetganini ko'rsatadi.",
     "readiness": "Tayyorlik",
     "nodeDetail": "{{skill}} · {{category}} — hozir {{current}}, kerak {{required}}",
     "legend": {
       "met": "Daraja yetgan",
       "partial": "Jarayonda",
       "missing": "Boshlanmagan",
-      "verified": "Tasdiqlangan"
+      "verified": "Tasdiqlangan",
+      "level": "Yoy — yetgan daraja"
     },
     "tapNode": "Tafsilot uchun tugunni bosing",
     "level": "Daraja",
@@ -1736,7 +1790,9 @@
       "done": "Bajarildi",
       "current": "Siz shu yerdasiz",
       "todo": "Oldinda"
-    }
+    },
+    "requiredCaption": "majburiy",
+    "mapLabel": "{{profession}} kasbi uchun ko'nikmalar xaritasi: {{total}} ta majburiydan {{met}} tasi yetgan"
   },
   "invites": {
     "title": "Suhbatga takliflar",
@@ -1750,24 +1806,207 @@
     "declineReason": "Sabab",
     "acceptMeaning": "Taklifni qabul qilsangiz, vakansiyaga ariza yuborilgan bo'ladi — kompaniya ismingizni va profildagi aloqa ma'lumotlaringizni ko'radi."
   },
-  "mentor": {
-    "learners": "O'quvchilar",
-    "learnersSubtitle": "Siz mashg'ulot o'tkazadigan insonlar.",
-    "noLearners": "Hozircha o'quvchilar yo'q",
-    "noLearnersHint": "Inson sizga mashg'ulotga yozilganda shu yerda paydo bo'ladi.",
-    "noUpcoming": "Mashg'ulot belgilanmagan",
-    "sessionsHeld": "O'tkazilgan",
+  "cvRating": {
+    "title": "Rezyume reytingi",
+    "none": "Rezyume yo'q",
+    "howToRaise": "Reytingni qanday oshirish mumkin",
+    "candidateTitle": "Rezyume va uning reytingi",
+    "showDocument": "Rezyumeni ochish",
+    "hideDocument": "Yopish",
+    "band": {
+      "EXCELLENT": "A'lo",
+      "STRONG": "Kuchli",
+      "FAIR": "O'rtacha",
+      "WEAK": "Zaif",
+      "EMPTY": "Bo'sh"
+    },
+    "component": {
+      "completeness": "To'ldirilganligi",
+      "skills": "Ko'nikmalar",
+      "proof": "Tasdiqlangan dalil",
+      "experience": "Tajriba",
+      "portfolio": "Portfolio",
+      "targeting": "Maqsadga yo'naltirilganlik"
+    },
+    "fact": {
+      "summary_length": "Qisqacha ma'lumot: {{chars}} belgi",
+      "skill_count": "{{count}} ta ko'nikma",
+      "strong_skills": "{{count}} tasi 50 dan yuqori",
+      "verified_skills": "{{count}} ta tasdiqlangan",
+      "proven_share": "{{total}} tadan {{percent}}% dalilga ega",
+      "certificates": "{{count}} ta sertifikat",
+      "experience_entries": "{{count}} ta ish yozuvi",
+      "experience_months": "jami {{months}} oy",
+      "portfolio_items": "{{count}} ta ish namunasi",
+      "target": "{{profession}} — tayyorlik {{readiness}}%"
+    },
+    "tip": {
+      "add_headline": "Sarlavha qo'shing — kim ekanligingizni bir qatorda ayting",
+      "add_summary": "Qisqacha ma'lumot yozing: bu birinchi o'qiladigan qism",
+      "expand_summary": "Qisqacha ma'lumotni kengaytiring — hozir juda qisqa",
+      "add_education": "Ta'lim ma'lumotini qo'shing",
+      "add_avatar": "Suratingizni yuklang",
+      "add_languages": "Bilgan tillaringizni ko'rsating",
+      "add_location": "Viloyat yoki shaharni ko'rsating",
+      "add_skills": "Ko'nikma qo'shing: hozir {{have}} ta, kamida {{want}} ta bo'lgani ma'qul",
+      "raise_proficiency": "Hech bir ko'nikma 50 dan oshmagan — test topshirib darajani ko'taring",
+      "verify_skills": "Hech bir ko'nikma tasdiqlanmagan. Test topshiring — bu eng ko'p ball beradi",
+      "verify_more_skills": "{{total}} tadan faqat {{proven}} tasi tasdiqlangan",
+      "earn_certificate": "Kursni tugatib sertifikat oling",
+      "add_experience": "Tajriba qo'shing: amaliyot, loyiha yoki ko'ngilli ish ham hisoblanadi",
+      "tag_experience_skills": "{{count}} ta ish yozuvida ko'nikma belgilanmagan — ular moslashtirishda ko'rinmaydi",
+      "add_portfolio": "Portfolioga ish namunasi qo'shing",
+      "describe_portfolio": "Ish namunalariga tavsif va havola qo'shing",
+      "set_target_profession": "Maqsadli kasbni tanlang — rezyume aniq yo'nalishga qaratilsin",
+      "close_target_gap": "{{profession}} uchun tayyorlik {{readiness}}% — yetishmayotgan ko'nikmalarni to'ldiring",
+      "aim_cv_at_target": "Bu rezyumeni maqsadli kasbga bog'lang"
+    }
+  },
+  "capability": {
+    "title": "Soft skillar",
+    "subtitle": "Vaziyat testi bo'yicha: ish vaziyatlarida qanday yo'l tutgan bo'lardingiz",
+    "softHint": "{{count}} ta kompetensiya",
+    "competencies": "Kompetensiyalar",
+    "selfReported": "O'z-o'zini baholash (vaziyat testi)",
+    "whatNext": "Keyingi qadam",
+    "noProfile": "Soft skillar profili hali yo'q",
+    "noProfileHint": "Vaziyatga asoslangan testni topshiring — 25 daqiqa, to'g'ri javob yo'q.",
+    "note": {
+      "take_soft_test": "Profil uchun kamida {{need}} ta kompetensiya kerak, hozir {{have}} ta",
+      "soft_strength": "Kuchli tomon: {{skill}} ({{score}})",
+      "soft_gap": "O'sish nuqtasi: {{skill}} ({{score}})",
+      "soft_all_self_reported": "Barcha kompetensiyalar o'z-o'zini baholashga asoslangan — test natijasi ularni mustahkamlaydi"
+    },
+    "action": {
+      "take_soft_skill_test": "Soft skillar testini topshiring",
+      "develop_competency": "{{skill}}: {{from}} dan {{to}} ga ko'taring"
+    },
+    "average": "O'rtacha ball"
+  },
+  "review": {
+    "title": "Platforma haqida fikringiz",
+    "subtitle": "Nima ishlayapti va nima ishlamayapti — ikkalasi ham kerak.",
+    "ratingLabel": "Umumiy baho",
+    "stars": "{{count}} yulduz",
+    "rating": {
+      "1": "Juda yomon",
+      "2": "Yomon",
+      "3": "O'rtacha",
+      "4": "Yaxshi",
+      "5": "A'lo"
+    },
+    "npsLabel": "Do'stingizga tavsiya qilasizmi?",
+    "npsHint": "0 — hech qachon, 10 — albatta",
+    "pros": "Nima yaxshi ishlayapti",
+    "prosHint": "Aniq misol keltiring",
+    "cons": "Nima yomon ishlayapti",
+    "consHint": "Bu eng foydali qism — to'g'ridan-to'g'ri yozing",
+    "suggestion": "Nimani qo'shish kerak",
+    "anonymous": "Anonim yuborish",
+    "anonymousHint": "Ismingiz ko'rinmaydi, lekin rolingiz ko'rsatiladi.",
+    "send": "Yuborish",
+    "notNow": "Hozir emas",
+    "thanksTitle": "Rahmat",
+    "thanksBody": "Fikringiz o'qiladi va javob berilishi mumkin.",
+    "mine": "Mening sharhlarim",
+    "teamReplied": "Jamoa javobi",
+    "trigger": {
+      "CAMPAIGN": "Platforma haqidagi fikringizni so'rayapmiz.",
+      "COURSE_COMPLETED": "Kursni tugatdingiz — o'qish qanday o'tdi?",
+      "PLACEMENT": "Ishga joylashdingiz — platforma yordam berdimi?",
+      "HIRED_CANDIDATE": "Nomzodni ishga oldingiz — jarayon qanday kechdi?",
+      "MANUAL": "Fikringizni istalgan vaqtda yozishingiz mumkin."
+    }
+  },
+  "adminReviews": {
+    "title": "Platforma sharhlari",
+    "subtitle": "Ishtirokchilar nima deb o'ylayapti va ularni qachon so'raymiz",
+    "pending": "Moderatsiya kutmoqda",
+    "pendingHint": "Ko'rib chiqilishi kerak",
+    "namedProblems": "Muammo ko'rsatilgan",
+    "namedProblemsHint": "Kamchilik yozilgan sharhlar",
+    "average": "O'rtacha baho",
+    "averageHint": "{{count}} ta sharh",
+    "nps": "NPS",
+    "npsHint": "{{promoters}} tarafdor / {{detractors}} tanqidchi",
+    "distribution": "Taqsimot",
+    "reviews": "Sharhlar",
+    "campaigns": "Kampaniyalar",
+    "empty": "Hozircha sharh yo'q",
+    "anonymous": "Anonim",
+    "publish": "Chop etish",
+    "reject": "Rad etish",
+    "reply": "Javob berish",
+    "ourReply": "Bizning javob",
+    "replyTitle": "Muallifga javob",
+    "replyHint": "Nima qilganingizni ayting — bu keyingi kampaniyaga javob berishga undaydi.",
+    "newCampaign": "Yangi kampaniya",
+    "noCampaigns": "Kampaniyalar yo'q",
+    "noCampaignsHint": "Kampaniya yarating va tanlangan rollarga so'rov yuboring.",
+    "everyone": "Hamma",
+    "minAge": "ro'yxatdan o'tganiga {{days}} kundan ko'p",
+    "launch": "Ishga tushirish",
+    "inviteMore": "Yangilarni taklif qilish",
+    "responded": "{{invited}} tadan {{responded}} ta javob berdi",
+    "status": {
+      "DRAFT": "Qoralama",
+      "RUNNING": "Faol",
+      "FINISHED": "Yakunlangan"
+    },
+    "campaignTitle": "Kampaniya nomi",
+    "campaignMessage": "Xabar",
+    "campaignMessageHint": "Nima uchun aynan hozir so'rayotganingizni tushuntiring.",
+    "audience": "Kimga",
+    "audienceHint": "Hech biri tanlanmasa — hammaga (adminlardan tashqari).",
+    "minAgeLabel": "Akkaunt yoshi, kun",
+    "minAgeHint": "Kecha ro'yxatdan o'tgan odamda hali fikr yo'q."
+  },
+  "profile": {
+    "title": "Mening profilim",
+    "subtitle": "Shaxsiy ma'lumotlar, tarif, kasb va rivojlanish",
+    "loadFailed": "Profil yuklanmadi. Sahifani yangilang.",
+    "personal": "Shaxsiy ma'lumotlar",
+    "personalHint": "Ish beruvchilar sizni shunday ko'radi va hujjatlarda shunday yoziladi.",
+    "lastName": "Familiya",
+    "firstName": "Ism",
+    "middleName": "Otasining ismi",
+    "optional": "Majburiy emas",
+    "phone": "Telefon",
+    "phoneHint": "Xalqaro formatda, masalan +998901234567",
+    "phoneInvalid": "Raqam xalqaro formatda bo'lishi kerak: 9 dan 15 gacha raqam, boshida + bo'lishi mumkin.",
+    "verified": "Tasdiqlangan",
+    "notVerified": "Tasdiqlanmagan",
+    "emailHint": "Hisobingizga shu manzil orqali kirasiz.",
+    "save": "Saqlash",
+    "saved": "Saqlandi",
+    "subscription": "Tarif",
+    "planPremium": "Premium",
+    "planFree": "Oddiy",
+    "renews": "{{date}} gacha uzaytiriladi",
+    "upgrade": "Premiumga o'tish",
+    "managePlan": "Tarifni boshqarish",
+    "subscriptionUnavailable": "Tarif yuklanmadi.",
+    "profession": "Maqsad kasb",
+    "professionHint": "Reja, tavsiyalar va vakansiyalar shunga qarab tuziladi.",
+    "changeProfession": "Kasbni o'zgartirish",
+    "openCareer": "Karyerani ochish",
+    "progress": "Rivojlanish",
+    "progressHint": "Boshqaruv panelidagi raqamlarning o'zi.",
+    "profileCompletion": "Profil to'ldirilganligi",
     "skillsVerified": "Tasdiqlangan ko'nikmalar",
-    "noPlanYet": "Rivojlanish rejasi hali tuzilmagan.",
-    "planWaiting": "Tekshirish kutilmoqda",
-    "planReviewed": "Siz tekshirdingiz",
-    "planApproved": "Tasdiqlangan",
-    "reviewPlan": "Rejani tekshirish",
-    "reviewPlanHint": "Rejani tasdiqlasangiz, unga o'z ismingizni qo'yasiz — platforma uni mutaxassis kelishgan deb hisoblaydi.",
-    "reviewDecision": "Qaror",
-    "reviewApprove": "Tasdiqlash",
-    "reviewChanges": "Tuzatish kerak",
-    "reviewComment": "Izoh",
-    "reviewCommentRequired": "Nimani tuzatish kerakligini yozing"
+    "ofTotal": "{{total}} tadan {{done}} ta",
+    "planProgress": "Rivojlanish rejasi",
+    "createPlan": "Reja tuzish",
+    "capital": "Kapital indeksi",
+    "axes": "{{total}} ta o'qdan {{measured}} tasi bo'yicha",
+    "knowledge": "Bilim darajasi",
+    "coursesCompleted": "Tugatilgan kurslar",
+    "testsPassed": "Topshirilgan testlar",
+    "record": "Mening ma'lumotlarim",
+    "recordHint": "Profilingiz nimalardan iborat.",
+    "recordSkills": "Nima qila olasiz va bu nima bilan tasdiqlangan",
+    "recordKnowledge": "Mavzular va toifalar bo'yicha natijalar",
+    "recordExperience": "Ish, loyihalar va volontyorlik",
+    "recordCv": "Rezyume va portfolio"
   }
 }

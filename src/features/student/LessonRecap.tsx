@@ -47,7 +47,7 @@ export function LessonRecap({
   }
 
   return (
-    <div className="mt-4 rounded-(--radius-card) border border-ink-200 bg-ink-50 p-4">
+    <div className="mt-4 rounded-(--radius-card) border border-ink-200/70 bg-ink-100/55 p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-sm font-semibold text-ink-900">

@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
 
 import { api, httpStatus } from "@/shared/api/client";
+import { CapabilityPanel } from "@/shared/ui/CapabilityPanel";
+import { CandidateCv } from "./CandidateCv";
 import { InviteToInterview } from "./InviteToInterview";
 import { MatchExplanation } from "@/features/student/MatchExplanation";
 import { matchTone } from "@/shared/lib/format";
@@ -413,6 +415,12 @@ export default function CandidateDetailPage() {
           </ul>
         )}
       </Card>
+
+      {/* What the tests measured, split into what they can do and how they
+          work — and marked where the second half is self-reported. */}
+      <CapabilityPanel userId={person.user_id} />
+
+      {person.cv && <CandidateCv cv={person.cv} />}
 
       {person.certificates.length > 0 && (
         <Card>

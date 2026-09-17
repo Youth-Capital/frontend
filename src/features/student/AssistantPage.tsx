@@ -94,7 +94,6 @@ export default function AssistantPage() {
     if (!refId) return null;
     if (type === "COURSE") return `/student/courses/${refId}`;
     if (type === "VACANCY") return `/student/jobs/${refId}`;
-    if (type === "MENTOR") return `/student/mentors`;
     if (type === "PROFESSION") return `/student/career`;
     return null;
   };
@@ -316,7 +315,7 @@ export default function AssistantPage() {
                       onClick={() =>
                         feedback.mutate({ id: recommendation.id, rating: "UP" })
                       }
-                      className="rounded-md p-1.5 text-ink-400 hover:bg-success-soft hover:text-success"
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-ink-400 hover:bg-success-soft hover:text-success coarse:h-11 coarse:w-11"
                     >
                       👍
                     </button>
@@ -326,7 +325,7 @@ export default function AssistantPage() {
                       onClick={() =>
                         feedback.mutate({ id: recommendation.id, rating: "DOWN" })
                       }
-                      className="rounded-md p-1.5 text-ink-400 hover:bg-danger-soft hover:text-danger"
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-ink-400 hover:bg-danger-soft hover:text-danger coarse:h-11 coarse:w-11"
                     >
                       👎
                     </button>

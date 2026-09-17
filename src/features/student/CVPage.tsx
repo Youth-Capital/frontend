@@ -16,6 +16,7 @@ import {
   Tabs,
   Textarea,
 } from "@/shared/ui";
+import { CvRatingBadge, CvRatingPanel, type CvRating } from "@/shared/ui/CvRating";
 import { CvIdentityBand } from "./CvIdentityBand";
 import { VerifiedSkills } from "./VerifiedSkills";
 import type { CVDocument, Paginated } from "@/shared/types/api";
@@ -71,6 +72,15 @@ export default function CVPage() {
     queryKey: ["cv-preview", selected],
     queryFn: async () => {
       const { data } = await api.get<CVPreview>(`/cv/documents/${selected}/preview/`);
+      return data;
+    },
+    enabled: Boolean(selected) && tab === "cv",
+  });
+
+  const rating = useQuery({
+    queryKey: ["cv-rating", selected],
+    queryFn: async () => {
+      const { data } = await api.get<CvRating>(`/cv/documents/${selected}/rating/`);
       return data;
     },
     enabled: Boolean(selected) && tab === "cv",
@@ -178,11 +188,23 @@ export default function CVPage() {
                       <span className="font-medium text-ink-900">{cv.title}</span>
                       {cv.is_primary && <Badge tone="brand">{t("cv.primary")}</Badge>}
                     </div>
-                    <p className="mt-1 text-xs text-ink-500">
-                      {cv.enabled_sections.length} {t("cv.sections").toLowerCase()}
-                    </p>
+                    <div className="mt-1.5 flex items-center justify-between gap-2">
+                      <p className="text-xs text-ink-500">
+                        {cv.enabled_sections.length} {t("cv.sections").toLowerCase()}
+                      </p>
+                      <CvRatingBadge score={cv.quality_score} size="sm" />
+                    </div>
                   </button>
                 ))}
+
+                {rating.data && (
+                  <Card>
+                    {/* Above the suggestions on purpose: the number is what
+                        an employer will see, so the student should meet it
+                        before the advice about raising it. */}
+                    <CvRatingPanel rating={rating.data} />
+                  </Card>
+                )}
 
                 {(suggestions.data?.length ?? 0) > 0 && (
                   <Card>

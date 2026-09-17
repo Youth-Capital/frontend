@@ -4,7 +4,6 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import { AuthLayout } from "@/app/layouts/AuthLayout";
 import { AdminLayout } from "@/app/layouts/AdminLayout";
 import { EmployerLayout } from "@/app/layouts/EmployerLayout";
-import { MentorLayout } from "@/app/layouts/MentorLayout";
 import { FocusLayout } from "@/app/layouts/FocusLayout";
 import { StudentLayout } from "@/app/layouts/StudentLayout";
 import { RedirectIfAuthenticated, RequireRole } from "@/shared/auth/RequireRole";
@@ -33,13 +32,13 @@ const NotesPage = lazy(() => import("@/features/student/NotesPage"));
 const StylePreviewPage = lazy(() => import("@/features/preview/StylePreviewPage"));
 const TestsPage = lazy(() => import("@/features/student/TestsPage"));
 const TestRunnerPage = lazy(() => import("@/features/student/TestRunnerPage"));
+const ProfilePage = lazy(() => import("@/features/student/ProfilePage"));
 const ExperiencePage = lazy(() => import("@/features/student/ExperiencePage"));
 const CVPage = lazy(() => import("@/features/student/CVPage"));
 const JobsPage = lazy(() => import("@/features/student/JobsPage"));
 const JobDetailPage = lazy(() => import("@/features/student/JobDetailPage"));
 const ApplicationsPage = lazy(() => import("@/features/student/ApplicationsPage"));
 const PlanPage = lazy(() => import("@/features/student/PlanPage"));
-const MentorsPage = lazy(() => import("@/features/student/MentorsPage"));
 const AssistantPage = lazy(() => import("@/features/student/AssistantPage"));
 const LandingPage = lazy(() => import("@/features/public/LandingPage"));
 const ChatPage = lazy(() => import("@/features/assistant/ChatPage"));
@@ -76,10 +75,10 @@ const AdminAnalyticsPage = lazy(() => import("@/features/admin/AnalyticsPage"));
 const AIMonitorPage = lazy(() => import("@/features/admin/AIMonitorPage"));
 const AdminSafetyPage = lazy(() => import("@/features/admin/SafetyPage"));
 const AuditPage = lazy(() => import("@/features/admin/AuditPage"));
+const AdminReviewsPage = lazy(() => import("@/features/admin/ReviewsPage"));
 
-const MentorDashboard = lazy(() => import("@/features/mentor/DashboardPage"));
-const MentorSessionsPage = lazy(() => import("@/features/mentor/SessionsPage"));
-const MentorLearnersPage = lazy(() => import("@/features/mentor/LearnersPage"));
+
+const ReviewPage = lazy(() => import("@/features/feedback/ReviewPage"));
 
 const PublicPassportPage = lazy(() => import("@/features/public/PassportPage"));
 
@@ -156,6 +155,28 @@ export const router = createBrowserRouter([
         path: "courses/:courseId/lessons/:lessonId",
         element: <Lazy><LessonPage /></Lazy>,
       },
+      // A test in progress belongs here for the same reason a lesson does,
+      // and more so: the sidebar is ten ways to lose an attempt, and the
+      // answers only exist in the page until it is submitted.
+      {
+        path: "tests/:testId/run",
+        element: <Lazy><TestRunnerPage /></Lazy>,
+      },
+      // Your own page is somewhere you come to read about yourself, not a
+      // place you pass through on the way to a task — so no sidebar here
+      // either. The way back is the mark in the header.
+      {
+        path: "profile",
+        element: <Lazy><ProfilePage /></Lazy>,
+      },
+      // The record the profile page opens onto: skills, knowledge,
+      // experience, CV. Same reasoning as the profile itself — somebody
+      // reading their own record is not on the way to a task. The way back
+      // is the account menu, whose first entry is the profile.
+      { path: "skills", element: <Lazy><SkillsPage /></Lazy> },
+      { path: "knowledge", element: <Lazy><KnowledgePage /></Lazy> },
+      { path: "experience", element: <Lazy><ExperiencePage /></Lazy> },
+      { path: "cv", element: <Lazy><CVPage /></Lazy> },
     ],
   },
 
@@ -170,21 +191,15 @@ export const router = createBrowserRouter([
       { index: true, element: <Navigate to="dashboard" replace /> },
       { path: "dashboard", element: <Lazy><StudentDashboard /></Lazy> },
       { path: "career", element: <Lazy><CareerPage /></Lazy> },
-      { path: "skills", element: <Lazy><SkillsPage /></Lazy> },
-      { path: "knowledge", element: <Lazy><KnowledgePage /></Lazy> },
       { path: "courses", element: <Lazy><CoursesPage /></Lazy> },
       { path: "courses/:courseId", element: <Lazy><CourseDetailPage /></Lazy> },
       { path: "notes", element: <Lazy><NotesPage /></Lazy> },
       { path: "style-preview", element: <Lazy><StylePreviewPage /></Lazy> },
       { path: "tests", element: <Lazy><TestsPage /></Lazy> },
-      { path: "tests/:testId/run", element: <Lazy><TestRunnerPage /></Lazy> },
-      { path: "experience", element: <Lazy><ExperiencePage /></Lazy> },
-      { path: "cv", element: <Lazy><CVPage /></Lazy> },
       { path: "jobs", element: <Lazy><JobsPage /></Lazy> },
       { path: "jobs/:vacancyId", element: <Lazy><JobDetailPage /></Lazy> },
       { path: "applications", element: <Lazy><ApplicationsPage /></Lazy> },
       { path: "plan", element: <Lazy><PlanPage /></Lazy> },
-      { path: "mentors", element: <Lazy><MentorsPage /></Lazy> },
       { path: "assistant", element: <Lazy><AssistantPage /></Lazy> },
       { path: "notifications", element: <Lazy><NotificationsPage /></Lazy> },
       // Kept as a redirect: the learner chat moved into the assistant page,
@@ -237,23 +252,6 @@ export const router = createBrowserRouter([
   },
 
   {
-    path: "/mentor",
-    element: (
-      <RequireRole roles={["MENTOR"]}>
-        <MentorLayout />
-      </RequireRole>
-    ),
-    children: [
-      { index: true, element: <Navigate to="dashboard" replace /> },
-      { path: "dashboard", element: <Lazy><MentorDashboard /></Lazy> },
-      { path: "sessions", element: <Lazy><MentorSessionsPage /></Lazy> },
-      { path: "learners", element: <Lazy><MentorLearnersPage /></Lazy> },
-      { path: "notifications", element: <Lazy><NotificationsPage /></Lazy> },
-      { path: "settings", element: <Lazy><SettingsPage /></Lazy> },
-    ],
-  },
-
-  {
     path: "/admin",
     element: (
       <RequireRole roles={["ADMIN"]}>
@@ -271,7 +269,30 @@ export const router = createBrowserRouter([
       { path: "ai", element: <Lazy><AIMonitorPage /></Lazy> },
       { path: "safety", element: <Lazy><AdminSafetyPage /></Lazy> },
       { path: "audit", element: <Lazy><AuditPage /></Lazy> },
+      { path: "reviews", element: <Lazy><AdminReviewsPage /></Lazy> },
       { path: "settings", element: <Lazy><SettingsPage /></Lazy> },
+    ],
+  },
+
+  {
+    /*
+      Feedback about the platform belongs to every role, so it lives outside
+      the four portals rather than being copied into each of them. The
+      notification links straight here, and RequireRole without a role list
+      means "signed in" — which is exactly who may answer.
+
+      FocusLayout, because a form asking what is wrong with the product should
+      not be surrounded by the product's navigation.
+    */
+    path: "/feedback",
+    element: (
+      <RequireRole>
+        <FocusLayout />
+      </RequireRole>
+    ),
+    children: [
+      { index: true, element: <Navigate to="review" replace /> },
+      { path: "review", element: <Lazy><ReviewPage /></Lazy> },
     ],
   },
 

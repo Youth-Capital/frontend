@@ -100,7 +100,6 @@ export default function UsersPage() {
           <option value="">{t("common.all")}</option>
           <option value="STUDENT">{t("role.STUDENT")}</option>
           <option value="EMPLOYER">{t("role.EMPLOYER")}</option>
-          <option value="MENTOR">{t("role.MENTOR")}</option>
           <option value="ADMIN">{t("role.ADMIN")}</option>
         </Select>
       </div>
@@ -170,7 +169,7 @@ export default function UsersPage() {
                         className="rounded-md border border-ink-300 px-2 py-1 text-xs"
                         aria-label={t("admin.changeRole")}
                       >
-                        {(["STUDENT", "EMPLOYER", "MENTOR", "ADMIN"] as const).map(
+                        {(["STUDENT", "EMPLOYER", "ADMIN"] as const).map(
                           (option) => (
                             <option key={option} value={option}>
                               {t(`role.${option}`)}

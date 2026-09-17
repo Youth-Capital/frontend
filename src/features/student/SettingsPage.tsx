@@ -9,6 +9,7 @@ import { useAuth } from "@/shared/auth/AuthContext";
 import { useApiError } from "@/shared/hooks/useApiError";
 import { SUPPORTED_LANGUAGES } from "@/shared/i18n";
 import { Badge, Button, Card, CardHeader, Input } from "@/shared/ui";
+import { AssistantPreferences } from "./AssistantPreferences";
 
 const REQUIRED_CONSENTS = new Set(["TERMS", "PRIVACY", "DATA_PROCESSING"]);
 
@@ -130,6 +131,8 @@ export default function SettingsPage() {
           </p>
         )}
       </Card>
+
+      <AssistantPreferences />
 
       <Card>
         <CardHeader title={t("settings.language")} />

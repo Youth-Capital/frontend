@@ -47,7 +47,7 @@ export function AuthPanel({ registering }: { registering: boolean }) {
   const { t } = useTranslation();
 
   return (
-    <aside className="deep hidden overflow-hidden px-8 py-8 lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col xl:px-10">
+    <aside className="deep hidden overflow-hidden px-8 py-8 lg:sticky lg:top-0 lg:flex lg:h-dvh lg:flex-col xl:px-10">
       <img
         src="/illustrations/auth-bridge.webp"
         alt=""

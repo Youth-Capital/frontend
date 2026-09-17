@@ -2,22 +2,37 @@
 <html lang="uz">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- viewport-fit=cover is what makes env(safe-area-inset-*) report real
+         numbers on a notched iPhone. Without it the insets are always zero and
+         every safe-area rule in the stylesheet quietly does nothing. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <!-- The same mark as the header, from the same arch construction. -->
     <link rel="icon" type="image/svg+xml" href="/logo.svg" />
     <meta name="description" content="Youth Capital — inson kapitalini rivojlantirish platformasi" />
-    <!-- Kept in step with the active theme by ThemeProvider. -->
-    <meta name="theme-color" content="#F5EFEB" />
+    <!-- The light page colour. The script below corrects it to the dark one
+         before first paint, and ThemeProvider keeps it in step after that.
+         One tag, no media attribute, because that is the one both can find. -->
+    <meta name="theme-color" content="#FAF8FF" />
     <script>
-      // Applied before first paint: reading the stored theme inside React would
-      // flash the default palette on every reload.
+      // Applied before first paint. Dark is keyed on [data-theme="dark"] alone,
+      // so without this a viewer whose system is set to dark gets a full white
+      // page until React mounts and stamps the attribute: a flash every load.
       try {
         var stored = localStorage.getItem("yk_theme");
-        if (stored === "navy" || stored === "berry") {
-          document.documentElement.dataset.theme = stored;
-        }
+        var theme =
+          stored === "light" || stored === "dark"
+            ? stored
+            : window.matchMedia &&
+                window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light";
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = theme;
+        document
+          .querySelector('meta[name="theme-color"]')
+          .setAttribute("content", theme === "dark" ? "#181327" : "#FAF8FF");
       } catch (error) {
-        /* private mode — fall back to the default theme */
+        /* private mode: fall back to the light theme already in the markup */
       }
     </script>
     <title>Youth Capital</title>

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { api, toApiError } from "@/shared/api/client";
 import { LessonVideo } from "@/features/student/LessonVideo";
+import { MaterialsEditor } from "./MaterialsEditor";
 import {
   Badge,
   Button,
@@ -145,6 +146,7 @@ export function LessonEditor({ courseId }: { courseId: string }) {
 
                   {openLesson === item.id && (
                     <OneLesson
+                      courseId={courseId}
                       lessonId={item.id}
                       onSaved={refresh}
                       onDeleted={() => {
@@ -185,10 +187,12 @@ export function LessonEditor({ courseId }: { courseId: string }) {
 
 /** One lesson, opened for editing. */
 function OneLesson({
+  courseId,
   lessonId,
   onSaved,
   onDeleted,
 }: {
+  courseId: string;
   lessonId: string;
   onSaved: () => void;
   onDeleted: () => void;
@@ -250,7 +254,7 @@ function OneLesson({
   }
 
   return (
-    <div className="mt-3 flex flex-col gap-4 rounded-(--radius-card) border border-ink-200 bg-surface p-4">
+    <div className="card mt-3 flex flex-col gap-4 p-4">
       <Input
         id={`lesson-title-${lessonId}`}
         label={t("courses.lessonTitle")}
@@ -320,6 +324,16 @@ function OneLesson({
           {t("common.save")}
         </Button>
       </div>
+
+      {/*
+        Below the save control, deliberately.
+
+        Materials are saved the moment they are added — each one is its own
+        POST — and putting them inside the form above would suggest they were
+        part of the unsaved draft, so an author would add a video, navigate
+        away without pressing Save, and reasonably expect to have lost it.
+      */}
+      <MaterialsEditor courseId={courseId} lessonId={lessonId} />
     </div>
   );
 }

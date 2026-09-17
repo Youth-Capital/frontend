@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useId, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -7,15 +7,13 @@ import { useApiError } from "@/shared/hooks/useApiError";
 import { Button, Input } from "@/shared/ui";
 import type { Language } from "@/shared/types/api";
 
-type SelfRole = "STUDENT" | "EMPLOYER" | "MENTOR";
+type SelfRole = "STUDENT" | "EMPLOYER";
 
+/** The server refuses to create an account without all three (accounts.REQUIRED_CONSENTS). */
 const REQUIRED_CONSENTS = ["TERMS", "PRIVACY", "DATA_PROCESSING"] as const;
 const OPTIONAL_CONSENTS = ["AI_PROCESSING", "TALENT_SEARCH"] as const;
 
-const CONSENT_LABEL: Record<string, string> = {
-  TERMS: "auth.consentTerms",
-  PRIVACY: "auth.consentPrivacy",
-  DATA_PROCESSING: "auth.consentData",
+const OPTIONAL_LABEL: Record<string, string> = {
   AI_PROCESSING: "auth.consentAi",
   TALENT_SEARCH: "auth.consentTalent",
 };
@@ -25,6 +23,8 @@ export default function RegisterPage() {
   const { register } = useAuth();
   const navigate = useNavigate();
   const describeError = useApiError();
+  const noticeId = useId();
+  const blockedId = useId();
 
   const [role, setRole] = useState<SelfRole>("STUDENT");
   const [form, setForm] = useState({
@@ -34,32 +34,56 @@ export default function RegisterPage() {
     last_name: "",
     birth_date: "",
     company_name: "",
-    headline: "",
   });
-  const [consents, setConsents] = useState<string[]>([...REQUIRED_CONSENTS]);
+  /*
+   * Nothing is ticked to begin with.
+   *
+   * The three required consents used to start already checked. A box somebody
+   * never touched is not an agreement they gave — it is one the form gave on
+   * their behalf — and consent to having personal data processed is exactly
+   * the thing that has to be an action the person takes.
+   */
+  const [consents, setConsents] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
   const update = (key: keyof typeof form) => (value: string) =>
     setForm((previous) => ({ ...previous, [key]: value }));
 
-  const toggleConsent = (consent: string) =>
+  const agreed = REQUIRED_CONSENTS.every((consent) => consents.includes(consent));
+
+  /*
+   * One box for the three required consents.
+   *
+   * Terms, privacy policy and data processing are all conditions of having an
+   * account at all — refusing any one of them means not registering — so three
+   * separate boxes offered three choices that were really one. They are still
+   * sent, and recorded, as three consents. The optional ones are genuine
+   * choices and stay separate, because bundling a real choice into a required
+   * box would take the choice away.
+   */
+  const toggleRequired = () =>
+    setConsents((previous) =>
+      agreed
+        ? previous.filter((item) => !(REQUIRED_CONSENTS as readonly string[]).includes(item))
+        : [...new Set([...previous, ...REQUIRED_CONSENTS])],
+    );
+
+  const toggleOptional = (consent: string) =>
     setConsents((previous) =>
       previous.includes(consent)
         ? previous.filter((item) => item !== consent)
         : [...previous, consent],
     );
 
-  const missingRequired = REQUIRED_CONSENTS.some(
-    (consent) => !consents.includes(consent),
-  );
-
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setError("");
 
-    if (missingRequired) {
-      setError(t("auth.consentRequired"));
+    // The button is disabled until this is true; the check stays for the Enter
+    // key, and the server makes the same one regardless.
+    if (!agreed) {
+      setError(t("auth.consentToContinue"));
       return;
     }
 
@@ -78,11 +102,6 @@ export default function RegisterPage() {
     if (role === "EMPLOYER") {
       payload.company_name = form.company_name;
       payload.legal_name = form.company_name;
-    }
-    if (role === "MENTOR") {
-      payload.first_name = form.first_name;
-      payload.last_name = form.last_name;
-      payload.headline = form.headline;
     }
 
     setBusy(true);
@@ -104,7 +123,6 @@ export default function RegisterPage() {
   const roleOptions: { value: SelfRole; label: string; hint: string }[] = [
     { value: "STUDENT", label: t("auth.roleStudent"), hint: t("auth.roleStudentHint") },
     { value: "EMPLOYER", label: t("auth.roleEmployer"), hint: t("auth.roleEmployerHint") },
-    { value: "MENTOR", label: t("auth.roleMentor"), hint: t("auth.roleMentorHint") },
   ];
 
   return (
@@ -169,7 +187,7 @@ export default function RegisterPage() {
           onChange={(event) => update("password")(event.target.value)}
         />
 
-        {(role === "STUDENT" || role === "MENTOR") && (
+        {role === "STUDENT" && (
           <div className="grid gap-4 sm:grid-cols-2">
             <Input
               id="first_name"
@@ -209,39 +227,42 @@ export default function RegisterPage() {
           />
         )}
 
-        {role === "MENTOR" && (
-          <Input
-            id="headline"
-            label={t("auth.headline")}
-            value={form.headline}
-            onChange={(event) => update("headline")(event.target.value)}
-          />
-        )}
+        {/* What the person is agreeing to, said before the box they tick —
+            not only in a policy they would have to go and find. */}
+        <div className="rounded-xl border border-ink-200 bg-ink-50 p-3">
+          <p id={noticeId} className="text-sm leading-relaxed text-ink-700">
+            {t("auth.consentNotice")}
+          </p>
+
+          <label className="mt-3 flex cursor-pointer items-start gap-2.5 text-sm">
+            <input
+              type="checkbox"
+              className="mt-0.5 h-4 w-4 shrink-0"
+              checked={agreed}
+              onChange={toggleRequired}
+              aria-describedby={noticeId}
+              required
+            />
+            <span className="font-medium text-ink-900">{t("auth.consentAgree")}</span>
+          </label>
+        </div>
 
         <fieldset className="rounded-xl border border-ink-200 p-3">
           <legend className="px-1 text-sm font-medium text-ink-700">
-            {t("auth.consents")}
+            {t("auth.consentOptional")}
           </legend>
           <div className="flex flex-col gap-2">
-            {[...REQUIRED_CONSENTS, ...OPTIONAL_CONSENTS].map((consent) => {
-              const required = (REQUIRED_CONSENTS as readonly string[]).includes(
-                consent,
-              );
-              return (
-                <label key={consent} className="flex items-start gap-2.5 text-sm">
-                  <input
-                    type="checkbox"
-                    className="mt-0.5"
-                    checked={consents.includes(consent)}
-                    onChange={() => toggleConsent(consent)}
-                  />
-                  <span className="text-ink-700">
-                    {t(CONSENT_LABEL[consent])}
-                    {required && <span className="ml-1 text-danger">*</span>}
-                  </span>
-                </label>
-              );
-            })}
+            {OPTIONAL_CONSENTS.map((consent) => (
+              <label key={consent} className="flex cursor-pointer items-start gap-2.5 text-sm">
+                <input
+                  type="checkbox"
+                  className="mt-0.5 h-4 w-4 shrink-0"
+                  checked={consents.includes(consent)}
+                  onChange={() => toggleOptional(consent)}
+                />
+                <span className="text-ink-700">{t(OPTIONAL_LABEL[consent])}</span>
+              </label>
+            ))}
           </div>
         </fieldset>
 
@@ -254,9 +275,24 @@ export default function RegisterPage() {
           </div>
         )}
 
-        <Button type="submit" loading={busy} fullWidth size="lg">
-          {t("auth.register")}
-        </Button>
+        <div className="flex flex-col gap-2">
+          <Button
+            type="submit"
+            loading={busy}
+            fullWidth
+            size="lg"
+            disabled={!agreed}
+            aria-describedby={agreed ? undefined : blockedId}
+          >
+            {t("auth.register")}
+          </Button>
+          {/* A disabled button on its own does not say why. */}
+          {!agreed && (
+            <p id={blockedId} aria-live="polite" className="text-center text-xs text-ink-500">
+              {t("auth.consentToContinue")}
+            </p>
+          )}
+        </div>
       </form>
 
       <p className="mt-6 text-center text-sm text-ink-500">

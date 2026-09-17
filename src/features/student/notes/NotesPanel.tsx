@@ -94,9 +94,19 @@ export function NotesPanel({
         aria-hidden
       />
 
+      {/*
+        `glass-raised` rather than the panel alpha, and the phone sheet is why.
+        On a phone this floats over the scrim above, so what the glass frosts is
+        the aurora *through* a 40% ink wash: at the panel's 68% that composite
+        measures #D8D5E4, where ink-500 drops to 3.82:1 and a brand-700 link to
+        4.34:1 — both below the weights they were solved for. At the raised 88%
+        the same ground comes back to #F1EFF5 and 4.83 / 5.48:1. On the desktop
+        rail it is also the right tier for a different reason: the page scrolls
+        underneath this, and only the harder blur stops the text moving through.
+      */}
       <aside
         aria-label={t("notes.panelTitle")}
-        className="fixed inset-x-0 bottom-0 top-16 z-60 flex flex-col rounded-t-2xl border border-ink-200 bg-surface shadow-2xl sm:inset-x-auto sm:right-0 sm:top-14 sm:w-88 sm:rounded-none sm:border-y-0 sm:border-r-0 sm:shadow-lg"
+        className="glass-raised fixed inset-x-0 bottom-0 top-[calc(4rem+env(safe-area-inset-top))] z-60 flex flex-col rounded-t-(--radius-card) pb-[env(safe-area-inset-bottom)] sm:inset-x-auto sm:right-0 sm:top-14 sm:w-88 sm:rounded-none sm:border-y-0 sm:border-r-0 sm:pb-0"
       >
         <header className="flex items-start gap-3 border-b border-ink-200 px-4 py-3.5">
           <div className="min-w-0 flex-1">
@@ -129,7 +139,7 @@ export function NotesPanel({
                 value={filter}
                 onChange={(event) => setFilter(event.target.value)}
                 aria-label={t("notes.filterLabel")}
-                className="min-w-0 flex-1 rounded-(--radius-control) border border-ink-300 bg-surface px-2.5 py-1.5 text-xs text-ink-700"
+                className="min-w-0 flex-1 rounded-(--radius-control) border border-ink-300 bg-surface/82 backdrop-blur-sm px-2.5 py-1.5 text-xs text-ink-700 focus:bg-surface"
               >
                 <option value="">{t("notes.allNotes")}</option>
                 {currentLessonId && (
@@ -150,7 +160,7 @@ export function NotesPanel({
               {error && (
                 <p
                   role="alert"
-                  className="mb-3 rounded-md bg-danger-soft px-3 py-2 text-xs text-danger"
+                  className="mb-3 rounded-(--radius-control) bg-danger-soft px-3 py-2 text-xs text-danger"
                 >
                   {error}
                 </p>

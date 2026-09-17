@@ -147,7 +147,7 @@ export default function ApplicationsPage() {
                         ))}
                       </ol>
                       {application.employer_note && (
-                        <p className="rounded-lg bg-surface p-3 text-sm text-ink-700">
+                        <p className="glass rounded-(--radius-control) p-3 text-sm text-ink-700">
                           {application.employer_note}
                         </p>
                       )}
@@ -185,7 +185,7 @@ export default function ApplicationsPage() {
                         closed
                           ? "h-1.5 w-4 rounded-full bg-ink-200"
                           : index <= stageIndex
-                            ? "h-1.5 w-4 rounded-full bg-brand-600"
+                            ? "h-1.5 w-4 rounded-full bg-brand-fill"
                             : "h-1.5 w-4 rounded-full bg-ink-200"
                       }
                     />

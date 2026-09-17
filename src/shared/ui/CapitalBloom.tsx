@@ -1,30 +1,37 @@
-import { useId, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useAxisColor, useTheme } from "@/shared/theme/ThemeContext";
 import type { CapitalDimensionScore } from "@/shared/types/api";
 
 /**
- * The Kapital Index visualisation — nine radial bars, one per axis.
+ * The Kapital Index — a radar over the nine axes.
  *
- * Why not a radar chart. A radar closes its polygon, so an axis with no data is
- * plotted at the origin and reads as "score: zero". Here that is a lie with
- * consequences: a learner who simply has never had a mentor session would be
- * shown as having zero social capital. Nine independent bars have no polygon to
- * close, so "not measured yet" gets its own visual state — a dotted, hollow
- * track — which reads as *an empty slot to fill*, which is what it is.
+ * WHY IT LOOKS LIKE AN INSTRUMENT. This was nine thick rounded petals in nine
+ * different hues around a glossy sphere. It read as an illustration, and the
+ * thing it illustrates is the concept the whole programme is named after
+ * (TZ §2.1). The frame here is the ordinary one an assessment chart uses —
+ * concentric rings, a spoke to every axis, names set outside the circle, one
+ * thin trace — because that frame is what makes a number look measured rather
+ * than decorated.
  *
- * The nine capital types are the concept the programme is named after
- * (TZ §2.1); drawing them with the same stock widget every dashboard uses
- * throws that identity away.
+ * WHY THE TRACE IS BROKEN. A radar normally closes its polygon, and a closed
+ * polygon has to plot an axis with no evidence somewhere. At the origin it
+ * reads "score: zero", which here is a lie with consequences — a learner who
+ * has simply never entered a competition would be shown as having zero social
+ * capital. So the trace is drawn only across runs of adjacent measured axes
+ * and stops where the evidence stops. An unmeasured spoke stays a dashed,
+ * empty track with an em dash where its number would be: an empty slot to
+ * fill, which is what it is. Only when all nine are measured does the polygon
+ * close and take a fill.
  *
- * Encoding: bar length outward from the inner ring = score 0–100. Colour is the
- * axis's own hue, constant across the product, and carries identity only — no
- * value is ever communicated by colour alone.
+ * WHY ONE COLOUR. The nine hues were carrying identity that the labels already
+ * carry, and nine hues on one profile reads as nine competing series when it
+ * is one. The trace is a single brand tone; the axis hues stay where they mean
+ * something — the unlock list, and the bars in the narrow layout.
  *
  * Below `sm` the radial form is replaced by a plain bar list. A 9-spoke chart
- * on a 360 px screen either clips its labels or shrinks them past readability;
- * the same data as horizontal bars stays legible.
+ * on a 360px screen either clips its labels or shrinks them past readability.
  */
 
 // Wider than tall on purpose: the side labels need horizontal room, and a
@@ -33,16 +40,59 @@ const WIDTH = 560;
 const HEIGHT = 420;
 const CX = WIDTH / 2;
 const CY = 200;
-const R_INNER = 62;
+
+/**
+ * The scale runs from the inner ring, not from the centre point.
+ *
+ * The hole is where the overall index sits. It also keeps the low end of the
+ * scale readable: nine traces converging on a single pixel tell you nothing
+ * about which of them is 4 and which is 11.
+ */
+const R_INNER = 54;
 const R_OUTER = 140;
 const R_LABEL = R_OUTER + 20;
-const BAR_WIDTH = 26;
-const GUIDES = [25, 50, 75, 100];
+const RINGS = [0, 25, 50, 75, 100];
 
 const polar = (radius: number, degrees: number): [number, number] => {
   const radians = ((degrees - 90) * Math.PI) / 180;
   return [CX + radius * Math.cos(radians), CY + radius * Math.sin(radians)];
 };
+
+const radiusFor = (score: number) =>
+  R_INNER + ((R_OUTER - R_INNER) * Math.max(0, Math.min(100, score))) / 100;
+
+/**
+ * The runs of adjacent measured axes, walking the wheel.
+ *
+ * Returns `closed: true` only when every axis has evidence — that is the one
+ * case where the trace may be a polygon. Otherwise it starts counting from the
+ * first gap, so a run that spans index 0 stays one run instead of being cut in
+ * half by the seam.
+ */
+function measuredRuns(flags: boolean[]): { runs: number[][]; closed: boolean } {
+  const count = flags.length;
+  if (count === 0) return { runs: [], closed: false };
+  if (flags.every(Boolean)) {
+    return { runs: [flags.map((_, index) => index)], closed: true };
+  }
+
+  const start = flags.indexOf(false);
+  const runs: number[][] = [];
+  let current: number[] = [];
+
+  for (let step = 1; step <= count; step += 1) {
+    const index = (start + step) % count;
+    if (flags[index]) {
+      current.push(index);
+    } else if (current.length > 0) {
+      runs.push(current);
+      current = [];
+    }
+  }
+  if (current.length > 0) runs.push(current);
+
+  return { runs, closed: false };
+}
 
 interface Props {
   dimensions: CapitalDimensionScore[];
@@ -56,10 +106,16 @@ export function CapitalBloom({ dimensions, overall, measured, total }: Props) {
   const { palette } = useTheme();
   const axisColor = useAxisColor();
   const [active, setActive] = useState<number | null>(null);
-  const gradientId = useId();
 
   const step = 360 / (dimensions.length || 1);
   const focused = active !== null ? dimensions[active] : null;
+
+  const { runs, closed } = measuredRuns(
+    dimensions.map((dimension) => dimension.has_data),
+  );
+
+  const pointFor = (index: number) =>
+    polar(radiusFor(dimensions[index].score), index * step);
 
   return (
     <>
@@ -71,37 +127,105 @@ export function CapitalBloom({ dimensions, overall, measured, total }: Props) {
           role="img"
           aria-label={t("capital.chartLabel", { measured, total, overall })}
         >
-          <defs>
-            <radialGradient id={gradientId}>
-              <stop offset="0%" stopColor="#ffffff" />
-              <stop offset="100%" stopColor={palette.ink[50]} />
-            </radialGradient>
-          </defs>
-
-          {/* Scale guides — reference, deliberately faint */}
-          {GUIDES.map((guide) => (
+          {/* The grid, deliberately recessive: it is the ruler, not the reading. */}
+          {RINGS.map((ring) => (
             <circle
-              key={guide}
+              key={ring}
               cx={CX}
               cy={CY}
-              r={R_INNER + ((R_OUTER - R_INNER) * guide) / 100}
+              r={radiusFor(ring)}
               fill="none"
-              stroke={palette.ink[200]}
+              /* The outer ring is the chart's edge and gets a boundary weight
+                 (ink-400 measures 3.07:1 on the glass composite); the ones
+                 inside it are reference only. */
+              stroke={ring === 100 ? palette.ink[400] : palette.ink[300]}
               strokeWidth={1}
-              strokeDasharray={guide === 100 ? undefined : "2 4"}
+              opacity={ring === 100 ? 0.7 : 0.45}
             />
           ))}
 
+          {/* One spoke per axis, out to the rim. Dashed where nothing has been
+              measured yet, so the empty axes read as tracks, not as zeroes. */}
+          {dimensions.map((dimension, index) => {
+            const [x, y] = polar(R_OUTER, index * step);
+            const [xInner, yInner] = polar(R_INNER, index * step);
+            return (
+              <line
+                key={`spoke-${dimension.slug}`}
+                x1={xInner}
+                y1={yInner}
+                x2={x}
+                y2={y}
+                stroke={palette.ink[300]}
+                strokeWidth={1}
+                strokeDasharray={dimension.has_data ? undefined : "3 5"}
+                opacity={dimension.has_data ? 0.38 : 0.63}
+              />
+            );
+          })}
+
+          {/*
+            A stem from the inner ring out to each measured value.
+
+            Without them the trace was four points and three segments floating
+            in a large empty grid, and an axis with no measured neighbour — the
+            entrepreneurial one here — was a dot with nothing holding it to the
+            scale. The stem is what makes each axis readable on its own, which
+            is the reading this chart is actually for.
+          */}
+          {dimensions.map((dimension, index) =>
+            dimension.has_data ? (
+              <line
+                key={`stem-${dimension.slug}`}
+                x1={polar(R_INNER, index * step)[0]}
+                y1={polar(R_INNER, index * step)[1]}
+                x2={pointFor(index)[0]}
+                y2={pointFor(index)[1]}
+                stroke={palette.brand[700]}
+                strokeWidth={2}
+                strokeLinecap="round"
+                opacity={0.35}
+              />
+            ) : null,
+          )}
+
+          {/* The trace. One colour: this is one profile, not nine series. */}
+          {runs.map((run) => {
+            const points = run.map(pointFor);
+            const path =
+              points.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
+
+            if (points.length < 2) return null;
+
+            return closed ? (
+              <polygon
+                key={`trace-${run[0]}`}
+                points={path}
+                fill={palette.brand[700]}
+                fillOpacity={0.14}
+                stroke={palette.brand[700]}
+                strokeWidth={2}
+                strokeLinejoin="round"
+              />
+            ) : (
+              <polyline
+                key={`trace-${run[0]}`}
+                points={path}
+                fill="none"
+                stroke={palette.brand[700]}
+                strokeWidth={3}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            );
+          })}
+
           {dimensions.map((dimension, index) => {
             const angle = index * step;
-            const [xInner, yInner] = polar(R_INNER, angle);
-            const [xTrack, yTrack] = polar(R_OUTER, angle);
-            const [xValue, yValue] = polar(
-              R_INNER + ((R_OUTER - R_INNER) * dimension.score) / 100,
-              angle,
-            );
+            const [xValue, yValue] = pointFor(index);
+            const [xHitInner, yHitInner] = polar(R_INNER, angle);
+            const [xHitOuter, yHitOuter] = polar(R_LABEL, angle);
             const isActive = active === index;
-            const color = axisColor(dimension.slug, dimension.color);
 
             return (
               <g
@@ -115,43 +239,31 @@ export function CapitalBloom({ dimensions, overall, measured, total }: Props) {
                 aria-label={`${dimension.name}: ${
                   dimension.has_data ? `${dimension.score}%` : t("capital.noData")
                 }`}
-                className="cursor-pointer outline-none"
+                className="cursor-pointer"
               >
-                {dimension.has_data ? (
-                  <line
-                    x1={xInner}
-                    y1={yInner}
-                    x2={xTrack}
-                    y2={yTrack}
-                    stroke={palette.ink[100]}
-                    strokeWidth={BAR_WIDTH}
-                    strokeLinecap="round"
-                  />
-                ) : (
-                  <line
-                    x1={xInner}
-                    y1={yInner}
-                    x2={xTrack}
-                    y2={yTrack}
-                    stroke={palette.ink[300]}
-                    strokeWidth={BAR_WIDTH}
-                    strokeLinecap="round"
-                    strokeDasharray="1 9"
-                    opacity={isActive ? 0.95 : 0.5}
-                  />
-                )}
+                {/* An invisible wedge along the whole spoke: the hit target has
+                    to be bigger than a 8px dot or the chart is only usable by
+                    people with steady hands. */}
+                <line
+                  x1={xHitInner}
+                  y1={yHitInner}
+                  x2={xHitOuter}
+                  y2={yHitOuter}
+                  stroke="transparent"
+                  strokeWidth={34}
+                />
 
-                {dimension.has_data && dimension.score > 0 && (
-                  <line
-                    x1={xInner}
-                    y1={yInner}
-                    x2={xValue}
-                    y2={yValue}
-                    stroke={color}
-                    strokeWidth={isActive ? BAR_WIDTH + 4 : BAR_WIDTH}
-                    strokeLinecap="round"
-                    opacity={active === null || isActive ? 1 : 0.3}
-                    style={{ transition: "stroke-width 150ms, opacity 150ms" }}
+                {dimension.has_data && (
+                  <circle
+                    cx={xValue}
+                    cy={yValue}
+                    r={isActive ? 7 : 5}
+                    fill={palette.brand[700]}
+                    /* A ring in the surface colour keeps the marker readable
+                       where the trace passes behind it. */
+                    stroke={palette.card}
+                    strokeWidth={2}
+                    style={{ transition: "r 150ms" }}
                   />
                 )}
 
@@ -168,13 +280,16 @@ export function CapitalBloom({ dimensions, overall, measured, total }: Props) {
             );
           })}
 
-          {/* Centre shows the focused axis, or the overall index when idle */}
+          {/* Centre: the focused axis, or the overall index when idle. Flat —
+              the gloss and the gradient here were the loudest thing in a chart
+              whose job is to be read. */}
           <circle
             cx={CX}
             cy={CY}
-            r={R_INNER - 8}
-            fill={`url(#${gradientId})`}
-            stroke={palette.ink[200]}
+            r={R_INNER - 6}
+            fill={palette.card}
+            stroke={palette.ink[300]}
+            strokeWidth={1}
           />
           {focused ? (
             <>
@@ -182,15 +297,15 @@ export function CapitalBloom({ dimensions, overall, measured, total }: Props) {
                 x={CX}
                 y={CY - 6}
                 textAnchor="middle"
-                className="fill-ink-900 text-[28px] font-semibold tabular-nums"
+                className="fill-ink-900 text-[26px] font-semibold tabular-nums"
               >
                 {focused.has_data ? focused.score : "—"}
               </text>
               <text
                 x={CX}
-                y={CY + 16}
+                y={CY + 14}
                 textAnchor="middle"
-                className="fill-ink-500 text-[13px]"
+                className="fill-ink-500 text-[12px]"
               >
                 {t(`capital.axis.${focused.slug}`, {
                   defaultValue: focused.name,
@@ -201,9 +316,9 @@ export function CapitalBloom({ dimensions, overall, measured, total }: Props) {
             <>
               <text
                 x={CX}
-                y={CY - 4}
+                y={CY - 2}
                 textAnchor="middle"
-                className="fill-ink-900 text-[36px] font-semibold tabular-nums"
+                className="fill-ink-900 font-display text-[34px] font-semibold tabular-nums"
               >
                 {overall}
               </text>
@@ -211,7 +326,7 @@ export function CapitalBloom({ dimensions, overall, measured, total }: Props) {
                 x={CX}
                 y={CY + 18}
                 textAnchor="middle"
-                className="fill-ink-500 text-[13px]"
+                className="fill-ink-500 text-[12px]"
               >
                 {measured}/{total} {t("capital.axesShort")}
               </text>
@@ -238,7 +353,7 @@ export function CapitalBloom({ dimensions, overall, measured, total }: Props) {
                 className={
                   dimension.has_data
                     ? "text-sm text-ink-700"
-                    : "text-sm text-ink-400"
+                    : "text-sm text-ink-500"
                 }
               >
                 {t(`capital.axis.${dimension.slug}`, {
@@ -249,7 +364,7 @@ export function CapitalBloom({ dimensions, overall, measured, total }: Props) {
                 className={
                   dimension.has_data
                     ? "text-sm font-semibold tabular-nums text-ink-800"
-                    : "text-xs text-ink-400"
+                    : "text-xs text-ink-500"
                 }
               >
                 {dimension.has_data ? dimension.score : t("capital.noData")}
@@ -319,7 +434,7 @@ export function CapitalUnlockList({
               style={{ backgroundColor: axisColor(dimension.slug, dimension.color) }}
               aria-hidden
             />
-            <span className="min-w-0 flex-1 truncate text-sm text-ink-700">
+            <span className="min-w-0 flex-1 text-sm text-ink-700">
               {t(`capital.axis.${dimension.slug}`, {
                 defaultValue: dimension.name,
               })}
@@ -371,19 +486,22 @@ function AxisLabel({
       x={x}
       y={y + dy}
       textAnchor={anchor}
+      /* An unmeasured axis is quieter than a measured one but it is still text
+         somebody reads, so the dim state is ink-500 (4.61:1 on glass) rather
+         than ink-400, which measures 3.07 and is a fill weight. */
       className={
         isActive
-          ? "fill-ink-900 text-[14px] font-semibold"
+          ? "fill-ink-900 text-[13px] font-semibold"
           : dimmed
-            ? "fill-ink-400 text-[14px]"
+            ? "fill-ink-500 text-[13px]"
             : hasData
-              ? "fill-ink-700 text-[14px]"
-              : "fill-ink-400 text-[14px]"
+              ? "fill-ink-700 text-[13px]"
+              : "fill-ink-500 text-[13px]"
       }
       style={{ transition: "fill 150ms" }}
     >
       {t(`capital.axis.${slug}`, { defaultValue: fallback })}
-      <tspan className={hasData ? "fill-ink-500" : "fill-ink-300"} fontSize="13">
+      <tspan className="fill-ink-500" fontSize="12">
         {" "}
         {hasData ? score : "—"}
       </tspan>

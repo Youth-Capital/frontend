@@ -13,6 +13,7 @@ import {
   useId,
   useRef,
   type ButtonHTMLAttributes,
+  type CSSProperties,
   type InputHTMLAttributes,
   type ReactNode,
   type SelectHTMLAttributes,
@@ -23,19 +24,44 @@ import {
 type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "success";
 type ButtonSize = "sm" | "md" | "lg";
 
+/*
+ * Buttons are pills now.
+ *
+ * On a page of frosted rectangles a rounded-rectangle button is one more
+ * rectangle. The pill is the one shape in the system that is not a panel,
+ * which is what makes it read as the thing you press.
+ *
+ * Primary stays opaque on purpose. It is the only element on most screens
+ * that is a solid saturated fill, and that is the whole point: on glass, the
+ * strongest signal available is *not* being translucent. It also sidesteps
+ * the composite problem entirely — on-colour measures 5.34:1 on brand-600
+ * whatever the aurora is doing behind it, which a frosted primary could not
+ * promise.
+ *
+ * Secondary and ghost are glass, and lean on the shared `.glass` class rather
+ * than restating the mix, so a change to the panel alpha moves them with
+ * everything else.
+ */
 const BUTTON_VARIANTS: Record<ButtonVariant, string> = {
+  /*
+   * The pastel measures 1.72:1 against a pale page — it cannot be its own
+   * edge. The border is the solved 3:1 boundary, so the button has a shape
+   * whether it sits on the page, on a card, or on glass.
+   */
   primary:
-    "bg-brand-600 text-on-colour hover:bg-brand-700 disabled:bg-brand-300 shadow-sm",
+    "bg-brand-fill text-on-brand border border-brand-edge " +
+    "hover:bg-brand-fill-hover disabled:bg-brand-100 disabled:text-ink-400 " +
+    "disabled:border-ink-200 shadow-sm",
   secondary:
-    "bg-surface text-ink-700 border border-ink-300 hover:bg-ink-50 disabled:text-ink-400",
+    "glass text-ink-700 hover:bg-surface disabled:text-ink-400 shadow-xs",
   ghost: "bg-transparent text-ink-600 hover:bg-ink-100 disabled:text-ink-400",
   danger: "bg-danger text-on-colour hover:brightness-95 disabled:opacity-50 shadow-sm",
   success: "bg-success text-on-colour hover:brightness-95 disabled:opacity-50 shadow-sm",
 };
 
 const BUTTON_SIZES: Record<ButtonSize, string> = {
-  sm: "h-8 px-3 text-sm gap-1.5",
-  md: "h-10 px-4 text-sm gap-2",
+  sm: "h-8 px-3 text-sm gap-1.5 coarse:h-11",
+  md: "h-10 px-4 text-sm gap-2 coarse:h-11",
   lg: "h-12 px-6 text-base gap-2",
 };
 
@@ -66,7 +92,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       ref={ref}
       disabled={disabled || loading}
       className={clsx(
-        "inline-flex items-center justify-center rounded-(--radius-control) font-medium",
+        "inline-flex items-center justify-center rounded-full font-medium",
         /*
          * Press had no state of its own: hover and active looked identical, so
          * a click gave no acknowledgement until the request came back. The dip
@@ -130,18 +156,34 @@ function FieldShell({
 }
 
 /*
- * 16px on phones, 14px from the small breakpoint up.
+ * 16px under a fingertip, 14px under a mouse.
  *
  * Not a taste decision: iOS Safari zooms the whole page in when a focused
- * input's font-size is under 16px, and it does not zoom back out. Every form in
- * the product was 14px, so tapping a field on an iPhone threw the layout off
- * screen and left the person pinching to find the next one. Desktop keeps the
- * denser size, where no such rule applies.
+ * input's font-size is under 16px, and it does not zoom back out. Tapping a
+ * field threw the layout off screen and left the person pinching to find the
+ * next one.
+ *
+ * This was guarded by a width breakpoint — 16px below `sm`, 14px above — which
+ * is the wrong question, and it let every iPad through: measured on iPad mini,
+ * Air, Pro 11", Pro 12.9" and in landscape, all ten fields on the profile and
+ * course pages came back at 14px, so tapping any of them zoomed the page. A
+ * tablet is wide *and* touch-driven. `fine:` asks about the pointer instead,
+ * so the denser size lands only where there is a real cursor, and the two
+ * conditions stack: a mouse *and* room for it.
+ */
+/*
+ * A field on glass has to read as an inset, and the panel it sits in is
+ * already translucent — so the field is *more* opaque than its card, not
+ * less. 82% white over the panel puts the worst composite lighter than the
+ * panel's own, which is why the placeholder grey still clears 3:1 there.
+ * On focus it goes fully solid: the field you are typing in is the one
+ * surface on the screen that should not be showing you the wallpaper.
  */
 const CONTROL_CLASS =
-  "w-full rounded-(--radius-control) border bg-surface px-3 py-2 text-base text-ink-800 sm:text-sm " +
-  "placeholder:text-ink-400 transition-colors focus:border-brand-500 " +
-  "disabled:bg-ink-100 disabled:text-ink-500";
+  "w-full rounded-(--radius-control) border bg-surface/82 backdrop-blur-sm px-3 py-2 coarse:py-2.5 " +
+  "text-base text-ink-800 fine:sm:text-sm " +
+  "placeholder:text-ink-400 transition-colors focus:border-brand-500 focus:bg-surface " +
+  "disabled:bg-ink-100/70 disabled:text-ink-500";
 
 export const Input = forwardRef<
   HTMLInputElement,
@@ -263,7 +305,7 @@ export function CardHeader({
 }
 
 /* ------------------------------------------------------------------- Badge */
-type BadgeTone =
+export type BadgeTone =
   | "neutral"
   | "brand"
   | "success"
@@ -280,20 +322,123 @@ const BADGE_TONES: Record<BadgeTone, string> = {
   info: "bg-info-soft text-info",
 };
 
+const BADGE_DOTS: Record<BadgeTone, string> = {
+  neutral: "bg-ink-400",
+  brand: "bg-brand-fill",
+  success: "bg-success",
+  warning: "bg-warning",
+  danger: "bg-danger",
+  info: "bg-info",
+};
+
+/**
+ * A status chip.
+ *
+ * The ground stays an opaque tint rather than becoming glass. It is small and
+ * it carries coloured text, and a translucent ground would put that text on a
+ * composite that changes with whatever the aurora is doing behind it — the
+ * one place in this design where a measured pair is worth more than the
+ * effect. The tints are pale enough to belong to the palette anyway.
+ *
+ * The dot is what the frosted style buys instead: at chip size a colour reads
+ * faster as a mark than as a background, and it survives being desaturated,
+ * printed, or looked at by someone who cannot separate the two tints.
+ */
 export function Badge({
   tone = "neutral",
+  dot = false,
   children,
   className,
 }: {
   tone?: BadgeTone;
+  /** Show the tone as a mark as well as a ground. */
+  dot?: boolean;
   children: ReactNode;
   className?: string;
 }) {
   return (
     <span
       className={clsx(
-        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium",
         BADGE_TONES[tone],
+        className,
+      )}
+    >
+      {dot && (
+        <span
+          aria-hidden
+          className={clsx("h-1.5 w-1.5 shrink-0 rounded-full", BADGE_DOTS[tone])}
+        />
+      )}
+      {children}
+    </span>
+  );
+}
+
+/* -------------------------------------------------------------------- Tile */
+
+/**
+ * The pictogram tile.
+ *
+ * This is the element that carries the palette. Every screen is otherwise
+ * near-white panels on a soft wash, and without something at full strength
+ * the five colours would only ever appear as a blur in the corners of the
+ * viewport. The tile is where one of them lands as an actual square of
+ * colour, holding a line icon.
+ *
+ * `hue` picks a stop off the palette's own fan. The default walks the fan by
+ * index, so a row of stat cards or a list of vacancies gets five different
+ * hues without any caller choosing them — which is what keeps it a system
+ * rather than a decision made 60 times.
+ *
+ * The icon inside takes ink-800, never the tint: a tint measures 1.2–1.8:1
+ * and cannot carry a stroke that has to be seen. On the tile ground ink-800
+ * measures at worst 8.9:1.
+ */
+export type TileHue = "pink" | "mauve" | "peri" | "blue" | "sky";
+
+const TILE_HUES: Record<TileHue, string> = {
+  pink: "var(--aurora-1)",
+  mauve: "var(--aurora-2)",
+  peri: "var(--aurora-3)",
+  blue: "var(--aurora-4)",
+  sky: "var(--aurora-5)",
+};
+
+const TILE_ORDER: TileHue[] = ["peri", "pink", "sky", "mauve", "blue"];
+
+const TILE_SIZES = {
+  xs: "h-6 w-6 [&>svg]:h-3.5 [&>svg]:w-3.5",
+  sm: "h-8 w-8 [&>svg]:h-4 [&>svg]:w-4",
+  md: "h-11 w-11 [&>svg]:h-5 [&>svg]:w-5",
+  lg: "h-14 w-14 [&>svg]:h-6 [&>svg]:w-6",
+} as const;
+
+export function Tile({
+  children,
+  hue,
+  index,
+  size = "md",
+  className,
+}: {
+  children: ReactNode;
+  /** An explicit stop off the fan. */
+  hue?: TileHue;
+  /** Or a position in a list, which walks the fan for you. */
+  index?: number;
+  size?: keyof typeof TILE_SIZES;
+  className?: string;
+}) {
+  const resolved =
+    hue ?? TILE_ORDER[(index ?? 0) % TILE_ORDER.length];
+
+  return (
+    <span
+      aria-hidden
+      style={{ "--tint": TILE_HUES[resolved] } as CSSProperties}
+      className={clsx(
+        "glass-tile inline-flex shrink-0 items-center justify-center",
+        TILE_SIZES[size],
         className,
       )}
     >
@@ -319,7 +464,7 @@ export function ProgressBar({
   const clamped = Math.max(0, Math.min(100, Math.round(value)));
   const fill: Record<BadgeTone, string> = {
     neutral: "bg-ink-400",
-    brand: "bg-brand-600",
+    brand: "bg-brand-fill",
     success: "bg-success",
     warning: "bg-warning",
     danger: "bg-danger",
@@ -387,7 +532,7 @@ export function Spinner({ size = 20 }: { size?: number }) {
 
 export function FullPageSpinner() {
   return (
-    <div className="flex min-h-screen items-center justify-center text-brand-600">
+    <div className="flex min-h-dvh items-center justify-center text-brand-600">
       <Spinner size={32} />
     </div>
   );
@@ -625,7 +770,7 @@ export function Modal({
         aria-labelledby={titleId}
         tabIndex={-1}
         className={clsx(
-          "max-h-[92vh] w-full overflow-y-auto rounded-t-2xl bg-surface shadow-xl outline-none sm:rounded-2xl",
+          "max-h-[92dvh] w-full overflow-y-auto rounded-t-2xl bg-surface pb-[env(safe-area-inset-bottom)] shadow-xl outline-none sm:rounded-2xl sm:pb-0",
           widths[size],
           panelClassName,
         )}
@@ -640,7 +785,7 @@ export function Modal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md p-1 text-ink-400 hover:bg-ink-100 hover:text-ink-700"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-ink-400 hover:bg-ink-100 hover:text-ink-700 coarse:h-11 coarse:w-11"
             aria-label={t("common.close")}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -686,7 +831,7 @@ export function Tabs<T extends string>({
           aria-selected={active === tab.key}
           onClick={() => onChange(tab.key)}
           className={clsx(
-            "-mb-px whitespace-nowrap border-b-2 px-4 py-2.5 text-sm font-medium transition-colors",
+            "-mb-px whitespace-nowrap border-b-2 px-4 py-2.5 text-sm font-medium transition-colors coarse:py-3",
             active === tab.key
               ? "border-brand-600 text-brand-700"
               : "border-transparent text-ink-500 hover:border-ink-300 hover:text-ink-700",

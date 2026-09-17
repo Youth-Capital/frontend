@@ -15,7 +15,6 @@
     "jobs": "Jobs",
     "applications": "Applications",
     "plan": "My plan",
-    "mentors": "Mentors",
     "assistant": "AI assistant",
     "settings": "Settings",
     "company": "Company",
@@ -33,7 +32,9 @@
     "logout": "Sign out",
     "billing": "Billing",
     "chat": "AI chat",
-    "notes": "My notes"
+    "notes": "My notes",
+    "reviews": "Reviews",
+    "profile": "My profile"
   },
   "common": {
     "save": "Save",
@@ -68,7 +69,8 @@
     "months": "{{count}} months",
     "days": "{{count}} days",
     "page": "Page",
-    "minutesShort": "min"
+    "minutesShort": "min",
+    "send": "Send"
   },
   "errors": {
     "generic": "Something went wrong.",
@@ -164,8 +166,6 @@
     "roleStudentHint": "School, college or university student, graduate or job seeker",
     "roleEmployer": "Employer",
     "roleEmployerHint": "Post vacancies, run courses, find candidates",
-    "roleMentor": "Mentor",
-    "roleMentorHint": "Guide young people in your field",
     "firstName": "First name",
     "lastName": "Last name",
     "birthDate": "Date of birth",
@@ -201,7 +201,11 @@
     "arcCareer": {
       "title": "Career",
       "body": "The work you want, and room to grow"
-    }
+    },
+    "consentNotice": "To create your account we need your consent. We store and process your profile data — name, date of birth, skills and test results — to build your development plan and match you with vacancies. An employer sees your details only if you apply to one of their vacancies yourself.",
+    "consentAgree": "I agree to the terms of service, the privacy policy and the processing of my personal data",
+    "consentOptional": "Optional — you can change these later in settings",
+    "consentToContinue": "Tick the consent to continue"
   },
   "onboarding": {
     "title": "Let's set up your profile",
@@ -259,7 +263,6 @@
     "title": "Career path",
     "subtitle": "What you have, what is missing, what to do next",
     "readiness": "Readiness for {{profession}}",
-    "readinessHint": "{{met}} of {{total}} required skills at the needed level",
     "haveSkills": "You already have",
     "partialSkills": "Below the required level",
     "missingSkills": "Missing",
@@ -279,10 +282,7 @@
     },
     "requirement_REQUIRED": "Required",
     "requirement_PREFERRED": "Preferred",
-    "requirement_OPTIONAL": "Optional",
-    "routeTo": "Route to",
-    "andMoreSkills_one": "and {{count}} more skill",
-    "andMoreSkills_other": "and {{count}} more skills"
+    "requirement_OPTIONAL": "Optional"
   },
   "skills": {
     "title": "Skills",
@@ -299,7 +299,6 @@
       "SELF": "Self-declared",
       "COURSE": "Course completion",
       "EXPERIENCE": "Work experience",
-      "MENTOR": "Mentor assessment",
       "TEST": "Test result",
       "EMPLOYER": "Employer verified"
     },
@@ -401,10 +400,34 @@
     "materialFile": "File",
     "materialFileHint": "PDF, document, spreadsheet, presentation or archive.",
     "materialBookHint": "A link to the book — the platform does not host it.",
+    "materialBookFile": "Book file",
+    "materialBookFileHint": "PDF or EPUB, up to 40 MB. Drag it in from your desktop.",
+    "materialBookLink": "Or a link to it",
+    "titleFromFileHint": "Leave empty to use the file name.",
+    "filesChosen": "{{count}} files — each is attached separately.",
+    "addMaterials": "Add {{count}} materials",
     "materialFailed": "The material could not be added.",
     "material_FILE": "File",
     "material_LINK": "Link",
     "material_BOOK": "Book",
+    "material_IMAGE": "Image",
+    "material_VIDEO": "Video",
+    "lessonMaterials": "Lesson materials",
+    "lessonMaterialsHint": "A video, images, files and links for this lesson only.",
+    "materialImage": "Image",
+    "materialImageHint": "JPEG, PNG or WebP. Shown inside the lesson, not as a download.",
+    "materialVideoUrl": "Video link",
+    "materialVideoHint": "YouTube or Vimeo. The player is embedded in the lesson.",
+    "materialDescription": "Description",
+    "materialDescriptionHint": "Optional — one line saying what this is for.",
+    "noMaterialsYet": "Nothing attached to this lesson yet.",
+    "addMaterial": "Add material",
+    "materialPreview": "Preview",
+    "stagedMaterialsHint": "Add them now — they are attached the moment the course is created. Held in this tab only, so they are lost if you reload before creating.",
+    "pendingMaterial": "will be attached",
+    "materialsNotSentHint": "The course was saved, but these did not upload. Try again, or remove them.",
+    "retryMaterials": "Try again",
+    "material_video_not_embeddable": "That link cannot be embedded. Paste a YouTube or Vimeo address, or add it as an ordinary link instead.",
     "recapTitle": "Short recap",
     "recapAsk": "Make a recap",
     "recapHint": "For coming back to the lesson and remembering the main points.",
@@ -423,7 +446,16 @@
     "check_too_short": "There is too little text to write questions from.",
     "check_no_model": "The check is unavailable: no model is connected.",
     "check_no_questions": "Questions could not be written for this lesson.",
-    "lockedHint": "Enrol in the course to open this lesson."
+    "lockedHint": "Enrol in the course to open this lesson.",
+    "tutorTitle": "Ask about this lesson",
+    "tutorHint": "Answers only from this lesson's own material.",
+    "tutorPlaceholder": "What didn't make sense?",
+    "tutorAsk": "Ask",
+    "tutorThinking": "Reading the lesson…",
+    "tutorGroundedOn": "From: {{sources}}",
+    "tutorNoSource": "This lesson has no text to answer from yet. Ask the author to add notes or a video transcript.",
+    "tutorNoModel": "No model is connected, so this cannot be answered.",
+    "tutorFailed": "The answer didn't come through. Try again."
   },
   "tests": {
     "title": "Tests",
@@ -452,7 +484,33 @@
     "incorrect": "Incorrect",
     "explanation": "Explanation",
     "empty": "No tests available yet.",
-    "screeningNote": "This is an employer screening test. It affects this application only, not your public profile."
+    "screeningNote": "This is an employer screening test. It affects this application only, not your public profile.",
+    "soft": {
+      "done": "Assessment complete",
+      "doneHint": "This one has no pass mark — the result is your profile.",
+      "byCompetency": "By competency",
+      "byCompetencyHint": "Each number is how much the actions you chose showed of that competency",
+      "reviewTitle": "Your answers",
+      "pointsAwarded": "{{points}} pts",
+      "noRightAnswer": "There is no right answer — pick what you would actually do."
+    },
+    "leaveTitle": "Leave the test?",
+    "leaveHint": "Your answers are not saved yet — they are sent only when you submit. Leave now and every answer is lost, while the timer keeps running.",
+    "leaveStay": "Stay",
+    "leaveAnyway": "Leave anyway",
+    "leaveAnswered": "{{answered}} of {{total}} answered",
+    "tabTodo": "Not passed",
+    "tabPassed": "Passed",
+    "tabResults": "Results",
+    "emptyTodo": "Every available test is passed.",
+    "emptyPassed": "No passed tests yet.",
+    "emptyResults": "No results yet — they appear after your first submission.",
+    "completed": "Completed",
+    "expired": "Time ran out",
+    "noPassMark": "No pass mark",
+    "date": "Date",
+    "attempt": "Attempt",
+    "outcome": "Outcome"
   },
   "experience": {
     "title": "Experience",
@@ -549,7 +607,7 @@
     "provenSkills": "Verified skills",
     "passedTests": "Tests passed",
     "verifiedSkills": "Verified skills",
-    "noVerifiedSkills": "Nothing verified yet. Pass a test or get a mentor to confirm a skill."
+    "noVerifiedSkills": "Nothing verified yet. Pass a test to confirm a skill."
   },
   "jobs": {
     "title": "Jobs",
@@ -597,7 +655,12 @@
     "noBreakdown": "Nothing to break down yet",
     "thisMatch": "Match breakdown",
     "youHaveCandidate": "Candidate has",
-    "youMissCandidate": "Missing"
+    "youMissCandidate": "Missing",
+    "why_target_profession": "Matches the profession you are aiming for",
+    "why_shares_target_skills": "Same skills as your target profession",
+    "why_declared_interest": "In a field you said interests you",
+    "why_outside_declared_interests": "Outside the fields you named",
+    "why_no_interests_declared": ""
   },
   "applications": {
     "title": "Applications",
@@ -640,7 +703,7 @@
     "dueOn": "Due {{date}}",
     "estimate": "~{{count}} min",
     "openLinked": "Open",
-    "reviews": "Mentor reviews",
+    "reviews": "Plan history",
     "milestone": {
       "foundation": "Month 1 — foundation",
       "build": "Month 2 — build",
@@ -657,7 +720,6 @@
       "TEST": "Test",
       "PROJECT": "Project",
       "APPLICATION": "Application",
-      "MENTOR_SESSION": "Mentor session",
       "PROFILE": "Profile",
       "CUSTOM": "Task"
     },
@@ -669,33 +731,10 @@
       "close_gap": "Closes the gap in {{skill}}.",
       "reach_level": "Reach level {{level}} in {{skill}}.",
       "portfolio": "Apply what you learned and add it to your portfolio."
-    }
-  },
-  "mentors": {
-    "title": "Mentors",
-    "subtitle": "People who have done what you are trying to do",
-    "request": "Request a session",
-    "mySessions": "My sessions",
-    "topic": "Topic",
-    "agenda": "What you want to discuss",
-    "expertise": "Expertise",
-    "yearsExperience": "{{count}} years of experience",
-    "sessions": "{{count}} sessions",
-    "free": "Free",
-    "empty": "No mentors found.",
-    "sessionsEmpty": "No sessions yet.",
-    "accept": "Accept",
-    "decline": "Decline",
-    "complete": "Mark completed",
-    "meetingLink": "Meeting link",
-    "status": {
-      "REQUESTED": "Requested",
-      "ACCEPTED": "Accepted",
-      "DECLINED": "Declined",
-      "COMPLETED": "Completed",
-      "CANCELLED": "Cancelled",
-      "NO_SHOW": "No show"
-    }
+    },
+    "periodLabel": "Plan length, days",
+    "periodCustom": "Custom",
+    "periodRange": "{{min}} to {{max}}"
   },
   "assistant": {
     "title": "AI assistant",
@@ -715,8 +754,7 @@
       "needs_verification": "These are declared but unverified: {{skills}}. A test would make them count.",
       "profession_readiness": "{{required_met}} of {{required_total}} required skills met.",
       "closes_skill_gap": "Covers {{skills}} for {{profession}}.",
-      "match_score": "Matched: {{matched}}. Missing: {{missing}}.",
-      "mentor_expertise_match": "Works in the area you are missing."
+      "match_score": "Matched: {{matched}}. Missing: {{missing}}."
     },
     "disclaimer": "Recommendations are generated from your own profile data. They are suggestions, not decisions — for medical, legal or financial matters, talk to a qualified specialist."
   },
@@ -839,14 +877,14 @@
     "inviteAwaitingReply": "Invitation sent, no reply yet.",
     "inviteDeclined": "The candidate declined the invitation.",
     "openCourse": "Open course",
-    "averageScore": "Average score"
+    "averageScore": "Average score",
+    "hiddenUntilApply": "Hidden until they apply"
   },
   "admin": {
     "dashboard": "Platform overview",
     "totalUsers": "Total users",
     "students": "Learners",
     "employers": "Employers",
-    "mentors": "Mentors",
     "activeUsers": "Active (30 days)",
     "funnel": "Conversion funnel",
     "funnelHint": "Registration through to employment",
@@ -934,7 +972,25 @@
     "consentsHint": "You can withdraw optional consents at any time.",
     "notifications": "Notifications",
     "visibility": "Profile visibility",
-    "danger": "Danger zone"
+    "danger": "Danger zone",
+    "assistant": "AI assistant",
+    "assistantHint": "It already adapts to where you are. Change these only if it reads you wrong.",
+    "assistantAuto": "Automatic",
+    "assistantStage_new": "Right now it treats you as someone who has just arrived: terms explained, one step at a time.",
+    "assistantStage_starting": "Right now it treats you as someone getting started: it points at the shortest route to a confirmed skill.",
+    "assistantStage_building": "Right now it treats you as someone well into their track: no explaining the platform, straight to the substance.",
+    "assistantStage_ready": "Right now it treats you as someone close to applying for work: specifics about matching and what still costs you points.",
+    "assistantDetail": "Answer length",
+    "assistantDetail_BRIEF": "Short",
+    "assistantDetail_NORMAL": "Normal",
+    "assistantDetail_DETAILED": "Detailed",
+    "assistantTone": "Tone",
+    "assistantTone_WARM": "Encouraging",
+    "assistantTone_NEUTRAL": "Neutral",
+    "assistantTone_DIRECT": "Direct",
+    "assistantTerms": "Platform terms",
+    "assistantTerms_true": "Explain them",
+    "assistantTerms_false": "Do not explain"
   },
   "notifications": {
     "title": "Notifications",
@@ -981,16 +1037,6 @@
         "body": "\"{{vacancy}}\" — {{scheduled_at}}."
       }
     },
-    "mentor": {
-      "request": {
-        "title": "Session requested",
-        "body": "Topic: {{topic}}."
-      },
-      "response": {
-        "title": "Mentor responded",
-        "body": "\"{{topic}}\"."
-      }
-    },
     "moderation": {
       "course": {
         "title": "Course moderation result",
@@ -1013,6 +1059,16 @@
       "declined": {
         "title": "Candidate declined",
         "body": "The invitation for {{vacancy}} was declined."
+      }
+    },
+    "review": {
+      "request": {
+        "title": "We would like your opinion",
+        "body": "Two minutes: what works on the platform and what does not."
+      },
+      "answered": {
+        "title": "Your review got a reply",
+        "body": "{{response}}"
       }
     }
   },
@@ -1049,7 +1105,6 @@
   "role": {
     "STUDENT": "Learner",
     "EMPLOYER": "Employer",
-    "MENTOR": "Mentor",
     "ADMIN": "Administrator"
   },
   "capital": {
@@ -1062,7 +1117,7 @@
     "notTracked": "not tracked yet",
     "unlockTitle": "How to unlock",
     "unlockHint": "An empty axis is not a low score — it is missing evidence. One step opens it.",
-    "explainer": "Each axis is computed from your evidence: verified skills, completed courses, experience, mentor sessions. With no evidence an axis is empty, not zero.",
+    "explainer": "Each axis is computed from your evidence: verified skills, completed courses, experience, projects. With no evidence an axis is empty, not zero.",
     "axis": {
       "KNOWLEDGE": "Knowledge",
       "PROFESSIONAL": "Professional",
@@ -1079,7 +1134,6 @@
       "passed_tests": "pass a test",
       "work_experience_months": "add work experience",
       "verified_skills": "verify a skill",
-      "mentor_sessions": "hold a mentor session",
       "recommendations": "get a recommendation",
       "projects": "add a project",
       "competitions": "enter a competition",
@@ -1227,7 +1281,7 @@
         "Courses, tests and verified results",
         "CV and portfolio built for you",
         "Matching vacancies and applications",
-        "Mentor sessions"
+        "A plan that updates as you go"
       ],
       "cards": [
         {
@@ -1251,8 +1305,8 @@
           "detail": "Every match comes with the reason: what fits and what is missing."
         },
         {
-          "title": "Mentor sessions",
-          "detail": "A mentor reviews your plan, and their rating counts as evidence for a skill."
+          "title": "AI assistant",
+          "detail": "Answers from your own data, pitched at where you actually are — not a generic reply."
         }
       ]
     },
@@ -1321,7 +1375,6 @@
         "self": "Self-declared",
         "course": "Course completed",
         "experience": "Work experience",
-        "mentor": "Mentor confirmed",
         "test": "Test passed",
         "employer": "Employer confirmed"
       }
@@ -1381,7 +1434,7 @@
         },
         {
           "q": "How is a skill verified?",
-          "a": "By a test, a course, work experience, a mentor or an employer. Each source carries a different weight."
+          "a": "By a test, a course, work experience or an employer. Each source carries a different weight."
         }
       ]
     },
@@ -1437,10 +1490,10 @@
       },
       "1": {
         "title": "Verified skills and knowledge",
-        "body": "Evidence from a test, a mentor or an employer outweighs anything you say about yourself.",
+        "body": "Evidence from a test or an employer outweighs anything you say about yourself.",
         "points": [
           "A passed test raises the skill level",
-          "A mentor's confirmation carries its own weight",
+          "An employer's verification carries the most weight",
           "Employers see evidence, not a claim"
         ]
       },
@@ -1542,7 +1595,8 @@
     "switchToLight": "Switch to light theme",
     "followingSystem": "Following your system setting",
     "light": "Light",
-    "dark": "Dark"
+    "dark": "Dark",
+    "title": "Theme"
   },
   "chat": {
     "title": "AI assistant",
@@ -1628,7 +1682,6 @@
     "SELF": "Self-declared",
     "COURSE": "Course",
     "EXPERIENCE": "Work experience",
-    "MENTOR": "Mentor confirmed",
     "TEST": "Test",
     "EMPLOYER": "Employer confirmed"
   },
@@ -1719,14 +1772,15 @@
       "map": "Skills map"
     },
     "mapTitle": "Skills map",
-    "mapHint": "Close to its group means the level is met. The rim means not started.",
+    "mapHint": "The arc around a skill shows how much of the required level is reached.",
     "readiness": "Readiness",
     "nodeDetail": "{{skill}} · {{category}} — now {{current}}, needs {{required}}",
     "legend": {
       "met": "Level met",
       "partial": "In progress",
       "missing": "Not started",
-      "verified": "Verified"
+      "verified": "Verified",
+      "level": "Arc — level reached"
     },
     "tapNode": "Tap a node for the detail",
     "level": "Level",
@@ -1736,7 +1790,9 @@
       "done": "Done",
       "current": "You are here",
       "todo": "Ahead"
-    }
+    },
+    "requiredCaption": "required",
+    "mapLabel": "Skills map for {{profession}}: {{met}} of {{total}} required skills reached"
   },
   "invites": {
     "title": "Interview invitations",
@@ -1750,24 +1806,207 @@
     "declineReason": "Reason",
     "acceptMeaning": "Accepting applies you to the vacancy — the company will then see your name and the contact details on your profile."
   },
-  "mentor": {
-    "learners": "Learners",
-    "learnersSubtitle": "The people you hold sessions with.",
-    "noLearners": "No learners yet",
-    "noLearnersHint": "Somebody appears here once they book a session with you.",
-    "noUpcoming": "Nothing scheduled",
-    "sessionsHeld": "Held",
-    "skillsVerified": "Skills verified",
-    "noPlanYet": "No development plan yet.",
-    "planWaiting": "Waiting for review",
-    "planReviewed": "You reviewed it",
-    "planApproved": "Approved",
-    "reviewPlan": "Review the plan",
-    "reviewPlanHint": "Approving a plan puts your name on it — the platform treats it as endorsed by a qualified person.",
-    "reviewDecision": "Decision",
-    "reviewApprove": "Approve",
-    "reviewChanges": "Changes needed",
-    "reviewComment": "Comment",
-    "reviewCommentRequired": "Say what should change"
+  "cvRating": {
+    "title": "CV rating",
+    "none": "No CV",
+    "howToRaise": "How to raise it",
+    "candidateTitle": "CV and its rating",
+    "showDocument": "Open the CV",
+    "hideDocument": "Collapse",
+    "band": {
+      "EXCELLENT": "Excellent",
+      "STRONG": "Strong",
+      "FAIR": "Fair",
+      "WEAK": "Weak",
+      "EMPTY": "Empty"
+    },
+    "component": {
+      "completeness": "Completeness",
+      "skills": "Skills",
+      "proof": "Proof",
+      "experience": "Experience",
+      "portfolio": "Portfolio",
+      "targeting": "Targeting"
+    },
+    "fact": {
+      "summary_length": "Summary: {{chars}} characters",
+      "skill_count": "{{count}} skills",
+      "strong_skills": "{{count}} above 50",
+      "verified_skills": "{{count}} verified",
+      "proven_share": "{{percent}}% of {{total}} backed by evidence",
+      "certificates": "{{count}} certificates",
+      "experience_entries": "{{count}} experience entries",
+      "experience_months": "{{months}} months in total",
+      "portfolio_items": "{{count}} portfolio items",
+      "target": "{{profession}} — {{readiness}}% ready"
+    },
+    "tip": {
+      "add_headline": "Add a headline — one line saying who you are",
+      "add_summary": "Write the summary: it is the first thing anyone reads",
+      "expand_summary": "Expand the summary — it is too short right now",
+      "add_education": "Add your education",
+      "add_avatar": "Upload a photo",
+      "add_languages": "List the languages you speak",
+      "add_location": "Add your region or city",
+      "add_skills": "Add skills: {{have}} now, aim for at least {{want}}",
+      "raise_proficiency": "No skill is above 50 — take a test and raise one",
+      "verify_skills": "Nothing is verified. A test is worth the most points here",
+      "verify_more_skills": "Only {{proven}} of {{total}} are backed by proof",
+      "earn_certificate": "Finish a course and earn a certificate",
+      "add_experience": "Add experience: an internship, a project or volunteering all count",
+      "tag_experience_skills": "{{count}} experience entries have no skills tagged — matching cannot see them",
+      "add_portfolio": "Add a piece of work to your portfolio",
+      "describe_portfolio": "Give your portfolio items a description and a link",
+      "set_target_profession": "Pick a target profession so the CV aims at something",
+      "close_target_gap": "{{readiness}}% ready for {{profession}} — close the missing skills",
+      "aim_cv_at_target": "Point this CV at your target profession"
+    }
+  },
+  "capability": {
+    "title": "Soft skills",
+    "subtitle": "From the situational assessment: what you would do in work situations",
+    "softHint": "{{count}} competencies",
+    "competencies": "Competencies",
+    "selfReported": "Self-reported (situational test)",
+    "whatNext": "What to do next",
+    "noProfile": "No soft-skill profile yet",
+    "noProfileHint": "Take the situational assessment — 25 minutes, and there are no right answers.",
+    "note": {
+      "take_soft_test": "A profile needs at least {{need}} competencies; there are {{have}}",
+      "soft_strength": "Strength: {{skill}} ({{score}})",
+      "soft_gap": "Room to grow: {{skill}} ({{score}})",
+      "soft_all_self_reported": "Every competency here is self-reported. A test result would carry more weight"
+    },
+    "action": {
+      "take_soft_skill_test": "Take the soft-skills assessment",
+      "develop_competency": "{{skill}}: raise from {{from}} to {{to}}"
+    },
+    "average": "Average score"
+  },
+  "review": {
+    "title": "Your view of the platform",
+    "subtitle": "What works and what does not — both halves matter.",
+    "ratingLabel": "Overall rating",
+    "stars": "{{count}} stars",
+    "rating": {
+      "1": "Very poor",
+      "2": "Poor",
+      "3": "Okay",
+      "4": "Good",
+      "5": "Excellent"
+    },
+    "npsLabel": "Would you recommend it to a friend?",
+    "npsHint": "0 — never, 10 — definitely",
+    "pros": "What works well",
+    "prosHint": "Give a concrete example",
+    "cons": "What works badly",
+    "consHint": "This is the most useful part — be direct",
+    "suggestion": "What is missing",
+    "anonymous": "Send anonymously",
+    "anonymousHint": "Your name stays hidden; your role is still shown.",
+    "send": "Send",
+    "notNow": "Not now",
+    "thanksTitle": "Thank you",
+    "thanksBody": "Someone reads every review, and may reply to yours.",
+    "mine": "My reviews",
+    "teamReplied": "The team replied",
+    "trigger": {
+      "CAMPAIGN": "We are asking what you think of the platform.",
+      "COURSE_COMPLETED": "You finished a course — how was it?",
+      "PLACEMENT": "You started a job — did the platform help?",
+      "HIRED_CANDIDATE": "You hired a candidate — how did the process go?",
+      "MANUAL": "You can write a review whenever you like."
+    }
+  },
+  "adminReviews": {
+    "title": "Platform reviews",
+    "subtitle": "What participants think, and when we ask them",
+    "pending": "Awaiting moderation",
+    "pendingHint": "Need a decision",
+    "namedProblems": "Problems named",
+    "namedProblemsHint": "Reviews that describe a weakness",
+    "average": "Average rating",
+    "averageHint": "{{count}} reviews",
+    "nps": "NPS",
+    "npsHint": "{{promoters}} promoters / {{detractors}} detractors",
+    "distribution": "Distribution",
+    "reviews": "Reviews",
+    "campaigns": "Campaigns",
+    "empty": "No reviews yet",
+    "anonymous": "Anonymous",
+    "publish": "Publish",
+    "reject": "Reject",
+    "reply": "Reply",
+    "ourReply": "Our reply",
+    "replyTitle": "Reply to the author",
+    "replyHint": "Say what you did — that is what makes people answer next time.",
+    "newCampaign": "New campaign",
+    "noCampaigns": "No campaigns",
+    "noCampaignsHint": "Create a campaign and invite the roles you want to hear from.",
+    "everyone": "Everyone",
+    "minAge": "registered more than {{days}} days ago",
+    "launch": "Launch",
+    "inviteMore": "Invite new people",
+    "responded": "{{responded}} of {{invited}} answered",
+    "status": {
+      "DRAFT": "Draft",
+      "RUNNING": "Running",
+      "FINISHED": "Finished"
+    },
+    "campaignTitle": "Campaign name",
+    "campaignMessage": "Message",
+    "campaignMessageHint": "Explain why you are asking right now.",
+    "audience": "Who to ask",
+    "audienceHint": "Nothing selected means everyone except administrators.",
+    "minAgeLabel": "Account age, days",
+    "minAgeHint": "Someone who signed up yesterday has no opinion yet."
+  },
+  "profile": {
+    "title": "My profile",
+    "subtitle": "Personal details, plan, profession and progress",
+    "loadFailed": "The profile didn't load. Refresh the page.",
+    "personal": "Personal details",
+    "personalHint": "How employers see you and how you appear on documents.",
+    "lastName": "Last name",
+    "firstName": "First name",
+    "middleName": "Patronymic",
+    "optional": "Optional",
+    "phone": "Phone",
+    "phoneHint": "International format, e.g. +998901234567",
+    "phoneInvalid": "Use international format: 9 to 15 digits, optionally starting with +.",
+    "verified": "Verified",
+    "notVerified": "Not verified",
+    "emailHint": "This is the address you sign in with.",
+    "save": "Save",
+    "saved": "Saved",
+    "subscription": "Plan",
+    "planPremium": "Premium",
+    "planFree": "Free",
+    "renews": "Renews {{date}}",
+    "upgrade": "Upgrade to premium",
+    "managePlan": "Manage plan",
+    "subscriptionUnavailable": "The plan didn't load.",
+    "profession": "Target profession",
+    "professionHint": "Your plan, recommendations and vacancy matches are built from it.",
+    "changeProfession": "Change profession",
+    "openCareer": "Open career",
+    "progress": "Progress",
+    "progressHint": "The same figures as your dashboard.",
+    "profileCompletion": "Profile completion",
+    "skillsVerified": "Verified skills",
+    "ofTotal": "{{done}} of {{total}}",
+    "planProgress": "Development plan",
+    "createPlan": "Make a plan",
+    "capital": "Capital index",
+    "axes": "From {{measured}} of {{total}} axes",
+    "knowledge": "Knowledge level",
+    "coursesCompleted": "Courses completed",
+    "testsPassed": "Tests passed",
+    "record": "My record",
+    "recordHint": "Everything your profile is built from.",
+    "recordSkills": "What you can do and what proves it",
+    "recordKnowledge": "Results by topic and category",
+    "recordExperience": "Work, projects and volunteering",
+    "recordCv": "CV and portfolio"
   }
 }

@@ -11,7 +11,6 @@ const NAV: NavItem[] = [
   { to: "/student/tests", labelKey: "nav.tests", icon: icons.tests },
   { to: "/student/jobs", labelKey: "nav.jobs", icon: icons.jobs },
   { to: "/student/applications", labelKey: "nav.applications", icon: icons.applications },
-  { to: "/student/mentors", labelKey: "nav.mentors", icon: icons.mentors },
   { to: "/student/assistant", labelKey: "nav.assistant", icon: icons.assistant },
 ];
 

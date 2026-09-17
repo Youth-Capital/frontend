@@ -32,7 +32,7 @@ export function LessonVideo({ video }: { video: Video }) {
         href={video.url}
         target="_blank"
         rel="noreferrer noopener"
-        className="deep mx-auto mb-4 flex aspect-video w-full max-w-[106vh] flex-col items-center justify-center gap-3 rounded-(--radius-card)"
+        className="deep mx-auto mb-4 flex aspect-video w-full max-w-[106svh] flex-col items-center justify-center gap-3 rounded-(--radius-card)"
       >
         <PlayBadge />
         <span className="text-sm" style={{ color: "var(--band-muted)" }}>
@@ -53,7 +53,7 @@ export function LessonVideo({ video }: { video: Video }) {
         // size pushes the lesson itself off the screen — but capping the
         // height would leave the width alone and break the ratio, so the
         // limit goes on the width: 60vh of height is 106vh of width.
-        className="deep group mx-auto mb-4 flex aspect-video w-full max-w-[106vh] flex-col items-center justify-center gap-3 rounded-(--radius-card)"
+        className="deep group mx-auto mb-4 flex aspect-video w-full max-w-[106svh] flex-col items-center justify-center gap-3 rounded-(--radius-card)"
       >
         <PlayBadge />
         <span className="text-sm" style={{ color: "var(--band-muted)" }}>
@@ -64,7 +64,7 @@ export function LessonVideo({ video }: { video: Video }) {
   }
 
   return (
-    <div className="mx-auto mb-4 aspect-video w-full max-w-[106vh] overflow-hidden rounded-(--radius-card) bg-ink-900">
+    <div className="mx-auto mb-4 aspect-video w-full max-w-[106svh] overflow-hidden rounded-(--radius-card) bg-ink-900">
       <iframe
         src={`${video.embed_url}${video.embed_url.includes("?") ? "&" : "?"}autoplay=1`}
         title={t("courses.videoTitle")}

@@ -67,7 +67,6 @@ export default function DashboardPage() {
         />
         <StatCard label={t("admin.students")} value={overview.students ?? 0} />
         <StatCard label={t("admin.employers")} value={overview.employers ?? 0} />
-        <StatCard label={t("admin.mentors")} value={overview.mentors ?? 0} />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

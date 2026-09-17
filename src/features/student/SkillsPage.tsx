@@ -27,12 +27,16 @@ import {
 import { useAuth } from "@/shared/auth/AuthContext";
 import type { Paginated, Skill, SkillGapEntry, UserSkill } from "@/shared/types/api";
 
+import { CapabilityPanel } from "@/shared/ui/CapabilityPanel";
 import { SkillsMap, type MapSkill } from "./journey/SkillsMap";
 
 /** Only the parts of the career-path payload the map needs. */
 interface CareerPath {
   profession: string;
   readiness: number;
+  /** Readiness counts only these — the map says so rather than showing a bare percentage. */
+  required_met: number;
+  required_total: number;
   matching_skills: SkillGapEntry[];
   partial_skills: SkillGapEntry[];
   missing_skills: SkillGapEntry[];
@@ -155,10 +159,16 @@ export default function SkillsPage() {
       {path.data && (
         <SkillsMap
           profession={path.data.profession}
-          readiness={path.data.readiness}
+          requiredMet={path.data.required_met}
+          requiredTotal={path.data.required_total}
           skills={toMapSkills(path.data)}
         />
       )}
+
+      {/* Behavioural competencies belong on the skills page, not on a page
+          of their own: they are skills, and splitting them out is how a
+          profile ends up with two disagreeing pictures of one person. */}
+      <CapabilityPanel />
 
       <Tabs<Filter>
         active={filter}

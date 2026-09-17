@@ -7,7 +7,6 @@ import { useAuth } from "@/shared/auth/AuthContext";
 const ROLE_PATH: Record<string, string> = {
   STUDENT: "/student/notifications",
   EMPLOYER: "/employer/notifications",
-  MENTOR: "/mentor/notifications",
   ADMIN: "/admin/dashboard",
 };
 
@@ -33,7 +32,7 @@ export function NotificationBell() {
     <button
       type="button"
       onClick={() => navigate(ROLE_PATH[user?.role ?? "STUDENT"])}
-      className="relative rounded-md p-2 text-ink-600 hover:bg-ink-100"
+      className="relative flex h-10 w-10 items-center justify-center rounded-md text-ink-600 hover:bg-ink-100 coarse:h-11 coarse:w-11"
       aria-label={`Notifications${count ? `: ${count} unread` : ""}`}
     >
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>

@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PageHeader } from "@/shared/ui/PageHeader";
-import { Flow } from "@/shared/ui/geometry";
 import "@/shared/styles/deep.css";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
@@ -140,8 +139,6 @@ export default function CareerPage() {
 
       {careerPath.data && (
         <>
-          <RouteToProfession path={careerPath.data} />
-
           {/* The pipeline the prompt asks for: have -> missing -> learn -> apply */}
           <div className="grid gap-4 lg:grid-cols-3">
             <SkillColumn
@@ -175,7 +172,7 @@ export default function CareerPage() {
                         className="flex items-center justify-between gap-3 rounded-xl border border-ink-200 p-3 hover:border-brand-400"
                       >
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-medium text-ink-800">
+                          <p className="line-clamp-2 text-sm font-medium text-ink-800">
                             {course.title}
                           </p>
                           <p className="text-xs text-ink-500">
@@ -204,7 +201,7 @@ export default function CareerPage() {
                         className="flex items-center justify-between gap-3 rounded-xl border border-ink-200 p-3 hover:border-brand-400"
                       >
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-medium text-ink-800">
+                          <p className="line-clamp-2 text-sm font-medium text-ink-800">
                             {vacancy.title}
                           </p>
                           <p className="text-xs text-ink-500">{vacancy.company}</p>
@@ -276,71 +273,6 @@ export default function CareerPage() {
         )}
       </Card>
     </div>
-  );
-}
-
-/**
- * The route to the profession, drawn as one line.
- *
- * The stops are the skills the profession actually requires, in the order
- * someone reaches them: the ones already at level, then the ones part-way,
- * then the untouched. So the filled section of the path is exactly what has
- * been done — the picture cannot claim progress the data does not have.
- *
- * Seven stops fit before the labels start colliding. When a profession asks
- * for more, the overflow is stated rather than dropped: a path that quietly
- * ends early would read as a shorter journey than it is.
- */
-function RouteToProfession({ path }: { path: CareerPathResponse }) {
-  const { t } = useTranslation();
-
-  const met = path.matching_skills;
-  const ordered = [...met, ...path.partial_skills, ...path.missing_skills];
-  const LIMIT = 7;
-  const shown = ordered.slice(0, LIMIT);
-  const hidden = ordered.length - shown.length;
-
-  return (
-    <section className="deep rounded-(--radius-card) px-5 py-6 sm:px-8 sm:py-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div className="min-w-0">
-          <p
-            className="text-[11px] font-semibold uppercase tracking-[0.14em]"
-            style={{ color: "var(--band-dim)" }}
-          >
-            {t("career.routeTo")}
-          </p>
-          <h2 className="mt-1 font-display text-2xl font-semibold leading-tight">
-            {path.profession}
-          </h2>
-          <p className="mt-1 text-sm" style={{ color: "var(--band-muted)" }}>
-            {t("career.readinessHint", {
-              met: path.required_met,
-              total: path.required_total,
-            })}
-          </p>
-        </div>
-
-        <span className="shrink-0 text-4xl font-semibold tabular-nums leading-none">
-          {path.readiness}%
-        </span>
-      </div>
-
-      {shown.length > 0 && (
-        <div className="mt-6">
-          <Flow
-            className="w-full"
-            reached={met.length}
-            stops={shown.map((entry) => entry.skill)}
-          />
-          {hidden > 0 && (
-            <p className="text-center text-[11px]" style={{ color: "var(--band-dim)" }}>
-              {t("career.andMoreSkills", { count: hidden })}
-            </p>
-          )}
-        </div>
-      )}
-    </section>
   );
 }
 

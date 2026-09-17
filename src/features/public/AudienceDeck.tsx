@@ -55,7 +55,7 @@ export function AudienceDeck({ cards }: { cards: DeckCard[] }) {
          */
         const faceBase = "yc-deck-face min-h-68 border transition-colors";
         const faceTone = isLead
-          ? "border-transparent bg-brand-600 text-on-colour"
+          ? "border-transparent bg-brand-fill text-on-brand"
           : "border-ink-200 bg-surface";
 
         return (

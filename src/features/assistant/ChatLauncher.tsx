@@ -80,8 +80,8 @@ export function ChatLauncher() {
           aria-label={t("chat.title")}
           className={
             wide
-              ? "fixed inset-x-3 bottom-20 top-16 z-40 flex flex-col rounded-(--radius-card) border border-ink-200 bg-surface shadow-2xl sm:inset-x-6 sm:left-auto sm:w-[min(56rem,calc(100vw-3rem))]"
-              : "fixed inset-x-3 bottom-20 z-40 flex max-h-[70vh] flex-col rounded-(--radius-card) border border-ink-200 bg-surface shadow-2xl sm:inset-x-auto sm:right-6 sm:w-[26rem]"
+              ? "fixed inset-x-3 bottom-[calc(5rem+env(safe-area-inset-bottom))] top-[calc(4rem+env(safe-area-inset-top))] z-40 flex flex-col rounded-(--radius-card) border border-ink-200 bg-surface shadow-2xl sm:inset-x-6 sm:left-auto sm:w-[min(56rem,calc(100%-3rem))]"
+              : "fixed inset-x-3 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-40 flex max-h-[70dvh] flex-col rounded-(--radius-card) border border-ink-200 bg-surface shadow-2xl sm:inset-x-auto sm:right-6 sm:w-[26rem]"
           }
         >
           <div className="flex items-center justify-between gap-2 border-b border-ink-200 px-4 py-3">
@@ -99,7 +99,7 @@ export function ChatLauncher() {
                 aria-pressed={wide}
                 title={t(wide ? "chat.narrow" : "chat.widen")}
                 aria-label={t(wide ? "chat.narrow" : "chat.widen")}
-                className="rounded-md p-1.5 text-ink-400 hover:bg-ink-100 hover:text-ink-800"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-ink-400 hover:bg-ink-100 hover:text-ink-800 coarse:h-11 coarse:w-11"
               >
                 {wide ? <CollapseIcon /> : <ExpandIcon />}
               </button>
@@ -107,7 +107,7 @@ export function ChatLauncher() {
                 type="button"
                 onClick={close}
                 aria-label={t("common.close")}
-                className="rounded-md p-1.5 text-ink-400 hover:bg-ink-100 hover:text-ink-800"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-ink-400 hover:bg-ink-100 hover:text-ink-800 coarse:h-11 coarse:w-11"
               >
                 ✕
               </button>
@@ -128,7 +128,7 @@ export function ChatLauncher() {
         onClick={() => setOpen((current) => !current)}
         aria-expanded={open}
         aria-label={t("chat.title")}
-        className="fixed bottom-5 right-5 z-40 flex h-12 items-center gap-2 rounded-full bg-brand-600 px-4 text-sm font-semibold text-on-colour shadow-lg transition-transform hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 active:scale-95"
+        className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom))] right-[calc(1.25rem+env(safe-area-inset-right))] z-40 flex h-12 items-center gap-2 rounded-full bg-brand-fill px-4 text-sm font-semibold text-on-brand shadow-lg transition-transform hover:bg-brand-fill-hover focus-visible:outline-2 focus-visible:outline-offset-2 active:scale-95"
       >
         <SparkIcon />
         <span className="hidden sm:inline">{t("chat.ask")}</span>

@@ -191,7 +191,7 @@ export function RowMenu({ actions, label }: { actions: RowAction[]; label: strin
           setOpen((value) => !value);
         }}
         className={clsx(
-          "rounded-md p-1.5 text-ink-400 transition-colors hover:bg-ink-100 hover:text-ink-700",
+          "flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-ink-400 transition-colors hover:bg-ink-100 hover:text-ink-700 coarse:h-11 coarse:w-11",
           open && "bg-ink-100 text-ink-700",
         )}
       >
@@ -205,7 +205,7 @@ export function RowMenu({ actions, label }: { actions: RowAction[]; label: strin
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-full z-20 mt-1 min-w-44 overflow-hidden rounded-xl border border-ink-200 bg-surface py-1 shadow-lg"
+          className="glass-raised absolute right-0 top-full z-20 mt-1 min-w-44 overflow-hidden rounded-(--radius-control) py-1"
         >
           {actions.map((action) => (
             <button
@@ -247,7 +247,7 @@ export function RowMeter({
 }) {
   const clamped = Math.max(0, Math.min(100, value));
   const tones = {
-    brand: "bg-brand-600",
+    brand: "bg-brand-fill",
     success: "bg-success",
     warning: "bg-warning",
     danger: "bg-danger",

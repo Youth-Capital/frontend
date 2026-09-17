@@ -84,7 +84,7 @@ export default function NotificationsPage() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     {!notification.is_read && (
-                      <span className="h-2 w-2 shrink-0 rounded-full bg-brand-600" />
+                      <span className="h-2 w-2 shrink-0 rounded-full bg-brand-fill" />
                     )}
                     <span className="font-medium text-ink-900">
                       {t(notification.title_key, {

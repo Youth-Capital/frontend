@@ -1,66 +1,69 @@
 /**
- * The deep-violet surface: the dashboard band, the landing hero, the sign-in
- * panel.
+ * The deep surface: the dashboard band, the landing hero, the sign-in panel.
  *
- * The band keeps a fixed colour in both themes, the way a hero image does —
- * a dark block on a pale page is the whole idea, and one that followed the
- * theme would stop being a block at all. That means its text cannot come from
- * the ink ramp, which flips: a band that stayed dark would end up with dark
- * text on it in the dark theme.
+ * The band keeps a fixed colour in both themes, the way a hero image does — a
+ * dark block on a pale page is the whole idea, and one that followed the theme
+ * would stop being a block at all. That means its text cannot come from the
+ * ink ramp, which flips: a band that stayed dark would end up with dark text
+ * on it in the dark theme.
  *
- * The colour itself was measured into place. Two earlier bands were rejected
- * from opposite ends: #221340 at 16% lightness read as too dark, #6C4AB6 at
- * 50% as too bright across a full-bleed hero. This is brand-900 at 29% — a
- * step already in the ramp, sitting between the two.
+ * The colour is brand-900 from the new palette — #302357, the periwinkle hue
+ * walked down to 22% lightness. It is deliberately the one surface in the
+ * product that is NOT glass: everything else is translucent now, and a page of
+ * frosted panels needs one opaque anchor or it reads as fog. The hero is that
+ * anchor.
  *
- * The text is solved against the band's *lightest point*, not its base colour.
- * That distinction matters and was missed twice: the lit corners paint the
- * band up to #563B92, roughly 30% lighter than the base, and tones solved
- * against the base alone fell to 3.26:1 exactly where the light lands. Solved
- * against the worst case they hold everywhere on the surface — 4.5:1 over the
- * brightest corner, 6.2:1 over the base — and white sits at 8.6:1 at its
- * worst.
+ * THE TEXT IS SOLVED AGAINST THE BAND'S BRIGHTEST POINT, NOT ITS BASE COLOUR.
+ *
+ * That distinction matters and the previous palette got it wrong twice. The
+ * lit corners paint the band up to #533386 where the two upper gradients
+ * overlap — a good deal lighter than the base — and tones solved against the
+ * base alone drop below the line exactly where the light lands. Solved against
+ * the worst case they hold everywhere on the surface:
+ *
+ *   --band-ink    #FFFFFF   9.61:1 at the brightest point, 13.97:1 over base
+ *   --band-muted  #BAABEB   4.63:1 at the brightest point,  6.73:1 over base
+ *   --band-dim    #B5B2C0   4.62:1 at the brightest point,  6.71:1 over base
  *
  * Which also means: brighten a corner and these have to be solved again.
  *
- * On the old near-black band the two secondary tones could differ in
- * lightness. On the brand purple there is not that much room, so they are told
- * apart by saturation instead — one leans purple, one is nearly neutral — and
- * both clear 4.5:1. Reaching for a dimmer grey would have put stage labels
- * below the line for small text, which is where they were heading.
+ * There is not much lightness room on a violet this deep, so the two secondary
+ * tones are told apart by saturation instead — one leans periwinkle, one is
+ * nearly neutral — and both clear 4.5:1.
  */
 
 /*
  * Wrapped in the components layer on purpose.
  *
- * These are unlayered rules otherwise, and an unlayered rule beats a
- * Tailwind utility whatever the source order — so `position: relative`
- * here overruled `sticky` on the landing header and the bar scrolled
- * away with the page. Inside the layer, a utility wins again.
+ * These are unlayered rules otherwise, and an unlayered rule beats a Tailwind
+ * utility whatever the source order — so `position: relative` here overruled
+ * `sticky` on the landing header and the bar scrolled away with the page.
+ * Inside the layer, a utility wins again.
  */
 @layer components {
   .deep {
-    --band: #3f2b6a;
+    --band: #302357;
     --band-ink: #ffffff;
-    --band-muted: #c5b4e2;
-    --band-dim: #bfb9c8;
+    --band-muted: #baabeb;
+    --band-dim: #b5b2c0;
     /* Markers and buttons on the band, and the text that sits inside them. */
     --band-accent: #ffffff;
-    --band-on-accent: #3f2b6a;
+    --band-on-accent: #302357;
 
     /*
-     * The warm accent: the lamp in the journey, the stage you are standing on.
+     * The accent on the band: the lamp in the journey, the stage you are
+     * standing on.
      *
      * Two tokens, because one colour cannot do both jobs in both themes.
-     * `--band-warm` is the fill — a ring, a glow, a dot — and stays the same
-     * bright amber everywhere, since a fill answers to no contrast rule.
-     * `--band-warm-ink` is the amber that may carry text, and it is solved per
-     * theme: on this ground the bright amber measures 6.98:1 and is fine as it
-     * is; on the light band it measures 1.48:1, which is not a colour, it is a
-     * suggestion of one.
+     * `--band-warm` is the fill — a ring, a glow, a dot — and stays the pink
+     * lace everywhere, since a fill answers to no contrast rule.
+     * `--band-warm-ink` is the pink that may carry text, solved per theme: on
+     * this deep ground the pink lace already measures 7.46:1 at the brightest
+     * point and needs no adjustment; on the pale band it measures 1.28:1,
+     * which is not a colour, it is a suggestion of one.
      */
-    --band-warm: #ffb86b;
-    --band-warm-ink: #ffb86b;
+    --band-warm: #ffd6ff;
+    --band-warm-ink: #ffd6ff;
 
     /*
      * The ink ramp is rebound inside this surface.
@@ -82,27 +85,39 @@
     --color-ink-800: var(--band-ink);
     --color-ink-900: var(--band-ink);
 
+    /*
+     * Glass, rebound too.
+     *
+     * A frosted panel dropped on this band would mix white into it and come
+     * out a milky grey — the surface token is solved for a pale page. Inside
+     * the band the panel is the band's own light instead, so a card here
+     * still reads as glass without turning the block to fog.
+     */
+    --color-surface: #ffffff;
+    --glass-alpha: 12%;
+    --glass-edge-alpha: 26%;
+
     position: relative;
     isolation: isolate;
     overflow: hidden;
     color: var(--band-ink);
-    /* Light thrown from behind the block, not a gradient painted on it. */
-    /* Depth from our own ramp — brand-500 lit from one corner, brand-800
+    /* Light thrown from behind the block, not a gradient painted on it.
+       Depth from our own ramp — brand-800 lit from one corner, the mauve
        settling at the other — rather than a second hue laid over the brand. */
     background:
       radial-gradient(
         46% 120% at 14% 0%,
-        color-mix(in oklab, #5d3f9d 78%, transparent),
+        color-mix(in oklab, #4f3795 78%, transparent),
         transparent 70%
       ),
       radial-gradient(
         42% 110% at 88% 10%,
-        color-mix(in oklab, #7453bd 42%, transparent),
+        color-mix(in oklab, #623384 44%, transparent),
         transparent 68%
       ),
       radial-gradient(
         62% 95% at 50% 120%,
-        color-mix(in oklab, #2b1c4c 70%, transparent),
+        color-mix(in oklab, #241a44 70%, transparent),
         transparent 74%
       ),
       var(--band);
@@ -162,8 +177,8 @@
   /**
    * The map panel needs its own edge.
    *
-   * In the dark theme the card surface and the page are #3C3650 and #2A2634,
-   * and inside a card the map would sit on #3C3650 against #3B354E — 1.02:1.
+   * In the dark theme the card surface and the page are #29233B and #181327,
+   * and inside a card the map would sit on #29233B against #28223C — 1.01:1.
    * The panel simply vanished, and only its contents showed anything was there.
    */
   .skills-map {
@@ -179,36 +194,42 @@
 }
 
 /*
- * The light-theme experiment: the band inverted.
+ * The light-theme band: inverted.
  *
  * What is violet in the dark theme becomes pale here, and what is white
  * becomes violet.
  *
- * Solved against #EAE4F5 — the darkest point this band actually paints — not
- * against its nominal colour. Measured on the rendered page the first pair
- * came out at 4.20 and 4.30, because the gradients below darken parts of the
- * surface: the same mistake as on the dark band, in mirror image. Against the
- * worst point they hold 4.8:1, and better than 5:1 over the flat colour.
+ * Solved against #D6C8FF — the darkest point this band actually paints, where
+ * the periwinkle wash overlaps the mauve one — not against its nominal
+ * colour. Measured on the rendered page the previous pair came out at 4.20 and
+ * 4.30, because the gradients darken parts of the surface: the same mistake as
+ * on the dark band, in mirror image. Against the worst point these hold:
  *
- * The ink-ramp rebinding above is undone: it exists so shared controls
- * written for a pale page survive a dark block, and on a pale block they
- * already work as written.
+ *   --band-ink       #302259   9.05:1 worst, 12.23:1 over base
+ *   --band-muted     #5F44B0   4.61:1 worst,  6.24:1 over base
+ *   --band-dim       #5A546C   4.65:1 worst,  6.28:1 over base
+ *   --band-warm-ink  #883788   4.60:1 worst,  6.22:1 over base
+ *
+ * The ink-ramp rebinding above is undone: it exists so shared controls written
+ * for a pale page survive a dark block, and on a pale block they already work
+ * as written. The glass rebinding is undone for the same reason.
  *
  * Written against :not([data-theme="dark"]) rather than [data-theme="light"]
  * so it also covers the unstamped state, where nothing has chosen yet.
  */
 :root:not([data-theme="dark"]) .deep {
-  --band: #f2edfb;
-  --band-ink: #442b70;
-  --band-muted: #744fb4;
-  --band-dim: #6a5e7d;
-  --band-accent: #6c4ab6;
+  --band: #f2edff;
+  --band-ink: #302259;
+  --band-muted: #5f44b0;
+  --band-dim: #5a546c;
+  --band-accent: #5e3ec2;
   --band-on-accent: #ffffff;
 
-  /* Same amber for the fill; a solved one for text. #8c653b is the same hue
-     walked down until it clears 4.5:1 against this band, measured, not picked. */
-  --band-warm: #ffb86b;
-  --band-warm-ink: #8c653b;
+  /* Same pink lace for the fill; a solved one for text. #883788 is the same
+     hue walked down until it clears 4.5:1 against this band — measured, not
+     picked. The fill measures 1.28:1 and may never carry a letter. */
+  --band-warm: #ffd6ff;
+  --band-warm-ink: #883788;
 
   /* The light road is a solid surface, not a glow on black, so the scrim has
      to hold much further across before it lets the picture through. */
@@ -225,6 +246,9 @@
   --color-ink-700: initial;
   --color-ink-800: initial;
   --color-ink-900: initial;
+  --color-surface: initial;
+  --glass-alpha: initial;
+  --glass-edge-alpha: initial;
 
   background:
     radial-gradient(
@@ -234,12 +258,12 @@
     ),
     radial-gradient(
       42% 110% at 88% 10%,
-      color-mix(in oklab, #e3d8f7 60%, transparent),
+      color-mix(in oklab, #e4dbff 62%, transparent),
       transparent 68%
     ),
     radial-gradient(
       62% 95% at 50% 120%,
-      color-mix(in oklab, #ded2f4 55%, transparent),
+      color-mix(in oklab, #c8b6ff 58%, transparent),
       transparent 74%
     ),
     var(--band);

@@ -46,7 +46,7 @@ export function BestMatchCard({
   const missing = result?.missing_skills ?? [];
 
   return (
-    <aside className="rounded-(--radius-card) border border-ink-200 bg-surface p-5">
+    <aside className="card p-5">
       <p className="text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-500">
         {isBest ? t("jobs.bestMatch") : t("jobs.thisMatch")}
       </p>
@@ -100,7 +100,7 @@ export function BestMatchCard({
 
       <Link
         to={`/student/jobs/${vacancy.id}`}
-        className="mt-5 block rounded-(--radius-control) bg-brand-600 py-2.5 text-center text-sm font-semibold text-on-colour hover:bg-brand-700"
+        className="mt-5 block rounded-full bg-brand-fill py-2.5 text-center text-sm font-semibold text-on-brand transition-colors hover:bg-brand-fill-hover"
       >
         {t("jobs.openVacancy")}
       </Link>
@@ -156,7 +156,7 @@ function Ring({ value }: { value: number }) {
         fill="none"
         strokeWidth="11"
         strokeLinecap="round"
-        className="stroke-brand-600"
+        className="stroke-brand-edge"
         strokeDasharray={circumference}
         strokeDashoffset={circumference * (1 - Math.min(Math.max(value, 0), 100) / 100)}
         transform="rotate(-90 64 64)"

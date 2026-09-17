@@ -213,7 +213,7 @@ export default function EmployerCourseDetailPage() {
                     </button>
 
                     {isOpen && (
-                      <div className="mt-3 rounded-(--radius-card) border border-ink-200 bg-surface p-4">
+                      <div className="card mt-3 p-4">
                         {lesson.isLoading && <CardSkeleton rows={4} />}
                         {lesson.isError && (
                           <p className="text-sm text-danger">

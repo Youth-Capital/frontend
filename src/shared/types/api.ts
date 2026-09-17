@@ -17,7 +17,7 @@ export interface Paginated<T> {
   results: T[];
 }
 
-export type Role = "STUDENT" | "EMPLOYER" | "MENTOR" | "ADMIN";
+export type Role = "STUDENT" | "EMPLOYER" | "ADMIN";
 export type Language = "uz" | "ru" | "en";
 
 export type ModerationStatus =
@@ -53,19 +53,48 @@ export interface StudentProfileStub {
   target_profession_id: string | null;
 }
 
+/**
+ * The full student profile, as `/me/profile/` returns it.
+ *
+ * The stub above is what the shell needs to render a header; this is the
+ * record itself. `middle_name` is the отчество — optional, and kept apart from
+ * the first name so documents can set it in the order an official record uses.
+ */
+export interface StudentProfile {
+  id: string;
+  youth_id: string;
+  first_name: string;
+  last_name: string;
+  middle_name: string;
+  full_name: string;
+  birth_date: string | null;
+  age: number | null;
+  is_minor: boolean;
+  gender: string;
+  avatar: string | null;
+  bio: string;
+  region: string | null;
+  region_detail: { id: string; name: string } | null;
+  city: string;
+  education_status: string;
+  institution: string;
+  study_year: number | null;
+  target_profession: string | null;
+  target_profession_detail: { id: string; name: string } | null;
+  employment_status: string;
+  open_to_work: boolean;
+  languages: unknown[];
+  profile_completion: number;
+  onboarding_completed_at: string | null;
+  diagnostics_completed_at: string | null;
+  is_high_potential: boolean;
+}
+
 export interface EmployerProfileStub {
   id: string;
   name: string;
   slug: string;
   logo: string | null;
-  verification_status: string;
-}
-
-export interface MentorProfileStub {
-  id: string;
-  name: string;
-  headline: string;
-  avatar: string | null;
   verification_status: string;
 }
 
@@ -79,7 +108,7 @@ export interface User {
   phone_verified: boolean;
   display_name: string;
   date_joined: string;
-  profile: StudentProfileStub | EmployerProfileStub | MentorProfileStub | null;
+  profile: StudentProfileStub | EmployerProfileStub | null;
   requires_guardian_approval: boolean;
 }
 
@@ -362,18 +391,40 @@ export interface Lesson extends LessonStub {
   materials: CourseMaterial[];
 }
 
-/** Reading or a download attached to a course, and optionally to one lesson. */
+/**
+ * Something attached to a course, and optionally narrowed to one lesson.
+ *
+ * Five kinds, and the difference is not cosmetic — each is rendered
+ * differently and each carries a different promise:
+ *
+ *   FILE   bytes we host, offered as a download
+ *   IMAGE  bytes we host, shown inline; a diagram you must download to see
+ *          is a diagram most learners will not see
+ *   VIDEO  a link checked hard enough to go in an iframe
+ *   LINK   somewhere else to go
+ *   BOOK   a link with an honest label, for something we do not host
+ */
+export type MaterialKind = "FILE" | "IMAGE" | "VIDEO" | "LINK" | "BOOK";
+
+/** Kinds whose content is bytes we host, and so must carry a file. */
+export const HOSTED_MATERIAL_KINDS: MaterialKind[] = ["FILE", "IMAGE"];
+
 export interface CourseMaterial {
   id: string;
   course: string;
   lesson: string | null;
-  kind: "FILE" | "LINK" | "BOOK";
+  kind: MaterialKind;
   title: string;
   description: string;
-  /** Present only for uploaded files. */
+  /** Present only for uploaded files and images. */
   file_url: string | null;
   file_size: number | null;
   url: string;
+  /**
+   * Present only for VIDEO, and built by the server from an id it checked.
+   * The raw `url` is never put in an iframe src — that field is user input.
+   */
+  video: LessonVideo | null;
   order: number;
   created_at: string;
 }
@@ -448,16 +499,28 @@ export interface Test {
 export interface Question {
   id: string;
   text: string;
-  type: "SINGLE" | "MULTIPLE" | "TRUE_FALSE" | "SHORT_ANSWER";
+  type: "SINGLE" | "MULTIPLE" | "TRUE_FALSE" | "SHORT_ANSWER" | "SITUATIONAL";
   points: number;
   order: number;
+  /** Option weights are never sent to the taker — a reader of the weights
+   *  does not need to answer the question. */
   options: { id: string; text: string; order: number }[];
 }
+
+export type TestKind =
+  | "COURSE_TEST"
+  | "SKILL_TEST"
+  | "DIAGNOSTIC"
+  | "SCREENING"
+  | "SOFT_SKILL";
 
 export interface TestAttempt {
   id: string;
   test: string;
   test_title: string;
+  /** Drives how the result reads: a soft-skill assessment has no pass mark
+   *  and no wrong answers, so it must not render as an exam. */
+  test_type: TestKind;
   attempt_no: number;
   started_at: string;
   expires_at: string | null;
@@ -551,6 +614,10 @@ export interface Vacancy {
     coverage: number;
     knowledge: number;
     missing_skills: string[];
+    /** Why it is in front of them — a different question from how well they fit. */
+    relevance: number;
+    relevance_known: boolean;
+    relevance_reason: string;
   } | null;
   my_application: { id: string; status: ApplicationStatus } | null;
   is_saved: boolean;
@@ -592,6 +659,17 @@ export interface MatchResult {
   matched_skills: MatchSkill[];
   missing_skills: MatchSkill[];
   explanation: MatchReason[];
+  /**
+   * How close this vacancy is to what the learner said they want — a separate
+   * number from the score on purpose. The score answers "can I do this job",
+   * this answers "is it the kind of job I asked for", and averaging the two
+   * would make a job you are perfect for but do not want look identical to
+   * one you want but cannot do.
+   */
+  relevance_score: number;
+  /** False when the learner has declared no interests: nothing was filtered. */
+  relevance_known: boolean;
+  relevance_reasons: MatchReason[];
   computed_at: string;
   is_stale: boolean;
 }
@@ -651,6 +729,9 @@ export interface Candidate {
   name: string | null;
   identified: boolean;
   has_applied: boolean;
+  has_cv: boolean;
+  /** CV quality rating, or null when this candidate has no CV. */
+  cv_rating: number | null;
   match: {
     overall: number;
     coverage: number;
@@ -749,6 +830,66 @@ export interface CandidateDetail {
     issued_at: string;
     serial: string | null;
   }[];
+  /**
+   * The candidate's CV: what the platform rates it at, and the document.
+   *
+   * `document` follows the same identity rule as the rest of the card — an
+   * anonymous candidate's résumé arrives with the capability intact and the
+   * name, photo, contacts, school and employers stripped out.
+   */
+  cv: {
+    id: string;
+    title: string;
+    language: Language;
+    updated_at: string;
+    rating: { overall: number; band: string; components: CvRatingComponentDto[] };
+    document: CvDocumentPayload;
+  } | null;
+}
+
+export interface CvRatingComponentDto {
+  key: string;
+  score: number;
+  max: number;
+  facts: { code: string; data?: Record<string, unknown> }[];
+  tips: { code: string; severity: string; data?: Record<string, unknown> }[];
+}
+
+/** The assembled résumé, as `/cv/documents/{id}/preview/` and the candidate
+ *  card both return it. */
+export interface CvDocumentPayload {
+  meta: { title: string; sections: string[]; identified?: boolean };
+  personal: Record<string, string | null>;
+  contacts?: { email: string; phone: string | null };
+  summary?: string;
+  education?: {
+    institution: string;
+    degree: string;
+    field_of_study: string;
+    start_date: string | null;
+    end_date: string | null;
+    is_current: boolean;
+  }[];
+  skills?: {
+    name: string;
+    category: string;
+    proficiency: number;
+    verified: boolean;
+    band: string;
+  }[];
+  experience?: {
+    type: string;
+    title: string;
+    organization: string;
+    description: string;
+    duration_months: number;
+    is_current: boolean;
+    skills: string[];
+  }[];
+  projects?: { title: string; description: string; type: string; url: string; skills: string[] }[];
+  courses?: { title: string; provider: string; completed_at: string | null; level: string }[];
+  certificates?: { title: string; serial: string; issued_at: string }[];
+  languages?: { code: string; level: string }[];
 }
 
 export interface Recommendation {
@@ -883,44 +1024,6 @@ export interface RiskRow {
   risk_score: number;
 }
 
-export interface Mentor {
-  id: string;
-  full_name: string;
-  headline: string;
-  bio: string;
-  avatar: string | null;
-  years_experience: number;
-  is_free: boolean;
-  hourly_rate: number | null;
-  currency: string;
-  languages: { code: string }[];
-  rating_avg: number;
-  rating_count: number;
-  sessions_count: number;
-  accepting_students: boolean;
-  expertise_names: string[];
-  verification_status: string;
-}
-
-export interface MentorSession {
-  id: string;
-  mentor: string;
-  mentor_name: string;
-  student: string;
-  student_name: string;
-  topic: string;
-  agenda: string;
-  scheduled_at: string | null;
-  duration_minutes: number;
-  mode: string;
-  meeting_link: string;
-  location: string;
-  status: string;
-  notes: string;
-  declined_reason: string;
-  created_at: string;
-}
-
 export interface CVDocument {
   id: string;
   title: string;
@@ -932,6 +1035,9 @@ export interface CVDocument {
   enabled_sections: string[];
   target_profession: string | null;
   is_primary: boolean;
+  /** Cached CV quality rating (0-100). The employer sees the same number. */
+  quality_score: number;
+  quality_computed_at: string | null;
   updated_at: string;
 }
 

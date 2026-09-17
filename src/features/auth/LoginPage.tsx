@@ -73,7 +73,7 @@ export default function LoginPage() {
       <div className="mt-6 flex items-center justify-between text-sm">
         <Link
           to="/auth/reset-password"
-          className="text-brand-600 hover:text-brand-700"
+          className="-my-3 inline-block py-3 text-brand-600 hover:text-brand-700"
         >
           {t("auth.forgotPassword")}
         </Link>

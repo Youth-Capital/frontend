@@ -36,12 +36,13 @@ export function AuthLayout() {
       */}
       <AuthPanel registering={registering} />
 
-      <main
-        className="flex min-h-dvh flex-col"
-        style={{
-          background: "color-mix(in oklab, var(--color-accent) 9%, var(--color-surface))",
-        }}
-      >
+      {/*
+        Transparent on purpose. This half used to carry its own faint accent
+        wash, which on the new page paints straight over the aurora — the form
+        side would have been the one screen in the product with no light behind
+        it. The wash it was there to provide is what the aurora already does.
+      */}
+      <main className="flex min-h-dvh flex-col">
         <div className="flex justify-end gap-2 p-4">
           <ThemeSwitcher />
           <LanguageSwitcher />

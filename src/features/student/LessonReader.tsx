@@ -7,6 +7,7 @@ import type { Course, Lesson } from "@/shared/types/api";
 
 import { NoteIcon } from "./notes/NotesEmpty";
 import { useSaveNote } from "./notes/useNotes";
+import { LessonTutor } from "./LessonTutor";
 
 import "@/shared/styles/deep.css";
 import { LessonCheck } from "./LessonCheck";
@@ -118,7 +119,7 @@ export function LessonReader({
                 rectangle pretending something is there. */}
             {lesson.video && <LessonVideo video={lesson.video} />}
 
-            <div className="rounded-(--radius-card) border border-ink-200 bg-surface p-5">
+            <div className="glass-raised rounded-(--radius-card) p-5">
               <h2 className="text-sm font-semibold text-ink-800">
                 {t("courses.lessonContent")}
               </h2>
@@ -177,6 +178,10 @@ export function LessonReader({
           lessonId={currentLessonId}
           onOpenAll={onOpenNotes}
         />
+
+        {/* Under the notes, because writing something down and asking
+            about something are the same pause in the same lesson. */}
+        <LessonTutor lessonId={currentLessonId} />
       </div>
     </div>
   );
@@ -289,7 +294,7 @@ function LessonNotes({
         rows={5}
         placeholder={t("notes.contentPlaceholder")}
         aria-label={t("courses.lessonNotes")}
-        className="mt-3 w-full rounded-(--radius-control) border border-ink-300 bg-surface px-3 py-2 text-xs text-ink-800 placeholder:text-ink-400 focus:border-brand-500"
+        className="mt-3 w-full rounded-(--radius-control) border border-ink-300 bg-surface/82 backdrop-blur-sm px-3 py-2 text-xs text-ink-800 placeholder:text-ink-400 focus:border-brand-500 focus:bg-surface"
       />
 
       {error && (

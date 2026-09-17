@@ -30,15 +30,23 @@ export function FocusLayout() {
   const { user } = useAuth();
   const home = user ? HOME_BY_ROLE[user.role] : "/";
 
+  /*
+   * The page declares `viewport-fit=cover`, so the document starts at the
+   * physical top of the screen. This bar is full-bleed and sticks to `top-0`,
+   * which means the inset belongs on the bar itself rather than on the
+   * wrapper: padded here, the glass runs up under the status bar and the row
+   * of controls sits below it. The wrapper carries the side insets for
+   * landscape, where the notch eats one edge.
+   */
   return (
-    <div className="min-h-dvh bg-ink-50">
+    <div className="min-h-dvh pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
       <SkipLink />
 
-      <header className="sticky top-0 z-30 border-b border-ink-200 bg-surface">
-        <div className="flex h-14 items-center gap-3 px-4 sm:px-6">
+      <header className="glass-bar sticky top-0 z-30 border-x-0 border-t-0 pt-[env(safe-area-inset-top)]">
+        <div className="flex h-14 items-center gap-2 px-3 sm:gap-3 sm:px-6">
           <Link
             to={home}
-            className="flex min-w-0 items-center gap-2.5 rounded-xl py-1 pr-2 transition-colors hover:bg-ink-100"
+            className="flex min-h-11 min-w-0 items-center gap-2.5 rounded-xl py-1 pr-2 transition-colors hover:bg-ink-100"
           >
             <Logo size={32} />
             <p className="truncate text-sm font-semibold leading-tight text-ink-900">
@@ -46,18 +54,22 @@ export function FocusLayout() {
             </p>
           </Link>
 
-          <div className="ml-auto flex items-center gap-2">
-            <ThemeSwitcher />
-            <LanguageSwitcher />
+          {/* Same trade as the app shell: on a phone the preferences move into
+              the profile menu so the wordmark and the bell keep their room. */}
+          <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+            <div className="hidden items-center gap-2 sm:flex">
+              <ThemeSwitcher />
+              <LanguageSwitcher />
+            </div>
             <NotificationBell />
-            <div className="border-l border-ink-200 pl-2">
+            <div className="border-l border-ink-200 pl-1.5 sm:pl-2">
               <ProfileMenu />
             </div>
           </div>
         </div>
       </header>
 
-      <main id="main" className="px-4 py-6 sm:px-6 lg:px-8">
+      <main id="main" className="px-4 pt-6 pb-[calc(6rem+env(safe-area-inset-bottom))] sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           <Outlet />
         </div>

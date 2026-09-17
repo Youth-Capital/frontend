@@ -119,7 +119,7 @@ export default function OnboardingPage() {
       : true;
 
   return (
-    <div className="min-h-screen bg-ink-50 px-4 py-10">
+    <div className="min-h-dvh px-4 py-10">
       <div className="mx-auto max-w-2xl">
         <h1 className="text-2xl font-semibold text-ink-900">
           {t("onboarding.title")}
@@ -250,7 +250,7 @@ export default function OnboardingPage() {
                   autoComplete="off"
                 />
                 {skillQuery.trim().length >= 2 && (
-                  <div className="absolute z-10 mt-1 max-h-56 w-full overflow-y-auto rounded-xl border border-ink-200 bg-surface shadow-lg">
+                  <div className="glass-raised absolute z-10 mt-1 max-h-56 w-full overflow-y-auto rounded-(--radius-control)">
                     {skillSearch.isLoading && (
                       <div className="flex justify-center p-3 text-ink-400">
                         <Spinner size={16} />

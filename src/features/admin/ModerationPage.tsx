@@ -28,13 +28,6 @@ interface VerificationQueue {
     industry: string;
     email: string;
   }[];
-  mentors: {
-    id: string;
-    name: string;
-    headline: string;
-    email: string;
-    years_experience: number;
-  }[];
 }
 
 export default function ModerationPage() {
@@ -121,7 +114,7 @@ export default function ModerationPage() {
       id,
       approve,
     }: {
-      kind: "employer" | "mentor";
+      kind: "employer";
       id: string;
       approve: boolean;
     }) => {
@@ -138,8 +131,7 @@ export default function ModerationPage() {
     courses: courses.data?.length ?? 0,
     tests: tests.data?.length ?? 0,
     verification:
-      (verification.data?.employers.length ?? 0) +
-      (verification.data?.mentors.length ?? 0),
+      verification.data?.employers.length ?? 0,
   };
 
   const loading =
@@ -351,40 +343,6 @@ export default function ModerationPage() {
             </Card>
           ))}
 
-          {verification.data?.mentors.map((mentor) => (
-            <Card key={mentor.id}>
-              <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
-                <div>
-                  <h3 className="font-semibold text-ink-900">{mentor.name}</h3>
-                  <p className="text-sm text-ink-600">{mentor.headline}</p>
-                  <p className="text-xs text-ink-500">
-                    {t("mentors.yearsExperience", { count: mentor.years_experience })} ·{" "}
-                    {mentor.email}
-                  </p>
-                </div>
-                <div className="flex shrink-0 gap-2">
-                  <Button
-                    variant="success"
-                    size="sm"
-                    onClick={() =>
-                      verify.mutate({ kind: "mentor", id: mentor.id, approve: true })
-                    }
-                  >
-                    {t("admin.approve")}
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() =>
-                      verify.mutate({ kind: "mentor", id: mentor.id, approve: false })
-                    }
-                  >
-                    {t("admin.reject")}
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          ))}
         </div>
       )}
 

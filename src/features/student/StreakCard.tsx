@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 
+import { Tile } from "@/shared/ui";
 import type { CompanyState, StreakState } from "@/shared/types/api";
 
 /**
@@ -22,12 +23,12 @@ export function StreakCard({
   const line = company.peers ?? company.hired ?? company.recent_test_takers;
 
   return (
-    <div className="flex flex-col gap-3 rounded-(--radius-card) border border-ink-200 bg-surface p-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="card flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex items-center gap-4">
         <Flame lit={streak.done_today} />
 
         <div>
-          <p className="text-2xl font-semibold tabular-nums text-ink-900">
+          <p className="font-display text-2xl font-semibold tabular-nums text-ink-900">
             {active
               ? t("streak.days", { count: streak.current_days })
               : t("streak.start")}
@@ -79,7 +80,7 @@ function WeekDots({ streak }: { streak: StreakState }) {
           key={index}
           className={
             index < filled
-              ? "h-2 w-2 rounded-full bg-brand-600"
+              ? "h-2 w-2 rounded-full bg-brand-fill"
               : "h-2 w-2 rounded-full bg-ink-200"
           }
         />
@@ -93,17 +94,37 @@ function WeekDots({ streak }: { streak: StreakState }) {
   );
 }
 
+/**
+ * The flame, lit or not.
+ *
+ * Lit is a palette tile: the pink lace is a fill, and the tile is the one
+ * element in the system that lets it appear at full strength while the icon on
+ * it comes from the ink ramp. It used to be drawn *in* the pink — a 1.21:1
+ * stroke, which is a flame you cannot see. Unlit keeps the tile's geometry and
+ * changes only its colour, because which of the two it is is the information.
+ */
 function Flame({ lit }: { lit: boolean }) {
+  if (lit) {
+    return (
+      <Tile hue="pink" size="md">
+        <FlameGlyph />
+      </Tile>
+    );
+  }
+
   return (
     <span
       aria-hidden
-      className={
-        lit
-          ? "flex h-11 w-11 items-center justify-center rounded-full bg-accent/25 text-accent"
-          : "flex h-11 w-11 items-center justify-center rounded-full bg-ink-100 text-ink-400"
-      }
+      className="flex h-11 w-11 items-center justify-center rounded-(--radius-tile) bg-ink-100 text-ink-400"
     >
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <FlameGlyph />
+    </span>
+  );
+}
+
+function FlameGlyph() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
         <path
           d="M12 2c1.5 3.5.5 5.5-1 7-1.8 1.8-3 3.4-3 5.8A4.2 4.2 0 0 0 12 19a4.2 4.2 0 0 0 4-4.2c0-1.6-.7-2.9-1.6-4"
           stroke="currentColor"
@@ -111,7 +132,6 @@ function Flame({ lit }: { lit: boolean }) {
           strokeLinecap="round"
           strokeLinejoin="round"
         />
-      </svg>
-    </span>
+    </svg>
   );
 }

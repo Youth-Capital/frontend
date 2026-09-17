@@ -65,8 +65,8 @@ export default function PassportPage() {
   const data = passport.data;
 
   return (
-    <div className="min-h-dvh bg-ink-50">
-      <header className="border-b border-ink-200 bg-surface">
+    <div className="min-h-dvh">
+      <header className="glass-bar border-x-0 border-t-0">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2.5">
             <Logo size={32} />

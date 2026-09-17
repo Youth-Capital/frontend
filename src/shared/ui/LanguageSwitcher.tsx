@@ -46,6 +46,17 @@ export function LanguageSwitcher() {
    */
   const itemRadius = "rounded-[calc(var(--radius-control)-2px)]";
 
+  /*
+   * 32x24 with a mouse, 44x44 with a fingertip.
+   *
+   * Three codes sit side by side, so at the small size the gap between the
+   * middle of one and the middle of the next is under 40px — inside the width
+   * of the fingertip pressing it. Growing them only for a coarse pointer keeps
+   * the bar compact on a desktop, where the pointer is a few pixels wide.
+   */
+  const size =
+    "px-2 py-1 text-xs coarse:flex coarse:h-11 coarse:min-w-11 coarse:items-center coarse:justify-center coarse:text-sm";
+
   return (
     <div
       className="flex items-center rounded-(--radius-control) border border-ink-200 p-0.5"
@@ -61,8 +72,8 @@ export function LanguageSwitcher() {
           title={language.label}
           className={
             current === language.code
-              ? `${itemRadius} bg-brand-600 px-2 py-1 text-xs font-semibold text-on-colour`
-              : `${itemRadius} px-2 py-1 text-xs font-medium text-ink-500 hover:bg-ink-100`
+              ? `${itemRadius} ${size} bg-brand-fill font-semibold text-on-colour`
+              : `${itemRadius} ${size} font-medium text-ink-500 hover:bg-ink-100`
           }
         >
           {language.short}

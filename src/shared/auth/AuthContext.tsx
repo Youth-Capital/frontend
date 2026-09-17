@@ -194,6 +194,5 @@ export function useAuth(): AuthState {
 export const HOME_BY_ROLE: Record<Role, string> = {
   STUDENT: "/student/dashboard",
   EMPLOYER: "/employer/dashboard",
-  MENTOR: "/mentor/dashboard",
   ADMIN: "/admin/dashboard",
 };

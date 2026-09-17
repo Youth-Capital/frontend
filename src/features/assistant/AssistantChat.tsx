@@ -154,7 +154,7 @@ export function AssistantChat({
         {chat.isLoading && <CardSkeleton rows={3} />}
 
         {!chat.isLoading && messages.length === 0 && (
-          <div className="rounded-(--radius-card) border border-ink-200 bg-ink-50 p-4">
+          <div className="rounded-(--radius-card) border border-ink-200/70 bg-ink-100/55 p-4">
             <p className="font-semibold text-ink-900">{t("chat.emptyTitle")}</p>
             <p className="mt-1 text-sm text-ink-600">{t("chat.emptyBody")}</p>
           </div>
@@ -329,7 +329,7 @@ function Turn({
   if (message.author === "USER") {
     return (
       <div className="flex justify-end">
-        <p className="max-w-[85%] rounded-(--radius-card) rounded-br-sm bg-brand-600 px-4 py-2.5 text-on-colour">
+        <p className="max-w-[85%] rounded-(--radius-card) rounded-br-sm bg-brand-fill px-4 py-2.5 text-on-brand">
           {message.text}
         </p>
       </div>
@@ -345,7 +345,7 @@ function Turn({
         <LogoMark size={18} />
       </span>
 
-      <div className="max-w-[85%] rounded-(--radius-card) rounded-tl-sm border border-ink-200 bg-surface px-4 py-3">
+      <div className="glass max-w-[85%] rounded-(--radius-card) rounded-tl-sm px-4 py-3">
         {/* A configured model phrases the same facts; without one the
             template sentence is used. Either way the receipts below are the
             rows the answer was built from. */}

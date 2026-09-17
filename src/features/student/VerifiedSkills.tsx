@@ -10,7 +10,7 @@ import type { Paginated, UserSkill } from "@/shared/types/api";
  * The proven part of the profile, on the page an employer reads.
  *
  * A CV lists what someone says about themselves. This block is the other kind
- * of claim — the skills where the evidence came from a test, a mentor or an
+ * of claim — the skills where the evidence came from a test or an
  * employer rather than from the student — so it is kept separate and named
  * for what makes it different.
  *
@@ -36,7 +36,7 @@ export function VerifiedSkills() {
     .sort((a, b) => b.proficiency - a.proficiency);
 
   return (
-    <section className="rounded-(--radius-card) border border-ink-200 bg-surface p-5">
+    <section className="card p-5">
       <div className="flex items-baseline justify-between gap-3">
         <h2 className="text-sm font-semibold text-ink-900">{t("cv.verifiedSkills")}</h2>
         <Link

@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useParams } from "react-router-dom";
+import { useBlocker, useNavigate, useParams } from "react-router-dom";
 
 import { api } from "@/shared/api/client";
 import { useApiError } from "@/shared/hooks/useApiError";
@@ -35,6 +35,37 @@ export default function TestRunnerPage() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [error, setError] = useState("");
   const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
+
+  /*
+   * Leaving mid-test costs the answers, so it asks first.
+   *
+   * The exact cost, because the warning has to be true: the answers given so
+   * far live in this component and are sent to the server once, on submit —
+   * navigate away and every one of them is gone. The attempt itself survives
+   * and can be resumed, but its clock never stopped, so what comes back is an
+   * empty answer sheet with less time on it.
+   *
+   * `useBlocker` catches anything the router does — the mark in the header,
+   * the profile menu, the back button. It cannot catch a closed tab, which is
+   * what the beforeunload handler below is for; that one shows the browser's
+   * own dialogue and cannot be worded by us.
+   */
+  const inProgress = attempt !== null && result === null;
+  const blocker = useBlocker(inProgress);
+
+  useEffect(() => {
+    if (!inProgress) return;
+
+    const warn = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      //: Chrome ignores a custom string and shows its own text; assigning
+      //: returnValue is still what arms the dialogue at all.
+      event.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [inProgress]);
 
   const start = useMutation({
     mutationFn: async () => {
@@ -139,6 +170,15 @@ export default function TestRunnerPage() {
 
   /* ---------------------------------------------------------------- result */
   if (result) {
+    /*
+     * A soft-skill assessment is not an exam and must not read like one.
+     *
+     * There is no pass mark, so a percentage presented as a verdict is a lie
+     * told to a seventeen-year-old about their character. The number they get
+     * is the competency profile; the headline says the assessment is done.
+     */
+    const isSoft = result.test_type === "SOFT_SKILL";
+
     return (
       <div className="mx-auto flex max-w-3xl flex-col gap-6">
         {/*
@@ -147,9 +187,10 @@ export default function TestRunnerPage() {
           surface of its own rather than another white card in the stack.
 
           The success and danger tokens are not used on it: both are solved
-          against a pale page, and neither clears 4.5:1 on #221340. The amber
-          already lives on this surface and carries the pass; a fail is stated
-          in words on the plain ink, which needs no colour to be understood.
+          against a pale page, and neither clears 4.5:1 on the band's #302357.
+          The pink already lives on this surface and carries the pass; a fail
+          is stated in words on the plain ink, which needs no colour to be
+          understood.
         */}
         <section className="deep rounded-(--radius-card) px-6 py-10 text-center">
           <p
@@ -159,44 +200,70 @@ export default function TestRunnerPage() {
             {t("tests.resultTitle")}
           </p>
 
-          <p
-            className="mt-3 text-6xl font-semibold tabular-nums"
-            style={{ color: result.passed ? "var(--band-accent)" : "var(--band-ink)" }}
-          >
-            {result.percentage}%
-          </p>
+          {isSoft ? (
+            <>
+              <p
+                className="mt-3 text-3xl font-semibold"
+                style={{ color: "var(--band-ink)" }}
+              >
+                {t("tests.soft.done")}
+              </p>
+              <p className="mt-2 text-sm" style={{ color: "var(--band-muted)" }}>
+                {t("tests.soft.doneHint")}
+              </p>
+            </>
+          ) : (
+            <>
+              <p
+                className="mt-3 text-6xl font-semibold tabular-nums"
+                style={{
+                  color: result.passed ? "var(--band-accent)" : "var(--band-ink)",
+                }}
+              >
+                {result.percentage}%
+              </p>
 
-          <p className="mt-2 text-sm" style={{ color: "var(--band-muted)" }}>
-            {t("tests.correctAnswers", {
-              correct: result.score,
-              total: result.max_score,
-            })}
-          </p>
+              <p className="mt-2 text-sm" style={{ color: "var(--band-muted)" }}>
+                {t("tests.correctAnswers", {
+                  correct: result.score,
+                  total: result.max_score,
+                })}
+              </p>
 
-          <p
-            className="mt-5 inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold"
-            style={
-              result.passed
-                ? { background: "var(--band-accent)", color: "var(--band-on-accent)" }
-                : {
-                    color: "var(--band-ink)",
-                    background: "color-mix(in oklab, var(--band-dim) 30%, transparent)",
-                  }
-            }
-          >
-            {result.passed && <TrophyGlyph />}
-            {result.passed ? t("tests.passed") : t("tests.failed")}
-          </p>
+              <p
+                className="mt-5 inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold"
+                style={
+                  result.passed
+                    ? { background: "var(--band-accent)", color: "var(--band-on-accent)" }
+                    : {
+                        color: "var(--band-ink)",
+                        background:
+                          "color-mix(in oklab, var(--band-dim) 30%, transparent)",
+                      }
+                }
+              >
+                {result.passed && <TrophyGlyph />}
+                {result.passed ? t("tests.passed") : t("tests.failed")}
+              </p>
+            </>
+          )}
         </section>
 
         {result.skill_results.length > 0 && (
           <Card>
-            <CardHeader title={t("tests.bySkill")} />
+            <CardHeader
+              title={isSoft ? t("tests.soft.byCompetency") : t("tests.bySkill")}
+              subtitle={isSoft ? t("tests.soft.byCompetencyHint") : undefined}
+            />
             <div className="flex flex-col gap-3">
               {result.skill_results.map((skill) => (
                 <ProgressBar
                   key={skill.skill}
-                  label={`${skill.skill_name} (${skill.questions_correct}/${skill.questions_total})`}
+                  label={
+                    isSoft
+                      ? skill.skill_name
+                      : `${skill.skill_name} (${skill.questions_correct}/${skill.questions_total})`
+                  }
                   value={skill.percentage}
                   showLabel
                   tone={matchTone(skill.percentage)}
@@ -208,22 +275,36 @@ export default function TestRunnerPage() {
 
         {result.review && (
           <Card>
-            <CardHeader title={t("tests.reviewAnswers")} />
+            <CardHeader
+              title={isSoft ? t("tests.soft.reviewTitle") : t("tests.reviewAnswers")}
+            />
             <ul className="flex flex-col gap-3">
               {result.review.map((item) => (
                 <li
                   key={item.question_id}
                   className={
-                    item.is_correct
-                      ? "rounded-xl border border-success-soft bg-success-soft/30 p-3"
-                      : "rounded-xl border border-danger-soft bg-danger-soft/30 p-3"
+                    isSoft
+                      ? "rounded-xl border border-ink-200/70 bg-ink-100/55 p-3"
+                      : item.is_correct
+                        ? "rounded-xl border border-success-soft bg-success-soft/30 p-3"
+                        : "rounded-xl border border-danger-soft bg-danger-soft/30 p-3"
                   }
                 >
                   <div className="flex items-start justify-between gap-3">
                     <p className="text-sm text-ink-800">{item.question}</p>
-                    <Badge tone={item.is_correct ? "success" : "danger"}>
-                      {item.is_correct ? t("tests.correct") : t("tests.incorrect")}
-                    </Badge>
+                    {isSoft ? (
+                      /* Points, not a verdict: how much of the competency the
+                         chosen action showed. */
+                      <Badge tone="neutral">
+                        {t("tests.soft.pointsAwarded", {
+                          points: item.points_awarded,
+                        })}
+                      </Badge>
+                    ) : (
+                      <Badge tone={item.is_correct ? "success" : "danger"}>
+                        {item.is_correct ? t("tests.correct") : t("tests.incorrect")}
+                      </Badge>
+                    )}
                   </div>
                   {item.explanation && (
                     <p className="mt-2 text-xs text-ink-600">
@@ -281,6 +362,12 @@ export default function TestRunnerPage() {
 
       <Card>
         <p className="text-base font-medium text-ink-900">{current.text}</p>
+        {current.type === "SITUATIONAL" && (
+          /* Said before they answer, not after. A person who thinks they are
+             being graded picks the answer they think is wanted, and the
+             instrument measures nothing. */
+          <p className="mt-2 text-sm text-ink-500">{t("tests.soft.noRightAnswer")}</p>
+        )}
         <div className="mt-4 flex flex-col gap-2">
           {current.options.map((option) => {
             const selected =
@@ -349,6 +436,31 @@ export default function TestRunnerPage() {
           </Button>
         )}
       </div>
+
+      <Modal
+        open={blocker.state === "blocked"}
+        onClose={() => blocker.reset?.()}
+        title={t("tests.leaveTitle")}
+        size="sm"
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => blocker.reset?.()}>
+              {t("tests.leaveStay")}
+            </Button>
+            <Button variant="danger" onClick={() => blocker.proceed?.()}>
+              {t("tests.leaveAnyway")}
+            </Button>
+          </>
+        }
+      >
+        <p className="text-sm text-ink-600">{t("tests.leaveHint")}</p>
+        <p className="mt-2 text-sm text-ink-500">
+          {t("tests.leaveAnswered", {
+            answered: answeredCount,
+            total: questions.length,
+          })}
+        </p>
+      </Modal>
 
       <Modal
         open={confirmOpen}

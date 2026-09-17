@@ -105,7 +105,7 @@ export default function ResetPasswordPage() {
       )}
 
       <p className="mt-6 text-center text-sm">
-        <Link to="/auth/login" className="text-brand-600 hover:text-brand-700">
+        <Link to="/auth/login" className="-my-3 inline-block py-3 text-brand-600 hover:text-brand-700">
           {t("common.back")}
         </Link>
       </p>

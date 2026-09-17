@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 
-import { Button } from "@/shared/ui";
+import { Button, Tile } from "@/shared/ui";
 
 /**
  * Nothing written yet.
@@ -28,13 +28,19 @@ export function NotesEmpty({
     <div
       className={
         compact
-          ? "flex flex-col items-center gap-2 rounded-(--radius-card) border border-dashed border-ink-300 px-4 py-8 text-center"
-          : "flex flex-col items-center gap-3 rounded-(--radius-card) border border-dashed border-ink-300 bg-surface px-6 py-14 text-center"
+          ? // Inside the notes panel, which is already a surface: a fill here
+            // would be a second pane with no gap between them, so the dashed
+            // outline carries the empty slot on its own.
+            "flex flex-col items-center gap-2 rounded-(--radius-card) border border-dashed border-ink-300 px-4 py-8 text-center"
+          : // On the page it is a panel, so it frosts like one — but keeps the
+            // dashed edge, which is the part that says "nothing here yet"
+            // rather than "something failed to load".
+            "glass flex flex-col items-center gap-3 rounded-(--radius-card) border-dashed border-ink-300 px-6 py-14 text-center"
       }
     >
-      <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-50 text-brand-600">
+      <Tile hue="peri">
         <NoteIcon size={20} />
-      </span>
+      </Tile>
       <h3 className="text-sm font-semibold text-ink-800">
         {filtered ? t("notes.emptyFilteredTitle") : t("notes.emptyTitle")}
       </h3>

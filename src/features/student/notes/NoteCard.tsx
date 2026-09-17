@@ -43,7 +43,7 @@ export function NoteCard({
     <button
       type="button"
       onClick={onOpen}
-      className="flex w-full flex-col gap-1.5 rounded-(--radius-card) border border-ink-200 bg-surface p-3.5 text-left transition-colors hover:border-brand-400"
+      className="card glass-lift flex w-full flex-col gap-1.5 p-3.5 text-left"
     >
       <p className="truncate text-sm font-semibold text-ink-900">
         {note.title || t("notes.untitled")}

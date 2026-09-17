@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { useAuth } from "@/shared/auth/AuthContext";
+import { LanguageSwitcher } from "@/shared/ui/LanguageSwitcher";
+import { ThemeSwitcher } from "@/shared/ui/ThemeSwitcher";
 
 /**
  * Everything that describes *you*, gathered under one control.
@@ -23,16 +25,21 @@ interface Item {
   labelKey: string;
 }
 
+/**
+ * A single door to your own page, per role.
+ *
+ * A learner's record — skills, knowledge, experience, CV — used to be four
+ * entries here. It now lives on the profile page, next to the name, phone and
+ * plan it belongs with, so the menu is one door instead of four corridors.
+ */
+const PROFILE: Record<string, string> = {
+  STUDENT: "/student/profile",
+};
+
 /** Your record, per role. Empty for roles that have none. */
 const RECORD: Record<string, Item[]> = {
-  STUDENT: [
-    { to: "/student/skills", labelKey: "nav.skills" },
-    { to: "/student/knowledge", labelKey: "nav.knowledge" },
-    { to: "/student/experience", labelKey: "nav.experience" },
-    { to: "/student/cv", labelKey: "nav.cv" },
-  ],
+  STUDENT: [],
   EMPLOYER: [{ to: "/employer/company", labelKey: "nav.company" }],
-  MENTOR: [],
   ADMIN: [],
 };
 
@@ -46,7 +53,6 @@ const ACCOUNT: Record<string, Item[]> = {
     { to: "/employer/billing", labelKey: "nav.billing" },
     { to: "/employer/settings", labelKey: "nav.settings" },
   ],
-  MENTOR: [{ to: "/mentor/settings", labelKey: "nav.settings" }],
   ADMIN: [{ to: "/admin/settings", labelKey: "nav.settings" }],
 };
 
@@ -104,25 +110,35 @@ export function ProfileMenu() {
         onClick={() => setOpen((current) => !current)}
         aria-expanded={open}
         aria-haspopup="menu"
-        className="flex items-center gap-2 rounded-full border border-ink-200 py-1 pl-1 pr-2 transition-colors hover:border-ink-300 sm:pr-3"
+        /*
+         * A round 44px target on a phone, a named pill from `sm` up.
+         *
+         * The name is hidden below `sm` anyway, so the pill there was an empty
+         * wide shape: avatar, a gap, and a chevron pointing at nothing. It cost
+         * 62px of a 320px bar, which is most of what the wordmark needed. As a
+         * circle it costs 44 and is a better target than the pill was.
+         */
+        className="flex h-11 w-11 items-center justify-center rounded-full border border-ink-200 transition-colors hover:border-ink-300 sm:h-auto sm:w-auto sm:gap-2 sm:py-1 sm:pl-1 sm:pr-3 coarse:sm:h-11"
       >
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-600 text-xs font-semibold text-on-colour">
+        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-fill text-sm font-semibold text-on-brand sm:h-7 sm:w-7 sm:text-xs">
           {initial}
         </span>
         <span className="hidden max-w-28 truncate text-sm text-ink-700 sm:block">
           {user.display_name}
         </span>
-        <Chevron open={open} />
+        <span className="hidden sm:block">
+          <Chevron open={open} />
+        </span>
       </button>
 
       {open && (
         <div
           role="menu"
           aria-label={t("profileMenu.title")}
-          className="absolute right-0 z-50 mt-2 w-72 overflow-hidden rounded-(--radius-card) border border-ink-200 bg-surface shadow-2xl"
+          className="glass-raised absolute right-0 z-50 mt-2 w-72 overflow-hidden rounded-(--radius-card)"
         >
           <div className="flex items-center gap-3 border-b border-ink-200 bg-ink-50 px-4 py-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-600 text-sm font-semibold text-on-colour">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-fill text-sm font-semibold text-on-brand">
               {initial}
             </span>
             <div className="min-w-0">
@@ -133,12 +149,41 @@ export function ProfileMenu() {
             </div>
           </div>
 
+          {PROFILE[user.role] && (
+            <div className="py-1.5">
+              <Link
+                to={PROFILE[user.role]}
+                role="menuitem"
+                className="block px-4 py-2 text-sm font-semibold text-ink-900 hover:bg-ink-100 coarse:py-3"
+              >
+                {t("nav.profile")}
+              </Link>
+            </div>
+          )}
+
           {record.length > 0 && (
             <Group label={t("profileMenu.record")} items={record} />
           )}
           {account.length > 0 && (
             <Group label={t("profileMenu.account")} items={account} />
           )}
+
+          {/* The two preferences the header cannot hold on a phone.
+              `sm:hidden` rather than a duplicate: above that width they are
+              back in the bar, and showing them twice would leave two controls
+              for one setting on the same screen. */}
+          <div className="border-t border-ink-200 sm:hidden">
+            <div className="flex items-center justify-between gap-3 px-4 py-2.5">
+              <span className="text-sm text-ink-700">
+                {t("settings.language")}
+              </span>
+              <LanguageSwitcher />
+            </div>
+            <div className="flex items-center justify-between gap-3 px-4 py-2.5">
+              <span className="text-sm text-ink-700">{t("theme.title")}</span>
+              <ThemeSwitcher />
+            </div>
+          </div>
 
           <button
             type="button"
@@ -167,7 +212,7 @@ function Group({ label, items }: { label: string; items: Item[] }) {
           key={item.to}
           to={item.to}
           role="menuitem"
-          className="block px-4 py-2 text-sm text-ink-700 hover:bg-ink-100 hover:text-ink-900"
+          className="block px-4 py-2 text-sm text-ink-700 hover:bg-ink-100 hover:text-ink-900 coarse:py-3"
         >
           {t(item.labelKey)}
         </Link>

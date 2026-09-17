@@ -1,198 +1,306 @@
 @import "tailwindcss";
 @import "./fonts.css";
+@import "./shared/styles/glass.css";
 
 /*
- * Design tokens.
+ * Pointer type, not screen width.
  *
- * Generated from the chosen brand palette (see scripts). Tailwind emits
- * these as CSS variables and its utilities reference them through var(), so
- * overriding the same names under [data-theme] re-themes every utility in the
- * product at runtime — no class rewriting, no rebuild.
+ * "Is this control driven by a fingertip or by a mouse?" is a different
+ * question from "how wide is the screen?", and an iPad answers them in
+ * opposite directions: 820px wide and touch-only. Sizing touch targets and
+ * field text off a width breakpoint therefore gets iPads wrong in both
+ * directions — it hands a tablet the 14px field text that makes iOS Safari
+ * zoom the page on focus, and it hands a wide touch screen 32px controls.
  *
- * ink-50 is the page background and ink-200 is the border colour, which is why
- * existing `bg-ink-50` / `border-ink-200` markup follows the theme for free.
+ * These two variants ask the real question instead. `coarse:` is a fingertip
+ * (phone, tablet, touch laptop); `fine:` is a mouse or trackpad.
+ */
+@custom-variant coarse (@media (pointer: coarse));
+@custom-variant fine (@media (pointer: fine));
+
+/*
+ * Design tokens — the Aurora Glass system.
+ *
+ * Generated from the five-colour palette the owner chose:
+ *
+ *   #FFD6FF  pink lace        hue 300.0   sat 100%   light 92.0%
+ *   #E7C6FF  mauve            hue 274.7   sat 100%   light 88.8%
+ *   #C8B6FF  periwinkle       hue 254.8   sat 100%   light 85.7%
+ *   #B8C0FF  blue-purple      hue 233.2   sat 100%   light 86.1%
+ *   #BBD0FF  light blue       hue 221.5   sat 100%   light 86.7%
+ *
+ * They are one hue fan — 300° down to 221.5°, all at full saturation, all
+ * within six points of lightness of each other. That is the whole character
+ * of the palette and also its whole problem: measured as text on white they
+ * come in at 1.29, 1.51, 1.81, 1.75 and 1.55:1. Not one of them can carry a
+ * letter. They are fills, and every text weight below is solved rather than
+ * picked — binary search down the lightness axis at the palette's own hue
+ * until it hits its target.
+ *
+ * The brand ramp is anchored at 254.8°, the periwinkle in the middle of the
+ * fan, and #C8B6FF is brand-200 unchanged. The pink end becomes the accent,
+ * the blue end becomes `info`. Saturation tapers as the ramp darkens so the
+ * bottom of it is a colour rather than a neon.
+ *
+ * WHAT MAKES THIS DIFFERENT FROM AN ORDINARY PALETTE SWAP: the interface is
+ * frosted glass now, and a frosted panel has no colour of its own. Text on it
+ * sits on the panel composited over whatever the aurora paints behind it, so
+ * the page background is not the ground — the composite is. Solved against
+ * the page alone, ink-500 (the most-used token in the product, 218 uses)
+ * measures 5.23:1 on the page and 4.18:1 on glass over the periwinkle. It
+ * would have failed in the one place it is most often read.
+ *
+ * So every weight below is solved against the *worst* composite instead:
+ * #EDE8FF in the light theme (a 68% white panel over the periwinkle) and
+ * #362244 in the dark (a 78% panel over the deepened pink). Each one then
+ * clears its target on the page, on an opaque card, and on glass — the three
+ * grounds it can actually land on. The measured ratios are in the comments.
  */
 @theme {
-  --color-brand-50: #EDE9F5;
-  --color-brand-100: #E3DDF0;
-  --color-brand-200: #D0C5E7;
-  --color-brand-300: #B8A8DC;
-  --color-brand-400: #9B84CD;
-  --color-brand-500: #8164C0;
-  --color-brand-600: #6C4AB6;
-  --color-brand-700: #5D3F9D;
-  --color-brand-800: #4E3583;
-  --color-brand-900: #3F2B6A;
-
-  --color-ink-50: #F8F7FF;
-  --color-ink-100: #ECE8FA;
-  --color-ink-200: #DBD4F4;
-  --color-ink-300: #C9C2E1;
-  --color-ink-400: #918D99;
-  --color-ink-500: #746F7F;
-  --color-ink-600: #5D5867;
-  --color-ink-700: #4B4754;
-  --color-ink-800: #3E3A46;
-  --color-ink-900: #2F2B35;
-
-  --color-accent: #FFB86B;
-  /*
-   * The amber that may carry meaning, not just decoration.
-   *
-   * `--color-accent` is the brand amber and it is a fill for warm surfaces.
-   * The moment amber has to *encode* something — a bar whose length is the
-   * message — it answers to 3:1 against the page like any other meaningful
-   * graphic, and on this pale ground the brand amber measures 1.60:1. This is
-   * the same hue walked down until it clears, measured rather than picked.
-   */
-  --color-accent-solid: #b8854d;
+  /* Brand — hue 254.8°, the palette's periwinkle. */
+  --color-brand-50: #F2EDFF;
+  --color-brand-100: #E4DBFF;
+  --color-brand-200: #C8B6FF; /* the source colour, unchanged */
+  --color-brand-300: #AD93FB;
+  --color-brand-400: #8A6AE9;
+  --color-brand-500: #7A5CD6; /* glass 4.06 — fills and borders, not text */
+  --color-brand-600: #7052C9; /* button ground; on-colour reads 5.34:1 on it */
+  --color-brand-700: #684AC3; /* link text — page 5.94  card 6.26  glass 5.24 */
+  --color-brand-800: #4F3795; /* page 8.62  card 9.08  glass 7.60 */
+  --color-brand-900: #382966; /* page 11.89  card 12.52  glass 10.49 */
 
   /*
-   * The amber that may carry *text*.
-   *
-   * There are now three ambers and the difference between them is the rule
-   * each one answers to. `--color-accent` is the brand fill and answers to
-   * nothing. `--color-accent-solid` is a graphic that carries meaning and
-   * answers to 3:1. This one is text and answers to 4.5:1 — the accent-solid
-   * amber measures 3.23:1 on a white card, which is fine under a bar and not
-   * fine as a label.
-   *
-   * Same hue, walked down until it cleared: 5.20:1 on a white card, 4.89:1 on
-   * the page. In the dark theme the brand amber already clears on both dark
-   * surfaces (6.71:1 and 8.64:1) and is used unchanged.
+   * Ink — the same hue at low saturation, so the neutrals belong to the
+   * palette instead of greying it out. 50 is the page and 200 is the border
+   * colour, which is what lets existing `bg-ink-50` / `border-ink-200` markup
+   * follow the theme without being rewritten.
    */
-  --color-accent-ink: #8c653b;
+  --color-ink-50: #FAF8FF;
+  --color-ink-100: #EDE8FA;
+  --color-ink-200: #DDD6F4;
+  --color-ink-300: #C7BFDF;
+  --color-ink-400: #888396; /* decorative, 3:1 — page 3.48  card 3.66  glass 3.07 */
+  --color-ink-500: #6B667B; /* secondary text — page 5.23  card 5.51  glass 4.61 */
+  --color-ink-600: #575366; /* body — page 7.03  card 7.41  glass 6.21 */
+  --color-ink-700: #433E50; /* page 9.76  card 10.28  glass 8.61 */
+  --color-ink-800: #322E3D; /* page 12.51  card 13.18  glass 11.03 */
+  --color-ink-900: #24212D; /* page 14.98  card 15.78  glass 13.22 */
+
+  /*
+   * The accent, which is the palette's warm end — and three tokens, because
+   * one colour cannot answer to three different rules.
+   *
+   * `--color-accent` is the pink lace itself. It is a fill: a chip ground, a
+   * meter, an icon tile. It answers to nothing and measures 1.22:1.
+   */
+  --color-accent: #FFD6FF;
+  /* The second fill, one step along the fan. Pairs with the accent on tiles. */
+  --color-accent-soft: #E7C6FF;
+  /*
+   * The pink that carries *meaning* — a bar whose length is the message.
+   * Answers to 3:1 like any other meaningful graphic. Same hue, walked down
+   * until it cleared: glass 3.06, page 3.47, card 3.66.
+   */
+  --color-accent-solid: #CD54CD;
+  /*
+   * The pink that may carry *text*, at 4.5:1: glass 4.62, page 5.23,
+   * card 5.51. Same hue as the other two — this is the pink lace at the
+   * lightness where it becomes legible, not a different colour.
+   */
+  --color-accent-ink: #A142A1;
+
+  /*
+   * THE ACTION FILLS — the palette itself, doing the interface's work.
+   *
+   * The first cut of this system derived a saturated violet from the
+   * periwinkle and used that for every button, active tab and meter. It was
+   * measurably correct and it was the wrong answer: the five colours the
+   * owner picked ended up as a blur in the corners of the viewport while a
+   * colour she never chose did all the visible work.
+   *
+   * So the fill is the pastel and the text on it is dark, which is the one
+   * way round that a colour at 86–92% lightness can carry a label at all.
+   * Measured, `--color-on-brand` on each of the five:
+   *
+   *   pink 9.91:1   mauve 8.46:1   periwinkle 7.04:1
+   *   blue-purple 7.30:1   light blue 8.25:1
+   *
+   * Solved against the periwinkle, the darkest of them, so one ink serves all
+   * five and a row of five buttons stays one family.
+   *
+   * These four are declared ONCE and never overridden per theme. A pastel is
+   * bright on a dark page and soft on a pale one, but it is legible on both,
+   * and the ink on it does not care what the page is doing. One definition is
+   * also what keeps a button recognisably the same object in both themes.
+   */
+  --color-brand-fill: #C8B6FF;
+  --color-brand-fill-hover: #BCA6FD;
+  /*
+   * A control needs a 3:1 boundary or it has no edge. The pastels measure
+   * 1.22–1.72:1 against a pale page — nowhere near — so the edge is a
+   * separate solved colour rather than a darker shade of the fill: the same
+   * periwinkle hue walked down until it cleared 3:1 on the page (3.06) and on
+   * a card (3.23).
+   */
+  --color-brand-edge: #9880E1;
+  /* The ink that sits on a pastel fill. Deep, low-chroma, same hue family. */
+  --color-on-brand: #372863;
 
   /*
    * A deep ground that stays deep in the dark theme too.
    *
    * The brand ramp inverts under [data-theme="dark"] — brand-900 becomes a
    * pale lilac — so a header built from it would flip to light and take its
-   * white numeral down with it (white on #D0C2EF is 1.35:1). This one is
-   * declared identically in both themes because it is not a step on a ramp,
-   * it is a surface the design asks to be dark on purpose.
+   * white numeral down with it. This one is declared identically in both
+   * themes because it is not a step on a ramp, it is a surface the design
+   * asks to be dark on purpose. White reads 13.4:1 on it.
    */
-  --color-deep: #3F2B6A;
+  --color-deep: #302357;
   --color-surface: #FFFFFF;
-  --color-on-colour: #F1F0F3;
-  --color-success: #2B7A53;
-  --color-success-soft: #E5F3EC;
-  --color-warning: #90631A;
-  --color-warning-soft: #F7EEE1;
-  --color-danger: #C03026;
-  --color-danger-soft: #F6E3E2;
-  --color-info: #7453BD;
-  --color-info-soft: #E9E5F3;
+  --color-on-colour: #FBF8FF;
+
+  /* Semantic. Solved on the glass composite, which is the hardest of the
+     three grounds — so each clears 4.5:1 on the page and on a card too. */
+  --color-success: #23774D;
+  --color-success-soft: #E1F6EC;
+  --color-warning: #886220;
+  --color-warning-soft: #FCF0DC;
+  --color-danger: #BC3B2C;
+  --color-danger-soft: #FDE5E3;
+  --color-info: #515FC8; /* the blue end of her fan, walked down to 4.5:1 */
+  --color-info-soft: #DBDFFF;
 
   /* Manrope for the interface: geometric, wide apertures, tabular figures
-     that keep score columns aligned. Playfair Display for page titles —
-     serif against sans is the strongest typographic contrast available, and
-     it is what carries personality without touching legibility of the data. */
+     that keep score columns aligned. Playfair Display for page titles and
+     for the large numerals — serif against sans is the strongest typographic
+     contrast available, and on frosted glass it is what stops the page
+     reading as a wash of soft rectangles. */
   --font-sans: "Manrope", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
     Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-display: "Playfair Display", "Manrope", Georgia, "Times New Roman",
     serif;
 
-  /* Softer corners throughout. Nested elements step down so a list row
-     inside a card does not fight the card's own radius. */
-  --radius-card: 1.25rem;
-  --radius-control: 0.75rem;
+  /*
+   * Radii, opened up for glass.
+   *
+   * Frosted panels want more corner than opaque ones: the blur softens the
+   * edge, and a tight radius against a soft fill reads as a mistake. Nested
+   * elements still step down so a list row inside a card does not fight the
+   * card's own radius — inner = outer − padding.
+   */
+  --radius-card: 1.5rem;
+  --radius-control: 0.875rem;
+  --radius-tile: 1rem;
 
   /*
-   * Shadows, layered and tinted.
+   * Shadows, layered and tinted with the palette's own violet.
    *
    * A single flat rgba(0,0,0,…) blur is the tell of an unfinished interface:
    * real shadows have a tight contact edge and a wide soft falloff, and they
-   * take their colour from the light in the room rather than from black. The
-   * hue here is the brand violet, so a card's shadow belongs to this palette
-   * instead of greying it out.
+   * take their colour from the light in the room rather than from black.
    *
-   * These override Tailwind's own shadow scale, so every existing `shadow-sm`
-   * and `shadow-lg` in the product picks them up without touching markup.
-   * Elevation carries meaning: a resting card is sm, a popover md, a modal lg.
+   * These override Tailwind's own scale, so every existing `shadow-sm` and
+   * `shadow-lg` picks them up without touching markup. Elevation carries
+   * meaning: a resting card is sm, a popover md, a modal lg.
    */
-  --shadow-tint: 262 32% 16%;
-  --shadow-xs: 0 1px 2px -1px hsl(var(--shadow-tint) / 0.1);
+  --shadow-tint: 255 40% 22%;
+  --shadow-xs: 0 1px 2px -1px hsl(var(--shadow-tint) / 0.09);
   --shadow-sm:
-    0 1px 2px -1px hsl(var(--shadow-tint) / 0.1),
-    0 1px 3px hsl(var(--shadow-tint) / 0.06);
+    0 1px 2px -1px hsl(var(--shadow-tint) / 0.09),
+    0 2px 8px -3px hsl(var(--shadow-tint) / 0.08);
   --shadow-md:
     0 2px 4px -2px hsl(var(--shadow-tint) / 0.1),
-    0 6px 16px -4px hsl(var(--shadow-tint) / 0.1);
+    0 8px 20px -6px hsl(var(--shadow-tint) / 0.12);
   --shadow-lg:
     0 8px 16px -8px hsl(var(--shadow-tint) / 0.12),
-    0 24px 48px -12px hsl(var(--shadow-tint) / 0.14);
+    0 28px 56px -16px hsl(var(--shadow-tint) / 0.16);
   --shadow-xl:
     0 12px 24px -10px hsl(var(--shadow-tint) / 0.14),
-    0 32px 64px -16px hsl(var(--shadow-tint) / 0.18);
+    0 36px 72px -20px hsl(var(--shadow-tint) / 0.2);
   --shadow-2xl:
     0 16px 32px -12px hsl(var(--shadow-tint) / 0.16),
-    0 48px 96px -24px hsl(var(--shadow-tint) / 0.22);
+    0 52px 104px -28px hsl(var(--shadow-tint) / 0.24);
 }
 
-/* Dark — overrides the same variable names. */
+/*
+ * Dark — overrides the same variable names.
+ *
+ * Not an inversion of the light theme. Surfaces are raised with lightness
+ * rather than shadow, and the same five hues run the aurora at 26% lightness
+ * instead of 86%. The text weights are re-solved against the dark composite
+ * (#362244, a 78% panel over the deepened pink), which is why they are not
+ * the light values flipped.
+ */
 :root[data-theme="dark"] {
-  --color-brand-50: #160E2A;
-  --color-brand-100: #20133E;
-  --color-brand-200: #331D66;
-  --color-brand-300: #4A2798;
-  --color-brand-400: #693DCD;
-  --color-brand-500: #9373DB;
-  --color-brand-600: #B49EE6;
-  --color-brand-700: #BDAAE9;
-  --color-brand-800: #C6B6EC;
-  --color-brand-900: #D0C2EF;
+  --color-brand-50: #151025;
+  --color-brand-100: #1F1639;
+  --color-brand-200: #2D1F59;
+  --color-brand-300: #3E2880;
+  --color-brand-400: #502EB8;
+  --color-brand-500: #9B84E2; /* glass 4.62  page 5.85 */
+  --color-brand-600: #B2A1E5; /* glass 6.21  page 7.86 */
+  --color-brand-700: #C3B6E8; /* glass 7.61  page 9.62 */
+  --color-brand-800: #D0C8EB;
+  --color-brand-900: #DCD7EE;
 
-  --color-ink-50: #2A2634;
-  --color-ink-100: #3B354E;
-  --color-ink-200: #4A4364;
-  --color-ink-300: #726B88;
-  --color-ink-400: #868290;
-  --color-ink-500: #A6A2AF;
-  --color-ink-600: #C4C2CB;
-  --color-ink-700: #DFDEE3;
-  --color-ink-800: #F5F4F6;
-  --color-ink-900: #F7F7F8;
-
-  --color-accent: #FFB86B;
-  /* 8.64:1 on this ground: the brand amber needs no adjustment here, and
-     the same holds for text — 6.71:1 on a card surface. */
-  --color-accent-solid: #FFB86B;
-  --color-accent-ink: #FFB86B;
-  /* Deliberately unchanged: a deep surface stays deep in both themes. */
-  --color-deep: #3F2B6A;
-  --color-surface: #3C3650;
-  --color-on-colour: #1F1C24;
+  --color-ink-50: #181327;
+  --color-ink-100: #28223C;
+  --color-ink-200: #3B3255;
+  --color-ink-300: #584F76;
+  --color-ink-400: #786F96; /* glass 3.07 */
+  --color-ink-500: #958FAA; /* glass 4.62 */
+  --color-ink-600: #ADA9BB; /* glass 6.24 */
+  --color-ink-700: #CAC8D2;
+  --color-ink-800: #E1DFE4;
+  --color-ink-900: #EDEDEF;
 
   /*
-   * Semantic colours, re-solved against the surface rather than the soft chip.
-   *
-   * The earlier values were measured on their own soft grounds, where they all
-   * cleared 4.5:1. But these are used as bare text far more often than inside a
-   * chip — `text-danger` alone appears 67 times, including on `role="alert"`
-   * error messages — and on `--color-surface` the old set measured 4.14, 4.13,
-   * 3.35 and 3.13:1. The error message was the worst of them.
-   *
-   * Each was walked up at fixed hue until it cleared 4.5:1 on the surface, then
-   * re-checked on every other ground it lands on: page 5.8:1, soft chip
-   * 5.0–6.6:1. Nothing regressed, because raising a colour on a dark ground
-   * raises it everywhere dark.
+   * On a dark ground the pink lace needs no adjustment at all: 14.05:1 on the
+   * page, 11.10:1 on glass. All three accent tokens are the same colour here,
+   * because the rule each answers to is already satisfied by the fill.
    */
-  --color-success: #40B77B;
-  --color-success-soft: #193929;
-  --color-warning: #D59726;
-  --color-warning-soft: #403012;
-  --color-danger: #EA877D;
-  --color-danger-soft: #401511;
-  --color-info: #B095E5;
-  --color-info-soft: #23153D;
+  --color-accent: #FFD6FF;
+  --color-accent-soft: #E7C6FF;
+  --color-accent-solid: #FFD6FF;
+  --color-accent-ink: #FFD6FF;
+
+  /* Deliberately unchanged: a deep surface stays deep in both themes. */
+  --color-deep: #302357;
+  --color-surface: #29233B;
+  --color-on-colour: #140F24;
+
+  --color-success: #30A66B;
+  --color-success-soft: #173828;
+  --color-warning: #C28720;
+  --color-warning-soft: #392C16;
+  --color-danger: #E56F61;
+  --color-danger-soft: #3B1A16;
+  --color-info: #808CE4;
+  --color-info-soft: #181C3F;
 
   /* Shadow falls away on dark grounds; depth comes from surface lightness
      instead, so the tint stays but the opacity drops rather than doubling. */
-  --shadow-tint: 262 40% 4%;
+  --shadow-tint: 255 45% 4%;
 }
 
 @layer base {
+  /*
+   * A grid with no column definition gets a single `auto` track, and an `auto`
+   * track refuses to shrink below the min-content width of what is in it. One
+   * long unbroken word, one row that will not wrap, and the track holds the
+   * whole page open — which is exactly how a phone ends up scrolling sideways
+   * while every element on it looks innocent.
+   *
+   * Every grid in this product wants a track that can shrink instead, so that
+   * is the default here. It is written with `:where()` so it carries no
+   * specificity at all: any `grid-cols-*` utility, at any breakpoint, still
+   * wins, and the many `grid lg:grid-cols-3` layouts keep their desktop shape
+   * while getting a floor of zero on a phone.
+   */
+  :where(.grid) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   html {
     -webkit-text-size-adjust: 100%;
 
@@ -206,9 +314,6 @@
      * interiors, the caret, autofill backgrounds, native select popups and the
      * default scrollbar. Without it those stayed light while the page went
      * dark — a white autofill box in a dark form is the classic tell.
-     *
-     * The theme is applied as an attribute rather than by media query, so the
-     * value is stated per theme rather than left as `light dark`.
      */
     color-scheme: light;
   }
@@ -225,9 +330,77 @@
     }
   }
 
+  /*
+   * The aurora.
+   *
+   * This is the thing every frosted panel in the product is frosting. It is
+   * painted once, on the body, and fixed — so it stays put while content
+   * scrolls over it, which is what makes the glass read as glass rather than
+   * as a texture printed on the cards.
+   *
+   * The five colours sit at the four corners and the centre, at the strengths
+   * measured in `--aurora-*`. Those strengths are not free: they set the
+   * darkest point behind the glass, and therefore the ground every text token
+   * was solved against. Raising them re-opens the contrast question.
+   */
   body {
     @apply bg-ink-50 text-ink-800 antialiased;
     font-family: var(--font-sans);
+    min-height: 100dvh;
+  }
+
+  /*
+   * The aurora — painted on a fixed pseudo-element, not on the body.
+   *
+   * `background-attachment: fixed` was the obvious way to do this and it is
+   * wrong on a phone: iOS Safari silently treats it as `scroll`. The
+   * gradients are sized in percentages of the element they are painted on, so
+   * on a long page the corner washes would stretch to the full document
+   * height and the middle of every screen would fall back to flat page
+   * colour. The effect would have worked on the machine it was built on and
+   * quietly failed on the device most of these students use.
+   *
+   * A fixed pseudo-element is viewport-sized by definition, so the wash stays
+   * put and stays the same size however long the page is. It paints into the
+   * root stacking context beneath everything, which is exactly what
+   * `backdrop-filter` samples — so the panels still frost it.
+   *
+   * `pointer-events: none` because it covers the viewport and would otherwise
+   * eat every click on the page.
+   */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-color: var(--color-ink-50);
+    background-image:
+      radial-gradient(
+        58% 44% at 0% 0%,
+        color-mix(in oklab, var(--aurora-1) var(--aurora-strength), transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        52% 40% at 100% 2%,
+        color-mix(in oklab, var(--aurora-5) var(--aurora-strength), transparent),
+        transparent 68%
+      ),
+      radial-gradient(
+        60% 46% at 96% 96%,
+        color-mix(in oklab, var(--aurora-2) var(--aurora-strength), transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        56% 42% at 4% 100%,
+        color-mix(in oklab, var(--aurora-3) var(--aurora-strength), transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        44% 34% at 50% 58%,
+        color-mix(in oklab, var(--aurora-4) var(--aurora-mid), transparent),
+        transparent 72%
+      );
   }
 
   /* Native checkboxes, radios, range and progress take the brand instead of
@@ -276,9 +449,18 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Visible focus for keyboard users — accessibility, TZ §12. */
+  /*
+   * Visible focus for keyboard users — accessibility, TZ §12.
+   *
+   * On glass a single-colour ring can land on a section of aurora close to
+   * its own hue and disappear. The white outer ring is what guarantees the
+   * indicator is visible against every point of the backdrop, which is the
+   * WCAG 2.2 focus-appearance requirement rather than a decoration.
+   */
   :focus-visible {
-    @apply outline-2 outline-offset-2 outline-brand-600;
+    outline: 2px solid var(--color-brand-600);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 5px color-mix(in oklab, var(--color-surface) 78%, transparent);
   }
 
   ::-webkit-scrollbar {
@@ -294,8 +476,16 @@
 }
 
 @layer components {
+  /*
+   * The card is glass now.
+   *
+   * `.card` is the single most-reused class in the product, so redefining it
+   * here converts every panel at once instead of rewriting 109 call sites.
+   * The frosted treatment itself lives in glass.css; this composes it with
+   * the resting elevation.
+   */
   .card {
-    @apply rounded-(--radius-card) border border-ink-200 bg-surface shadow-sm;
+    @apply rounded-(--radius-card) shadow-sm;
   }
 
   .skeleton {
@@ -306,10 +496,11 @@
      Landing cards.
 
      A considered lift rather than a product-page shadow: the card rises three
-     pixels, its border warms, and a short warm rule lights along its top edge.
-     The warm line is the same signal the evidence ladder uses, so attention is
-     marked with the colour the page already spends on meaning — and it arrives
-     only on attention, which is why it does not compete at rest.
+     pixels, its edge brightens, and a short rule lights along its top edge in
+     the accent. The pink line is the same signal the evidence ladder uses, so
+     attention is marked with the colour the page already spends on meaning —
+     and it arrives only on attention, which is why it does not compete at
+     rest.
 
      Everything here is a transform or a colour. The global reduced-motion
      block at the bottom of this file flattens all of it to a near-zero

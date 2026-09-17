@@ -22,7 +22,7 @@ export function ThemeSwitcher() {
       onClick={toggle}
       title={followsSystem ? `${label} · ${t("theme.followingSystem")}` : label}
       aria-label={label}
-      className="relative flex h-9 w-9 items-center justify-center rounded-(--radius-control) border border-ink-200 text-ink-600 transition-colors hover:border-ink-300 hover:text-ink-900"
+      className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-(--radius-control) border border-ink-200 text-ink-600 transition-colors hover:border-ink-300 hover:text-ink-900 coarse:h-11 coarse:w-11"
     >
       {nextIsDark ? <MoonIcon /> : <SunIcon />}
 

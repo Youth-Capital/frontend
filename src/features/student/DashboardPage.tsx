@@ -1,10 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import type { CSSProperties } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { StreakCard } from "./StreakCard";
 import { api } from "@/shared/api/client";
 import { CapitalBloom, CapitalUnlockList } from "@/shared/ui/CapitalBloom";
+import { PERIOD_DEFAULT } from "./PlanPeriod";
 import { matchTone, resolveTaskTitle } from "@/shared/lib/format";
 
 import { JourneyBand } from "./journey/JourneyBand";
@@ -45,7 +47,12 @@ export default function DashboardPage() {
 
   const generatePlan = useMutation({
     mutationFn: async () => {
-      const { data } = await api.post("/plan/plans/generate/", { period_days: 90 });
+      //: The same default the plan page offers. 90 was hardcoded here and is
+      //: no longer one of the presets — the length is chosen on the plan page,
+      //: and this shortcut should not quietly disagree with it.
+      const { data } = await api.post("/plan/plans/generate/", {
+        period_days: PERIOD_DEFAULT,
+      });
       return data;
     },
     onSuccess: () => {
@@ -87,7 +94,10 @@ export default function DashboardPage() {
         which is exactly what this replaces.
       */}
       {!data.intake_completed && (
-        <div className="flex flex-col gap-3 rounded-(--radius-card) border border-brand-200 bg-brand-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div
+          style={{ "--tint": "var(--aurora-3)" } as CSSProperties}
+          className="glass-tinted flex flex-col gap-3 rounded-(--radius-card) p-4 sm:flex-row sm:items-center sm:justify-between"
+        >
           <div>
             <p className="font-semibold text-ink-900">
               {t(data.intake_started ? "intake.resumeTitle" : "intake.startTitle")}
@@ -98,7 +108,7 @@ export default function DashboardPage() {
           </div>
           <Link
             to="/intake"
-            className="shrink-0 self-start rounded-(--radius-control) bg-brand-600 px-4 py-2.5 text-sm font-semibold text-on-colour hover:bg-brand-700 sm:self-auto"
+            className="shrink-0 self-start rounded-full bg-brand-fill px-5 py-3 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-fill-hover sm:self-auto"
           >
             {t(data.intake_started ? "intake.resumeCta" : "intake.startCta")}
           </Link>
@@ -152,7 +162,7 @@ export default function DashboardPage() {
                     type="button"
                     onClick={() => completeTask.mutate(task.id)}
                     disabled={completeTask.isPending}
-                    className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-ink-300 transition-colors hover:border-success hover:bg-success-soft"
+                    className="relative mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-ink-300 transition-colors hover:border-success hover:bg-success-soft before:absolute before:-inset-3.5 before:content-['']"
                     aria-label={t("plan.markDone")}
                   >
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
@@ -191,7 +201,7 @@ export default function DashboardPage() {
                   {task.ref_type === "Course" && task.ref_id && (
                     <Link
                       to={`/student/courses/${task.ref_id}`}
-                      className="shrink-0 text-sm font-medium text-brand-600 hover:text-brand-700"
+                      className="-my-3 shrink-0 py-3 text-sm font-medium text-brand-600 hover:text-brand-700"
                     >
                       {t("plan.openLinked")}
                     </Link>
@@ -204,8 +214,13 @@ export default function DashboardPage() {
           {data.plan && (
             <div className="mt-4 rounded-xl bg-brand-50 p-3">
               <div className="flex items-center justify-between gap-3 text-sm">
-                <span className="font-medium text-brand-800">
-                  {data.plan.title}
+                {/* The server stores this as a key with arguments, the same as
+                    a task title — `plan.generated.title::days=90::...`. Shown
+                    raw it is both untranslated and a 48-character word with
+                    nowhere to wrap, which was holding the whole dashboard open
+                    to 508px on a 390px phone. */}
+                <span className="min-w-0 font-medium text-brand-800">
+                  {resolveTaskTitle(data.plan.title, t)}
                 </span>
                 <span className="text-brand-700">
                   {t("dashboard.daysLeft", { count: data.plan.days_remaining })}
@@ -235,7 +250,7 @@ export default function DashboardPage() {
             {stats.matching_vacancies > 0 && (
               <Link
                 to="/student/jobs"
-                className="font-medium text-brand-600 hover:text-brand-700"
+                className="-my-3 py-3 font-medium text-brand-600 hover:text-brand-700"
               >
                 {t("dashboard.stats.matchingVacancies")}:{" "}
                 <span className="tabular-nums">{stats.matching_vacancies}</span>
@@ -268,7 +283,7 @@ export default function DashboardPage() {
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-ink-800">
+                      <p className="line-clamp-2 text-sm font-medium text-ink-800">
                         {recommendation.title}
                       </p>
                       <p className="mt-0.5 text-xs text-ink-500">

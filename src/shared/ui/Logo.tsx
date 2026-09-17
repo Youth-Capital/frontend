@@ -112,16 +112,20 @@ export function LogoMark({
 /**
  * The mark in its tile, as it appears in a header.
  *
- * The tile is the board's brand violet, written as a literal rather than taken
- * from `brand-600`: that ramp inverts under `[data-theme="dark"]` and the tile
+ * The tile is the brand violet, written as a literal rather than taken from
+ * `brand-600`: that ramp inverts under `[data-theme="dark"]` and the tile
  * would turn pale lilac while the mark stayed white, taking the whole thing to
  * 2.34:1 — under the 3:1 a mark answers to. A brand ground is not a step on a
  * ramp; it holds its value the way a cover does.
  *
- * White on that ground measures 6.38:1, the same in both themes.
+ * It is the periwinkle now, and the mark on it is the dark ink rather than
+ * white — the same flip the buttons made. A mark answers to 3:1 and this pair
+ * measures 7.04:1, so the tile has room to spare, which matters here: the
+ * logo is rendered at 20px in a header and at 96px on the sign-in panel, and
+ * a mark that only just clears at one size does not clear at the other.
  */
-const TILE_BG = "#6C4AB6";
-const TILE_INK = "#FFFFFF";
+const TILE_BG = "#C8B6FF";
+const TILE_INK = "#372863";
 
 export function Logo({
   size = 40,

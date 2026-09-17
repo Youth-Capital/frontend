@@ -95,7 +95,7 @@ export function LessonCheck({
     questions !== null && Object.keys(chosen).length === questions.length;
 
   return (
-    <div className="mt-4 rounded-(--radius-card) border border-ink-200 bg-surface p-4">
+    <div className="card mt-4 p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-sm font-semibold text-ink-900">

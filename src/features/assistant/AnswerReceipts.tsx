@@ -292,7 +292,7 @@ export function AnswerReceipts({ message }: { message: ChatMessage }) {
               <span className="flex-1 truncate text-ink-700">{axis.name}</span>
               <span className="h-1.5 w-24 overflow-hidden rounded-full bg-ink-100">
                 <i
-                  className="block h-full rounded-full bg-brand-600"
+                  className="block h-full rounded-full bg-brand-fill"
                   style={{ width: `${axis.has_data ? axis.score : 0}%` }}
                 />
               </span>
