@@ -64,9 +64,10 @@ export default function NotificationsPage() {
       <div className="flex flex-col gap-2">
         {notifications.data?.map((notification) => {
           // The payload is machine output until it is made readable: dates
-          // arrive as ISO timestamps and a status arrives as its enum name.
+          // arrive as ISO timestamps, a status arrives as its enum name, and a
+          // title the server generated arrives as a translation key.
           const body = t(notification.body_key, {
-            ...humanisePayload(notification.payload, i18n.resolvedLanguage),
+            ...humanisePayload(notification.payload, i18n.resolvedLanguage, t),
             status: notification.payload.status
               ? t(`applications.status.${notification.payload.status as string}`, {
                   defaultValue: String(notification.payload.status),

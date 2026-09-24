@@ -30,10 +30,19 @@ export const setSessionExpiredHandler = (handler: () => void): void => {
   onSessionExpired = handler;
 };
 
+/*
+ * Sent with every request. The server refuses a refresh or a logout without
+ * it: those two act on the refresh cookie alone, so they are the only
+ * endpoints another site could drive with this person's credentials attached.
+ * A form on another origin cannot set a header, and a script there has to ask
+ * the browser first — which CORS refuses. See apps/accounts/authentication.py.
+ */
+const APP_HEADERS = { "X-Requested-With": "XMLHttpRequest" } as const;
+
 export const api: AxiosInstance = axios.create({
   baseURL: BASE_URL,
   withCredentials: true, // send the refresh cookie
-  headers: { "Content-Type": "application/json" },
+  headers: { "Content-Type": "application/json", ...APP_HEADERS },
 });
 
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
@@ -74,10 +83,12 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 let refreshPromise: Promise<string> | null = null;
 
 const refreshAccessToken = async (): Promise<string> => {
+  // Plain axios rather than `api`, so the 401 interceptor below cannot loop on
+  // its own refresh — which also means it does not inherit `api`'s headers.
   const response = await axios.post<{ access: string }>(
     `${BASE_URL}/auth/refresh/`,
     {},
-    { withCredentials: true },
+    { withCredentials: true, headers: APP_HEADERS },
   );
   return response.data.access;
 };

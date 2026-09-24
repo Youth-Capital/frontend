@@ -1070,6 +1070,13 @@
         "title": "Sharhingizga javob berildi",
         "body": "{{response}}"
       }
+    },
+    "security": {
+      "newDevice": {
+        "title": "Yangi qurilmadan kirish",
+        "body": "{{browser}} · {{system}}, IP {{ip}}. Agar bu siz bo'lmasangiz, parolni o'zgartiring.",
+        "bodyUnknown": "Qurilma aniqlanmadi, IP {{ip}}. Agar bu siz bo'lmasangiz, parolni o'zgartiring."
+      }
     }
   },
   "education": {

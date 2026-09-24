@@ -1070,6 +1070,13 @@
         "title": "Your review got a reply",
         "body": "{{response}}"
       }
+    },
+    "security": {
+      "newDevice": {
+        "title": "New device signed in",
+        "body": "{{browser}} · {{system}}, IP {{ip}}. If this was not you, change your password.",
+        "bodyUnknown": "Device not recognised, IP {{ip}}. If this was not you, change your password."
+      }
     }
   },
   "education": {

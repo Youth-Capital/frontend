@@ -63,21 +63,34 @@ const ISO_DATETIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?(\.\d+)?(Z|[+-]\d{2
  *
  * Doing this per notification type would mean remembering it for every new
  * one, and the one that gets forgotten is the one a student reads. So it is
- * done here, by shape: anything that is an ISO timestamp becomes a date the
- * reader recognises, in their own language.
+ * done here, by shape, and there are two shapes to undo.
+ *
+ * An ISO timestamp becomes a date the reader recognises, in their own
+ * language. And a value the server stored as a translation key with arguments
+ * — `plan.generated.title::days=90::profession=...` — becomes the sentence it
+ * stands for. That second one was reaching the notifications page verbatim:
+ * the plan-ready notification interpolates the plan's title, and the title the
+ * server stores is a key, not a sentence. Pass `t` and it is resolved; without
+ * it the value is left alone, which is what every non-key string wants anyway.
  */
 export function humanisePayload(
   payload: Record<string, unknown> | null | undefined,
   language = "uz",
+  t?: (key: string, options?: Record<string, unknown>) => string,
 ): Record<string, unknown> {
   if (!payload) return {};
 
   const humanised: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(payload)) {
-    humanised[key] =
-      typeof value === "string" && ISO_DATETIME.test(value)
-        ? formatDateTime(value, language)
-        : value;
+    if (typeof value !== "string") {
+      humanised[key] = value;
+    } else if (ISO_DATETIME.test(value)) {
+      humanised[key] = formatDateTime(value, language);
+    } else {
+      // resolveTaskTitle returns anything that is not a key untouched, so a
+      // course name typed by a person passes through as itself.
+      humanised[key] = t ? resolveTaskTitle(value, t) : value;
+    }
   }
   return humanised;
 }
