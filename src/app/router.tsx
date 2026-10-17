@@ -7,7 +7,7 @@ import { EmployerLayout } from "@/app/layouts/EmployerLayout";
 import { FocusLayout } from "@/app/layouts/FocusLayout";
 import { StudentLayout } from "@/app/layouts/StudentLayout";
 import { RedirectIfAuthenticated, RequireRole } from "@/shared/auth/RequireRole";
-import { HOME_BY_ROLE, useAuth } from "@/shared/auth/AuthContext";
+import { homeForUser, useAuth } from "@/shared/auth/AuthContext";
 import { FullPageSpinner } from "@/shared/ui";
 
 /*
@@ -16,6 +16,7 @@ import { FullPageSpinner } from "@/shared/ui";
  */
 const LoginPage = lazy(() => import("@/features/auth/LoginPage"));
 const RegisterPage = lazy(() => import("@/features/auth/RegisterPage"));
+const VerifyEmailPage = lazy(() => import("@/features/auth/VerifyEmailPage"));
 const ResetPasswordPage = lazy(() => import("@/features/auth/ResetPasswordPage"));
 const OnboardingPage = lazy(() => import("@/features/auth/OnboardingPage"));
 const IntakePage = lazy(() => import("@/features/auth/IntakePage"));
@@ -89,7 +90,7 @@ function Lazy({ children }: { children: ReactNode }) {
 function RootEntry() {
   const { user, isLoading } = useAuth();
   if (isLoading) return <FullPageSpinner />;
-  if (user) return <Navigate to={HOME_BY_ROLE[user.role]} replace />;
+  if (user) return <Navigate to={homeForUser(user)} replace />;
   return (
     <Lazy>
       <LandingPage />
@@ -111,6 +112,7 @@ export const router = createBrowserRouter([
       { index: true, element: <Navigate to="login" replace /> },
       { path: "login", element: <Lazy><LoginPage /></Lazy> },
       { path: "register", element: <Lazy><RegisterPage /></Lazy> },
+      { path: "verify-email", element: <Lazy><VerifyEmailPage /></Lazy> },
       { path: "reset-password", element: <Lazy><ResetPasswordPage /></Lazy> },
     ],
   },

@@ -2,7 +2,7 @@ import { useId, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 
-import { HOME_BY_ROLE, useAuth, type RegisterPayload } from "@/shared/auth/AuthContext";
+import { homeForUser, useAuth, type RegisterPayload } from "@/shared/auth/AuthContext";
 import { useApiError } from "@/shared/hooks/useApiError";
 import { Button, Input } from "@/shared/ui";
 import type { Language } from "@/shared/types/api";
@@ -107,10 +107,8 @@ export default function RegisterPage() {
     setBusy(true);
     try {
       const user = await register(payload);
-      // A brand new learner goes to the intake interview, not to an empty
-      // dashboard — the old form wizard was skippable, which is how accounts
-      // ended up on a dashboard with zero skills and nothing to do.
-      navigate(role === "STUDENT" ? "/intake" : HOME_BY_ROLE[user.role], {
+      // Verify mailbox ownership first; verified learners continue to intake.
+      navigate(homeForUser(user), {
         replace: true,
       });
     } catch (caught) {

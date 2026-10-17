@@ -6,6 +6,7 @@
 
 # Dependencies and build output
 node_modules/
+.cache/
 dist/
 .vite/
 *.tsbuildinfo

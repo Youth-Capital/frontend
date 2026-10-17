@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 
-import { HOME_BY_ROLE, useAuth } from "@/shared/auth/AuthContext";
+import { homeForUser, useAuth } from "@/shared/auth/AuthContext";
 import { useApiError } from "@/shared/hooks/useApiError";
 import { Button, Input } from "@/shared/ui";
 
@@ -23,7 +23,7 @@ export default function LoginPage() {
     setBusy(true);
     try {
       const user = await login(email.trim(), password);
-      navigate(HOME_BY_ROLE[user.role], { replace: true });
+      navigate(homeForUser(user), { replace: true });
     } catch (caught) {
       setError(describeError(caught));
     } finally {

@@ -73,6 +73,11 @@
     "send": "Отправить"
   },
   "errors": {
+    "email_verification_required": "Подтвердите email, чтобы продолжить.",
+    "email_already_verified": "Email уже подтверждён. Обновите страницу.",
+    "verification_rate_limited": "Подождите перед запросом нового кода.",
+    "verification_code_expired": "Срок действия кода или попытки закончились. Запросите новый код.",
+    "verification_code_invalid": "Неверный код. Осталось попыток: {{attempts_remaining}}.",
     "generic": "Что-то пошло не так.",
     "network_error": "Нет связи с сервером.",
     "invalid_credentials": "Неверный email или пароль.",
@@ -147,6 +152,18 @@
     "not_your_learner": "Вы не работаете с этим учеником."
   },
   "auth": {
+    "verifyTitle": "Подтвердите email",
+    "verifySubtitle": "Перед продолжением подтвердите, что {{email}} принадлежит вам.",
+    "verifySent": "Мы отправили шестизначный код. Введите его ниже.",
+    "verifySendNotice": "Если код не пришёл, запросите новый ниже. Проверьте адрес email.",
+    "verifyCode": "Код подтверждения",
+    "verifyCodeHint": "Введите все шесть цифр из письма, включая нули в начале.",
+    "verifyExpires": "Код истечёт через {{time}}",
+    "verifySubmit": "Подтвердить и продолжить",
+    "verifyResend": "Отправить новый код",
+    "verifyResendWait": "Повторная отправка через {{seconds}} с",
+    "verifySpamHint": "Проверьте папку «Спам». Работает только последний запрошенный код.",
+    "verifyDifferentAccount": "Выйти и использовать другой аккаунт",
     "login": "Войти",
     "register": "Создать аккаунт",
     "email": "Email",

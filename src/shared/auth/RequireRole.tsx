@@ -4,7 +4,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import { FullPageSpinner } from "@/shared/ui/Spinner";
 import type { Role } from "@/shared/types/api";
 
-import { HOME_BY_ROLE, useAuth } from "./AuthContext";
+import { HOME_BY_ROLE, homeForUser, useAuth } from "./AuthContext";
 
 interface Props {
   roles?: Role[];
@@ -30,6 +30,10 @@ export function RequireRole({ roles, children }: Props) {
     return <Navigate to="/auth/login" state={{ from: location }} replace />;
   }
 
+  if (!user.email_verified) {
+    return <Navigate to="/auth/verify-email" replace />;
+  }
+
   if (roles && !roles.includes(user.role)) {
     return <Navigate to={HOME_BY_ROLE[user.role]} replace />;
   }
@@ -39,8 +43,11 @@ export function RequireRole({ roles, children }: Props) {
 
 export function RedirectIfAuthenticated({ children }: { children: ReactNode }) {
   const { user, isLoading } = useAuth();
+  const location = useLocation();
 
   if (isLoading) return <FullPageSpinner />;
-  if (user) return <Navigate to={HOME_BY_ROLE[user.role]} replace />;
+  if (user && !(location.pathname === "/auth/verify-email" && !user.email_verified)) {
+    return <Navigate to={homeForUser(user)} replace />;
+  }
   return <>{children}</>;
 }

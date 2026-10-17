@@ -73,6 +73,11 @@
     "send": "Send"
   },
   "errors": {
+    "email_verification_required": "Verify your email to continue.",
+    "email_already_verified": "Your email is already verified. Refresh the page.",
+    "verification_rate_limited": "Please wait before requesting another code.",
+    "verification_code_expired": "This code has expired or has no attempts left. Request a new code.",
+    "verification_code_invalid": "Incorrect code. Attempts remaining: {{attempts_remaining}}.",
     "generic": "Something went wrong.",
     "network_error": "No connection to the server.",
     "invalid_credentials": "Invalid email or password.",
@@ -147,6 +152,18 @@
     "not_your_learner": "You do not work with this learner."
   },
   "auth": {
+    "verifyTitle": "Verify your email",
+    "verifySubtitle": "Confirm that {{email}} belongs to you before continuing.",
+    "verifySent": "We sent you a six-digit code. Enter it below.",
+    "verifySendNotice": "If no code arrives, request another below. Check that your email address is correct.",
+    "verifyCode": "Verification code",
+    "verifyCodeHint": "Enter all six digits from the email, including any leading zeros.",
+    "verifyExpires": "Code expires in {{time}}",
+    "verifySubmit": "Verify and continue",
+    "verifyResend": "Send a new code",
+    "verifyResendWait": "Send again in {{seconds}}s",
+    "verifySpamHint": "Check your spam folder. Only the most recently requested code works.",
+    "verifyDifferentAccount": "Sign out and use another account",
     "login": "Sign in",
     "register": "Create account",
     "email": "Email",

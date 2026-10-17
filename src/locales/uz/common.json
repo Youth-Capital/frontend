@@ -73,6 +73,11 @@
     "send": "Yuborish"
   },
   "errors": {
+    "email_verification_required": "Davom etish uchun email manzilingizni tasdiqlang.",
+    "email_already_verified": "Email manzilingiz tasdiqlangan. Sahifani yangilang.",
+    "verification_rate_limited": "Yangi kod so'rashdan oldin biroz kuting.",
+    "verification_code_expired": "Kod muddati yoki urinishlar soni tugagan. Yangi kod so'rang.",
+    "verification_code_invalid": "Kod noto'g'ri. Qolgan urinishlar: {{attempts_remaining}}.",
     "generic": "Nimadir xato ketdi.",
     "network_error": "Server bilan aloqa yo'q.",
     "invalid_credentials": "Email yoki parol noto'g'ri.",
@@ -147,6 +152,18 @@
     "not_your_learner": "Siz bu o'quvchi bilan ishlamaysiz."
   },
   "auth": {
+    "verifyTitle": "Email manzilingizni tasdiqlang",
+    "verifySubtitle": "Davom etishdan oldin {{email}} sizga tegishli ekanini tasdiqlang.",
+    "verifySent": "Emailingizga olti xonali kod yubordik. Uni quyida kiriting.",
+    "verifySendNotice": "Kod kelmasa, quyida yangisini so'rang. Email manzilingiz to'g'riligini tekshiring.",
+    "verifyCode": "Tasdiqlash kodi",
+    "verifyCodeHint": "Emaildagi olti raqamni, shu jumladan boshidagi nollarni ham kiriting.",
+    "verifyExpires": "Kod {{time}} dan keyin eskiradi",
+    "verifySubmit": "Tasdiqlash va davom etish",
+    "verifyResend": "Yangi kod yuborish",
+    "verifyResendWait": "{{seconds}} soniyadan keyin qayta yuborish",
+    "verifySpamHint": "Spam jildini tekshiring. Faqat oxirgi so'ralgan kod ishlaydi.",
+    "verifyDifferentAccount": "Chiqish va boshqa hisobdan foydalanish",
     "login": "Kirish",
     "register": "Hisob yaratish",
     "email": "Email",

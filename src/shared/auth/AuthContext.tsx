@@ -13,7 +13,6 @@ import {
   api,
   setAccessToken,
   setSessionExpiredHandler,
-  toApiError,
 } from "@/shared/api/client";
 import type { Language, Role, User } from "@/shared/types/api";
 
@@ -130,7 +129,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         applySession(data.access, data.user);
         return data.user;
       } catch (error) {
-        throw toApiError(error);
+        throw error;
       }
     },
     [applySession],
@@ -146,7 +145,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         applySession(data.access, data.user);
         return data.user;
       } catch (error) {
-        throw toApiError(error);
+        throw error;
       }
     },
     [applySession],
@@ -196,3 +195,12 @@ export const HOME_BY_ROLE: Record<Role, string> = {
   EMPLOYER: "/employer/dashboard",
   ADMIN: "/admin/dashboard",
 };
+
+export function homeForUser(user: User): string {
+  if (!user.email_verified) return "/auth/verify-email";
+  if (
+    user.role === "STUDENT" && user.profile &&
+    "onboarding_completed" in user.profile && !user.profile.onboarding_completed
+  ) return "/intake";
+  return HOME_BY_ROLE[user.role];
+}
