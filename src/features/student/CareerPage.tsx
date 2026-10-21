@@ -2,19 +2,19 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PageHeader } from "@/shared/ui/PageHeader";
 import "@/shared/styles/deep.css";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
-
 import { api } from "@/shared/api/client";
 import { useAuth } from "@/shared/auth/AuthContext";
 import { scoreTone } from "@/shared/lib/format";
 import {
-  Badge,
   Button,
   Card,
   CardHeader,
   CardSkeleton,
+  DataList,
+  DataRow,
   EmptyState,
   ProgressBar,
+  SectionLabel,
   Select,
 } from "@/shared/ui";
 import type {
@@ -38,6 +38,9 @@ interface CareerPathResponse {
     level: string;
     duration_minutes: number;
     rating: number;
+    /** Set for a course taken on the partner's site (Coursera). */
+    external_url: string;
+    provider_name: string;
   }[];
   related_vacancies: {
     id: string;
@@ -143,76 +146,88 @@ export default function CareerPage() {
           <div className="grid gap-4 lg:grid-cols-3">
             <SkillColumn
               title={t("career.haveSkills")}
-              tone="success"
               entries={careerPath.data.matching_skills}
             />
             <SkillColumn
               title={t("career.partialSkills")}
-              tone="warning"
               entries={careerPath.data.partial_skills}
             />
             <SkillColumn
               title={t("career.missingSkills")}
-              tone="danger"
               entries={careerPath.data.missing_skills}
             />
           </div>
 
           <div className="grid gap-6 lg:grid-cols-2">
-            <Card>
-              <CardHeader title={t("career.recommendedCourses")} />
+            <Card className="self-start">
+              <SectionLabel>{t("career.recommendedCourses")}</SectionLabel>
               {careerPath.data.recommended_courses.length === 0 ? (
                 <EmptyState title={t("courses.empty")} />
               ) : (
-                <ul className="flex flex-col gap-2">
+                <DataList>
                   {careerPath.data.recommended_courses.map((course) => (
-                    <li key={course.id}>
-                      <Link
-                        to={`/student/courses/${course.id}`}
-                        className="flex items-center justify-between gap-3 rounded-xl border border-ink-200 p-3 hover:border-brand-400"
-                      >
-                        <div className="min-w-0">
-                          <p className="line-clamp-2 text-sm font-medium text-ink-800">
+                    <DataRow
+                      key={course.id}
+                      title={
+                        course.external_url ? (
+                          <>
                             {course.title}
-                          </p>
-                          <p className="text-xs text-ink-500">
-                            {t(`courses.level_${course.level}`)} ·{" "}
-                            {t("common.minutes", { count: course.duration_minutes })}
-                          </p>
-                        </div>
-                        <Badge tone="brand">★ {course.rating}</Badge>
-                      </Link>
-                    </li>
+                            <span aria-hidden className="ml-1.5 text-ink-500">
+                              ↗
+                            </span>
+                          </>
+                        ) : (
+                          course.title
+                        )
+                      }
+                      meta={[
+                        t(`courses.level_${course.level}`),
+                        course.external_url ? course.provider_name : null,
+                        course.duration_minutes > 0
+                          ? t("common.minutes", {
+                              count: course.duration_minutes,
+                            })
+                          : null,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                      /* The rating is the one figure worth comparing down a
+                         list of courses; an external one has none of ours. */
+                      value={
+                        course.external_url ? undefined : `★ ${course.rating}`
+                      }
+                      to={
+                        course.external_url
+                          ? undefined
+                          : `/student/courses/${course.id}`
+                      }
+                      href={course.external_url || undefined}
+                    />
                   ))}
-                </ul>
+                </DataList>
               )}
             </Card>
 
-            <Card>
-              <CardHeader title={t("career.relatedVacancies")} />
+            <Card className="self-start">
+              <SectionLabel>{t("career.relatedVacancies")}</SectionLabel>
               {careerPath.data.related_vacancies.length === 0 ? (
                 <EmptyState title={t("jobs.empty")} />
               ) : (
-                <ul className="flex flex-col gap-2">
+                <DataList>
                   {careerPath.data.related_vacancies.map((vacancy) => (
-                    <li key={vacancy.id}>
-                      <Link
-                        to={`/student/jobs/${vacancy.id}`}
-                        className="flex items-center justify-between gap-3 rounded-xl border border-ink-200 p-3 hover:border-brand-400"
-                      >
-                        <div className="min-w-0">
-                          <p className="line-clamp-2 text-sm font-medium text-ink-800">
-                            {vacancy.title}
-                          </p>
-                          <p className="text-xs text-ink-500">{vacancy.company}</p>
-                        </div>
-                        <Badge tone="neutral">
-                          {t(`jobs.type_${vacancy.employment_type}`)}
-                        </Badge>
-                      </Link>
-                    </li>
+                    <DataRow
+                      key={vacancy.id}
+                      title={vacancy.title}
+                      meta={[
+                        vacancy.company,
+                        t(`jobs.type_${vacancy.employment_type}`),
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                      to={`/student/jobs/${vacancy.id}`}
+                    />
                   ))}
-                </ul>
+                </DataList>
               )}
             </Card>
           </div>
@@ -278,49 +293,47 @@ export default function CareerPage() {
 
 function SkillColumn({
   title,
-  tone,
   entries,
 }: {
   title: string;
-  tone: "success" | "warning" | "danger";
   entries: SkillGapEntry[];
 }) {
   const { t } = useTranslation();
 
   return (
-    <Card>
-      <CardHeader
-        title={
-          <span className="flex items-center gap-2">
-            {title}
-            <Badge tone={tone}>{entries.length}</Badge>
-          </span>
-        }
-      />
+    /*
+      Three of these sit side by side, and they used to be three bordered
+      panels of bordered rows with a count in a coloured pill — green, amber
+      and pink for what is one scale, so the colour said nothing the number did
+      not. The heading is now a label, the count rides with it, and the levels
+      sit in their own right-aligned column where "0 / 65" can be read down the
+      list instead of being found inside a sentence.
+
+      `self-start` is the other half of it: the three columns used to stretch to
+      the tallest, so a profession with nothing in the middle band showed a
+      half-screen of empty frosted glass.
+    */
+    <Card className="self-start">
+      <SectionLabel count={entries.length}>{title}</SectionLabel>
       {entries.length === 0 ? (
-        <p className="text-sm text-ink-400">{t("common.none")}</p>
+        /* ink-400 measures 3.07:1 on glass — a fill weight, not a text one. */
+        <p className="text-sm text-ink-500">{t("common.none")}</p>
       ) : (
-        <ul className="flex flex-col gap-2">
+        <DataList>
           {entries.map((entry) => (
-            <li
+            <DataRow
               key={entry.skill_id}
-              className="rounded-xl border border-ink-200 px-3 py-2"
-            >
-              <div className="flex items-center justify-between gap-2">
-                <span className="truncate text-sm text-ink-800">{entry.skill}</span>
-                {entry.verified && <Badge tone="success">✓</Badge>}
-              </div>
-              <p className="mt-0.5 text-xs text-ink-500">
-                {t("career.level", {
-                  current: entry.current_level,
-                  required: entry.required_level,
-                })}
-                {entry.requirement === "PREFERRED" &&
-                  ` · ${t("requirement.PREFERRED")}`}
-              </p>
-            </li>
+              title={entry.skill}
+              mark={entry.verified ? "success" : undefined}
+              meta={
+                entry.requirement === "PREFERRED"
+                  ? t("requirement.PREFERRED")
+                  : undefined
+              }
+              value={`${entry.current_level} / ${entry.required_level}`}
+            />
           ))}
-        </ul>
+        </DataList>
       )}
     </Card>
   );

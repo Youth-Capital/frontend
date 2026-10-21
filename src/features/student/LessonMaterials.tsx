@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import type { ReactNode } from "react";
 
 import { LessonVideo } from "./LessonVideo";
+import { formatFileSize } from "@/shared/lib/format";
 import { Tile, type TileHue } from "@/shared/ui";
 import type { CourseMaterial, MaterialKind } from "@/shared/types/api";
 
@@ -148,7 +149,7 @@ export function LessonMaterials({ materials }: { materials: CourseMaterial[] }) 
                     </span>
                     {item.file_size != null && (
                       <span className="text-xs tabular-nums text-ink-400">
-                        {Math.max(1, Math.round(item.file_size / 1024))} KB
+                        {formatFileSize(item.file_size)}
                       </span>
                     )}
                   </div>

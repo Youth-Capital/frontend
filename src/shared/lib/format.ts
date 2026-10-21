@@ -178,3 +178,10 @@ export function resolveTaskTitle(
   }
   return t(key, { ...params, defaultValue: title });
 }
+
+/** A file size a person can read: KB below a megabyte, MB above it. */
+export function formatFileSize(bytes: number): string {
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  const mb = bytes / (1024 * 1024);
+  return `${mb < 10 ? mb.toFixed(1) : Math.round(mb)} MB`;
+}

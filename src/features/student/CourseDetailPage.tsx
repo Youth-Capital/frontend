@@ -8,6 +8,7 @@ import { useApiError } from "@/shared/hooks/useApiError";
 import {
   Badge,
   Button,
+  buttonClassName,
   Card,
   CardHeader,
   CardSkeleton,
@@ -77,6 +78,65 @@ export default function CourseDetailPage() {
   }
 
   const data = course.data;
+
+  // Taken on the partner's site: nothing to enrol on or read here, so the
+  // page is the course's description and the way out to where it lives. The
+  // plan and the dashboard link here by id, which is why this view exists at
+  // all rather than every link going straight out.
+  if (data.external_url) {
+    return (
+      <div className="flex flex-col gap-6">
+        <Link to="/student/courses" className="text-sm text-brand-600 hover:text-brand-700">
+          ← {t("common.back")}
+        </Link>
+
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge tone="neutral">{t(`courses.level_${data.level}`)}</Badge>
+              <span className="text-sm text-ink-500">{data.provider_name}</span>
+              {data.is_certified && <Badge tone="brand">{t("courses.certificate")}</Badge>}
+            </div>
+            <h1 className="mt-2 text-2xl font-semibold text-ink-900">{data.title}</h1>
+            <p className="mt-2 max-w-2xl text-sm text-ink-600">{data.summary}</p>
+            {data.description && (
+              <p className="mt-2 max-w-2xl text-sm text-ink-500">{data.description}</p>
+            )}
+          </div>
+
+          <div className="w-full shrink-0 lg:w-64">
+            <Card>
+              <a
+                href={data.external_url}
+                target="_blank"
+                rel="noreferrer noopener"
+                className={buttonClassName({ fullWidth: true })}
+              >
+                {t("courses.opensOn", { name: data.external_platform || data.provider_name })} ↗
+              </a>
+              <p className="mt-3 text-xs text-ink-500">
+                {t("courses.externalHint", { name: data.external_platform || data.provider_name })}
+              </p>
+            </Card>
+          </div>
+        </div>
+
+        {data.skills.length > 0 && (
+          <Card>
+            <CardHeader title={t("courses.skillsYouGain")} />
+            <div className="flex flex-wrap gap-2">
+              {data.skills.map((skill) => (
+                <Badge key={skill.id} tone="brand">
+                  {skill.name}
+                </Badge>
+              ))}
+            </div>
+          </Card>
+        )}
+      </div>
+    );
+  }
+
   const totalLessons =
     data.modules?.reduce((sum, module) => sum + module.lessons.length, 0) ?? 0;
 

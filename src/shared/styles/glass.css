@@ -51,8 +51,61 @@
   --aurora-strength: 85%;
   --aurora-mid: 42%;
 
-  /* The panel. 68% of the surface colour, 32% of whatever is behind it. */
-  --glass-alpha: 68%;
+  /*
+   * The orbs.
+   *
+   * The five hues are pastels at 85–92% lightness, and a wash of them on a
+   * near-white page is so pale that a frosted panel over it has nothing to
+   * frost: the panels read as plain white cards and the whole effect is spent.
+   * These are the same five hues taken down toward the brand violet until they
+   * are a colour rather than a tint, painted as a few large soft spheres
+   * behind everything.
+   *
+   * Mixed, not written out, so the dark theme gets the same treatment without
+   * a second set of values — there the mix lands on a deep ground and reads as
+   * lit glass instead of a pastel balloon.
+   *
+   * `--orb-depth` is the one number that decides how much colour ends up
+   * behind a panel, and therefore what text sits on. It is the same dependency
+   * the header describes: raising it re-opens the contrast question, and the
+   * measured ratios in index.css are taken at this value.
+   */
+  /*
+   * The page field.
+   *
+   * The five stops are pastels at 85-92% lightness, and washed over a
+   * near-white page they produce a page that is, to the eye, white. The
+   * reference the owner gave is a field of lilac with the panels sitting in
+   * it. These are the same five hues brought down far enough to be a colour,
+   * and they are what the body paints; the stops themselves stay untouched so
+   * tiles, chips and the stage keep their pastel character.
+   */
+  --wash-depth: 22%;
+  --wash-1: color-mix(in oklab, var(--aurora-1) calc(100% - var(--wash-depth)), var(--color-brand-400));
+  --wash-2: color-mix(in oklab, var(--aurora-2) calc(100% - var(--wash-depth)), var(--color-brand-400));
+  --wash-3: color-mix(in oklab, var(--aurora-3) calc(100% - var(--wash-depth)), var(--color-brand-400));
+  --wash-4: color-mix(in oklab, var(--aurora-4) calc(100% - var(--wash-depth)), var(--color-brand-400));
+  --wash-5: color-mix(in oklab, var(--aurora-5) calc(100% - var(--wash-depth)), var(--color-brand-400));
+
+  --orb-depth: 54%;
+  --orb-alpha: 92%;
+  --orb-1: color-mix(in oklab, var(--aurora-1) calc(100% - var(--orb-depth)), var(--color-brand-400));
+  --orb-2: color-mix(in oklab, var(--aurora-3) calc(100% - var(--orb-depth)), var(--color-brand-400));
+  --orb-3: color-mix(in oklab, var(--aurora-5) calc(100% - var(--orb-depth)), var(--color-brand-400));
+  --orb-4: color-mix(in oklab, var(--aurora-2) calc(100% - var(--orb-depth)), var(--color-brand-400));
+
+  /*
+   * The panel. 76% of the surface colour, 24% of whatever is behind it.
+   *
+   * It was 68%. The orbs put real colour behind the glass, and at 68% that
+   * colour came through far enough to move the composite every text weight in
+   * index.css was solved against — measured on the rendered page, the panel
+   * ground went from #EDE8FF to #ECE0FF and nine tokens fell from 4.5-ish to
+   * 4.37:1. Raising the panel is one change instead of re-solving nine, and it
+   * costs nothing visually: what reads as glass is the difference between the
+   * panel and the backdrop, and the backdrop is far stronger than it was.
+   */
+  --glass-alpha: 76%;
   /* The edge: a light rim, brighter than the fill, the way a real pane
      catches light along its cut. */
   --glass-edge-alpha: 86%;
@@ -76,13 +129,34 @@
   --aurora-strength: 78%;
   --aurora-mid: 40%;
 
-  --glass-alpha: 78%;
+  /* 86%, not the 78% this was: the orbs are deeper here too, and the dark
+     composite is the tighter of the two — ink-500 cleared 4.5:1 by two
+     hundredths at 84%, which is not a margin. */
+  --glass-alpha: 86%;
   --glass-edge-alpha: 40%;
 
   /* On a dark ground a tint lightens the card and takes contrast away, which
      is the opposite of what it does on light. The ceiling is lower. */
   --glass-tint: 17%;
   --glass-tint-edge: 30%;
+
+  /* The orbs are already deep here — the aurora stops are the deepened hues —
+     so they are mixed toward the lit end instead, or they would be five dark
+     circles on a dark page and invisible. */
+  /* Deep already; the wash mixes toward the lit end here, like the orbs. */
+  --wash-depth: 16%;
+  --wash-1: color-mix(in oklab, var(--aurora-1) calc(100% - var(--wash-depth)), var(--color-brand-500));
+  --wash-2: color-mix(in oklab, var(--aurora-2) calc(100% - var(--wash-depth)), var(--color-brand-500));
+  --wash-3: color-mix(in oklab, var(--aurora-3) calc(100% - var(--wash-depth)), var(--color-brand-500));
+  --wash-4: color-mix(in oklab, var(--aurora-4) calc(100% - var(--wash-depth)), var(--color-brand-500));
+  --wash-5: color-mix(in oklab, var(--aurora-5) calc(100% - var(--wash-depth)), var(--color-brand-500));
+
+  --orb-depth: 42%;
+  --orb-alpha: 88%;
+  --orb-1: color-mix(in oklab, var(--aurora-1) calc(100% - var(--orb-depth)), var(--color-brand-500));
+  --orb-2: color-mix(in oklab, var(--aurora-3) calc(100% - var(--orb-depth)), var(--color-brand-500));
+  --orb-3: color-mix(in oklab, var(--aurora-5) calc(100% - var(--orb-depth)), var(--color-brand-500));
+  --orb-4: color-mix(in oklab, var(--aurora-2) calc(100% - var(--orb-depth)), var(--color-brand-500));
 }
 
 /*

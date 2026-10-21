@@ -17,13 +17,18 @@ import {
 } from "@/shared/ui";
 import type { Course, Paginated, SkillCategory } from "@/shared/types/api";
 
+import { CourseSkillsEditor } from "./CourseSkillsEditor";
 import { LessonEditor } from "./LessonEditor";
 import {
   MaterialsEditor,
   StagedMaterialsEditor,
+  firstDetail,
   materialErrorText,
   useStagedMaterials,
 } from "./MaterialsEditor";
+
+/** Where the course is taken: here, as lessons, or on another platform. */
+type Delivery = "platform" | "external";
 
 /**
  * Building a course, on a page rather than in a box.
@@ -103,7 +108,10 @@ export default function CourseEditorPage() {
     category: "",
     level: "BEGINNER",
     duration_minutes: 120,
+    external_url: "",
   });
+  const [delivery, setDelivery] = useState<Delivery>("platform");
+  const [urlError, setUrlError] = useState("");
 
   // Once the course arrives, the form becomes its editor.
   const loaded = course.data;
@@ -116,24 +124,35 @@ export default function CourseEditorPage() {
       category: loaded.category ?? "",
       level: loaded.level,
       duration_minutes: loaded.duration_minutes,
+      external_url: loaded.external_url ?? "",
     });
+    setDelivery(loaded.external_url ? "external" : "platform");
     setHydrated(true);
   }
 
+  const external = delivery === "external";
+  // Lessons already written pin the course to the platform: the server
+  // refuses to turn it into a link, so the switch is not offered.
+  const hasLessons = (loaded?.modules?.length ?? 0) > 0;
+
   const save = useMutation({
     mutationFn: async () => {
+      // Switching back to "on the platform" clears the link rather than
+      // leaving a hidden one behind.
+      const body = { ...form, external_url: external ? form.external_url.trim() : "" };
       if (creating) {
-        const { data } = await api.post<Course>("/learning/courses/", form);
+        const { data } = await api.post<Course>("/learning/courses/", body);
         return data;
       }
       const { data } = await api.patch<Course>(
         `/learning/courses/${courseId}/`,
-        form,
+        body,
       );
       return data;
     },
     onSuccess: async (data) => {
       setError("");
+      setUrlError("");
       /*
        * The course exists now, so anything staged has somewhere to go.
        *
@@ -142,7 +161,9 @@ export default function CourseEditorPage() {
        * saved either way, and silently dropping an author's upload because
        * the third of five was rejected would be the worst possible outcome.
        */
-      if (creating && staged.length > 0) {
+      // Not for a course taken elsewhere: anything staged before the switch
+      // to "on Coursera" belongs to a course this is no longer.
+      if (creating && !external && staged.length > 0) {
         const failure = await flush(data.id);
         setMaterialError(failure ? materialErrorText(failure, t) : "");
       }
@@ -153,20 +174,30 @@ export default function CourseEditorPage() {
     },
     onError: (err) => {
       const api_error = toApiError(err);
+      // The server's own sentence for the link ("paste a course page on
+      // Coursera") says what to fix; a generic error would not.
+      setUrlError(firstDetail(api_error.details, "external_url") ?? "");
       setError(
         t(`errors.${api_error.code}`, { defaultValue: t("errors.generic") }),
       );
     },
   });
 
+  const [publishError, setPublishError] = useState("");
   const publish = useMutation({
     mutationFn: async () => {
       await api.post(`/learning/courses/${courseId}/submit/`);
     },
     onSuccess: () => {
+      setPublishError("");
       void queryClient.invalidateQueries({ queryKey: ["employer-course"] });
       void queryClient.invalidateQueries({ queryKey: ["employer-courses"] });
     },
+    // It used to fail silently: "add a lesson first" was sent and never shown.
+    onError: (err) =>
+      setPublishError(
+        t(`errors.${toApiError(err).code}`, { defaultValue: t("errors.generic") }),
+      ),
   });
 
   if (!creating && course.isLoading) {
@@ -212,10 +243,65 @@ export default function CourseEditorPage() {
         }
       />
 
+      {publishError && (
+        <div role="alert" className="rounded-xl bg-danger-soft px-3 py-2 text-sm text-danger">
+          {publishError}
+        </div>
+      )}
+
       {/* ------------------------------------------------- the course itself */}
       <Card>
         <CardHeader title={t("courses.aboutCourse")} />
         <div className="flex flex-col gap-4">
+          <fieldset className="min-w-0 border-0 p-0">
+            <legend className="mb-2 text-sm font-medium text-ink-700">
+              {t("courses.deliveryTitle")}
+            </legend>
+            <div className="flex flex-wrap gap-2">
+              {(["platform", "external"] as const).map((value) => {
+                const active = delivery === value;
+                const locked = value === "external" && hasLessons && !external;
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    aria-pressed={active}
+                    disabled={locked}
+                    onClick={() => setDelivery(value)}
+                    className={
+                      active
+                        ? "rounded-full border border-brand-edge bg-brand-fill px-3 py-1.5 text-sm font-medium text-on-brand"
+                        : "glass rounded-full px-3 py-1.5 text-sm font-medium text-ink-700 transition-colors hover:border-brand-400 disabled:cursor-not-allowed disabled:opacity-60"
+                    }
+                  >
+                    {t(`courses.delivery_${value}`)}
+                  </button>
+                );
+              })}
+            </div>
+            {hasLessons && !external && (
+              <p className="mt-1 text-xs text-ink-500">{t("courses.deliveryLockedHint")}</p>
+            )}
+          </fieldset>
+
+          {external && (
+            <Input
+              id="course-external-url"
+              type="url"
+              inputMode="url"
+              required
+              label={t("courses.externalUrl")}
+              hint={t("courses.externalUrlHint")}
+              placeholder="https://www.coursera.org/learn/…"
+              error={urlError || undefined}
+              value={form.external_url}
+              onChange={(event) => {
+                setUrlError("");
+                setForm({ ...form, external_url: event.target.value });
+              }}
+            />
+          )}
+
           <Input
             id="course-title"
             label={t("courses.courseTitle")}
@@ -282,7 +368,9 @@ export default function CourseEditorPage() {
             <Button
               onClick={() => save.mutate()}
               loading={save.isPending}
-              disabled={!form.title || !form.category}
+              disabled={
+                !form.title || !form.category || (external && !form.external_url.trim())
+              }
             >
               {creating ? t("common.create") : t("common.save")}
             </Button>
@@ -309,7 +397,26 @@ export default function CourseEditorPage() {
         />
       )}
 
-      {creating ? (
+      {/* Skills come first once the course exists: for a course taken
+          elsewhere they are everything the platform knows about it, and they
+          are what puts it in front of the learners who need it. */}
+      {!creating && loaded && (
+        <CourseSkillsEditor
+          courseId={courseId!}
+          skills={loaded.skills}
+          required={external}
+        />
+      )}
+
+      {external ? (
+        // Its lessons live on the other platform. Offering an editor for them
+        // here would be a syllabus nobody can open.
+        <Card>
+          <p className="text-sm text-ink-500">
+            {t(creating ? "courses.externalSaveFirstHint" : "courses.externalNoLessonsHint")}
+          </p>
+        </Card>
+      ) : creating ? (
         <>
           <StagedMaterialsEditor
             staged={staged}

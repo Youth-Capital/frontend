@@ -1,12 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { PageHeader } from "@/shared/ui/PageHeader";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
 import { api } from "@/shared/api/client";
 import {
-  Badge,
   Card,
   CardSkeleton,
   EmptyState,
@@ -140,53 +139,102 @@ function CourseCard({
   const currentProgress = progress ?? course.my_enrollment?.progress;
   const currentStatus = status ?? course.my_enrollment?.status;
 
+  const external = Boolean(course.external_url);
+
   return (
-    <Link to={`/student/courses/${course.id}`} className="block">
-      <Card className="flex h-full flex-col transition-shadow hover:shadow-md">
-        <div className="flex items-start justify-between gap-2">
-          <Badge tone="neutral">{t(`courses.level_${course.level}`)}</Badge>
-          {course.is_certified && <Badge tone="brand">★</Badge>}
-        </div>
+    <CourseLink course={course}>
+      {/*
+        The card carried six chips: a level, a certificate star, three skills
+        and an overflow count — plus the words "opens on Coursera" repeated
+        under every one of them. Nine cards made a paint chart of twenty-seven
+        pills saying things that are the same on most of them.
 
-        <h3 className="mt-3 font-semibold leading-snug text-ink-900">
+        What is left is what differs between two cards: the title, what it is
+        about, which skills it teaches, and the one figure worth comparing.
+        Everything else is one quiet line. The arrow is the only mark, and it
+        says the one thing the learner cannot otherwise know before clicking —
+        that this link leaves the platform.
+      */}
+      <Card className="glass-lift flex h-full flex-col">
+        <h3 className="leading-snug font-semibold text-ink-900">
           {course.title}
-        </h3>
-        <p className="mt-1 line-clamp-2 text-sm text-ink-500">{course.summary}</p>
-
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          {course.skills.slice(0, 3).map((skill) => (
-            <Badge key={skill.id} tone="brand">
-              {skill.name}
-            </Badge>
-          ))}
-          {course.skills.length > 3 && (
-            <Badge tone="neutral">+{course.skills.length - 3}</Badge>
+          {external && (
+            <span aria-hidden className="ml-1.5 text-ink-500">
+              ↗
+            </span>
           )}
-        </div>
+          {course.is_certified && (
+            <>
+              <span aria-hidden className="ml-1.5 text-accent-solid">
+                ★
+              </span>
+              <span className="sr-only">{t("courses.certificate")}</span>
+            </>
+          )}
+        </h3>
+
+        <p className="mt-1.5 line-clamp-2 text-sm text-ink-500">
+          {course.summary}
+        </p>
+
+        {course.skills.length > 0 && (
+          <p className="mt-2 truncate text-xs text-ink-500">
+            {course.skills.map((skill) => skill.name).join(" · ")}
+          </p>
+        )}
 
         <div className="mt-auto pt-4">
-          {currentProgress !== undefined && currentStatus !== undefined ? (
-            <>
+          {currentProgress !== undefined && currentStatus !== undefined && (
+            <div className="mb-2">
               <ProgressBar
                 value={currentProgress}
                 showLabel
                 size="sm"
                 tone={currentStatus === "COMPLETED" ? "success" : "brand"}
               />
-              <p className="mt-1.5 text-xs text-ink-500">
-                {currentStatus === "COMPLETED"
-                  ? t("courses.completed")
-                  : t("courses.inProgress")}
-              </p>
-            </>
-          ) : (
-            <div className="flex items-center justify-between text-xs text-ink-500">
-              <span>{course.provider_name}</span>
-              <span>{t("common.minutes", { count: course.duration_minutes })}</span>
             </div>
           )}
+          <div className="flex items-baseline justify-between gap-3 text-xs text-ink-500">
+            <span className="truncate">
+              {[t(`courses.level_${course.level}`), course.provider_name]
+                .filter(Boolean)
+                .join(" · ")}
+            </span>
+            {course.duration_minutes > 0 && (
+              <span className="shrink-0 tabular-nums">
+                {t("common.minutes", { count: course.duration_minutes })}
+              </span>
+            )}
+          </div>
         </div>
       </Card>
+    </CourseLink>
+  );
+}
+
+/**
+ * A course taken on the partner's site opens there, in a new tab, so the
+ * platform is still where the learner left it when they come back. Every
+ * other course opens its page here.
+ */
+function CourseLink({ course, children }: { course: Course; children: ReactNode }) {
+  const { t } = useTranslation();
+  if (course.external_url) {
+    return (
+      <a
+        href={course.external_url}
+        target="_blank"
+        rel="noreferrer noopener"
+        className="block"
+        aria-label={`${course.title} — ${t("courses.opensOn", { name: course.external_platform || course.provider_name })}`}
+      >
+        {children}
+      </a>
+    );
+  }
+  return (
+    <Link to={`/student/courses/${course.id}`} className="block">
+      {children}
     </Link>
   );
 }

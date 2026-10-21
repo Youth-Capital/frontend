@@ -2,6 +2,7 @@ import { useId, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 
+import { toApiError } from "@/shared/api/client";
 import { homeForUser, useAuth, type RegisterPayload } from "@/shared/auth/AuthContext";
 import { useApiError } from "@/shared/hooks/useApiError";
 import { Button, Input } from "@/shared/ui";
@@ -45,10 +46,42 @@ export default function RegisterPage() {
    */
   const [consents, setConsents] = useState<string[]>([]);
   const [error, setError] = useState("");
+  /*
+   * What the server said about each field, shown under that field.
+   *
+   * The form used to show only the error's code, translated: "check the
+   * highlighted fields" — while highlighting nothing. Someone whose email was
+   * already registered, or whose password was nine characters, was told to fix
+   * something and not told what.
+   */
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
 
-  const update = (key: keyof typeof form) => (value: string) =>
+  const update = (key: keyof typeof form) => (value: string) => {
     setForm((previous) => ({ ...previous, [key]: value }));
+    // Editing a field is answering its error; it should not keep shouting.
+    setFieldErrors((previous) => {
+      if (!(key in previous)) return previous;
+      const { [key]: _gone, ...rest } = previous;
+      return rest;
+    });
+  };
+
+  /** The first message per field, with the one English sentence we own translated. */
+  const readFieldErrors = (details: Record<string, unknown>) => {
+    const out: Record<string, string> = {};
+    for (const [field, value] of Object.entries(details ?? {})) {
+      const first = Array.isArray(value) ? value[0] : value;
+      if (typeof first !== "string") continue;
+      // Django's own validators already answer in the reader's language; this
+      // check is ours and is not, so it is translated here.
+      out[field] =
+        field === "email" && first.includes("already exists")
+          ? t("auth.emailTaken")
+          : first;
+    }
+    return out;
+  };
 
   const agreed = REQUIRED_CONSENTS.every((consent) => consents.includes(consent));
 
@@ -79,6 +112,7 @@ export default function RegisterPage() {
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setError("");
+    setFieldErrors({});
 
     // The button is disabled until this is true; the check stays for the Enter
     // key, and the server makes the same one regardless.
@@ -112,7 +146,20 @@ export default function RegisterPage() {
         replace: true,
       });
     } catch (caught) {
-      setError(describeError(caught));
+      const apiError = toApiError(caught);
+      if (apiError.code === "validation_error") {
+        const perField = readFieldErrors(apiError.details);
+        setFieldErrors(perField);
+        // Anything the form has no field for (consents, a general error) has
+        // nowhere to go but the banner, so it goes there in full.
+        const shown = new Set(Object.keys(form));
+        const orphaned = Object.entries(perField)
+          .filter(([field]) => !shown.has(field))
+          .map(([, message]) => message);
+        setError([describeError(caught), ...orphaned].join(" "));
+      } else {
+        setError(describeError(caught));
+      }
     } finally {
       setBusy(false);
     }
@@ -171,6 +218,7 @@ export default function RegisterPage() {
           autoComplete="email"
           required
           value={form.email}
+          error={fieldErrors.email}
           onChange={(event) => update("email")(event.target.value)}
         />
         <Input
@@ -182,6 +230,7 @@ export default function RegisterPage() {
           minLength={10}
           required
           value={form.password}
+          error={fieldErrors.password}
           onChange={(event) => update("password")(event.target.value)}
         />
 
@@ -192,14 +241,16 @@ export default function RegisterPage() {
               label={t("auth.firstName")}
               required
               value={form.first_name}
-              onChange={(event) => update("first_name")(event.target.value)}
+              error={fieldErrors.first_name}
+          onChange={(event) => update("first_name")(event.target.value)}
             />
             <Input
               id="last_name"
               label={t("auth.lastName")}
               required
               value={form.last_name}
-              onChange={(event) => update("last_name")(event.target.value)}
+              error={fieldErrors.last_name}
+          onChange={(event) => update("last_name")(event.target.value)}
             />
           </div>
         )}
@@ -211,7 +262,8 @@ export default function RegisterPage() {
             label={t("auth.birthDate")}
             required
             value={form.birth_date}
-            onChange={(event) => update("birth_date")(event.target.value)}
+            error={fieldErrors.birth_date}
+          onChange={(event) => update("birth_date")(event.target.value)}
           />
         )}
 
@@ -221,7 +273,8 @@ export default function RegisterPage() {
             label={t("auth.companyName")}
             required
             value={form.company_name}
-            onChange={(event) => update("company_name")(event.target.value)}
+            error={fieldErrors.company_name}
+          onChange={(event) => update("company_name")(event.target.value)}
           />
         )}
 

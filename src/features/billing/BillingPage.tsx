@@ -4,7 +4,9 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { api } from "@/shared/api/client";
-import { useAuth } from "@/shared/auth/AuthContext";
+import { Navigate } from "react-router-dom";
+
+import { HOME_BY_ROLE, useAuth } from "@/shared/auth/AuthContext";
 import { useApiError } from "@/shared/hooks/useApiError";
 import { formatDate } from "@/shared/lib/format";
 import {
@@ -61,7 +63,19 @@ const PAYMENT_TONE: Record<
  * actually reach. Splitting it in two would duplicate the whole upgrade flow
  * to change four strings.
  */
+/**
+ * While paid plans are switched off there is nothing to show here, so a
+ * bookmark or an old link lands on the dashboard instead of an empty page.
+ */
 export default function BillingPage() {
+  const { user } = useAuth();
+  if (user && !user.billing_enabled) {
+    return <Navigate to={HOME_BY_ROLE[user.role]} replace />;
+  }
+  return <BillingPageContent />;
+}
+
+function BillingPageContent() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const queryClient = useQueryClient();

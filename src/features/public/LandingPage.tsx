@@ -15,6 +15,7 @@ import "@/shared/styles/deep.css";
 import { Logo } from "@/shared/ui/Logo";
 
 import { AudienceDeck, type DeckCard } from "./AudienceDeck";
+import { EMPLOYER_DECK_ART, STUDENT_DECK_ART } from "./DeckArt";
 import { SkipLink } from "@/shared/ui/SkipLink";
 
 /*
@@ -50,6 +51,18 @@ export default function LandingPage() {
     },
   });
 
+  // Whether anything is on sale at all. While paid plans are switched off the
+  // catalogue answers empty, and the section is left out rather than shown
+  // with nothing in it. Asked without a role, so flipping the audience tabs
+  // cannot make the whole section blink in and out.
+  const anyPlans = useQuery({
+    queryKey: ["public-plans", "any"],
+    queryFn: async () => {
+      const { data } = await api.get<Plan[]>("/billing/plans/");
+      return data.length > 0;
+    },
+  });
+
   return (
     <div className="min-h-dvh text-ink-800">
       {/* First in the DOM, so it is the first thing Tab reaches. */}
@@ -66,12 +79,14 @@ export default function LandingPage() {
         <Learning />
         <Assessment />
         <Intelligence />
-        <Pricing
-          plans={plans.data ?? []}
-          loading={plans.isLoading}
-          audience={audience}
-          onAudience={setAudience}
-        />
+        {anyPlans.data && (
+          <Pricing
+            plans={plans.data ?? []}
+            loading={plans.isLoading}
+            audience={audience}
+            onAudience={setAudience}
+          />
+        )}
         <Faq />
         <ClosingCta />
       </main>
@@ -818,6 +833,7 @@ function AudiencePanel({
   title,
   lead,
   cards,
+  art,
   cta,
   tone,
 }: {
@@ -825,6 +841,7 @@ function AudiencePanel({
   title: string;
   lead: string;
   cards: DeckCard[];
+  art?: ReactNode[];
   cta: string;
   tone: "page" | "surface";
 }) {
@@ -846,7 +863,7 @@ function AudiencePanel({
         </Link>
       }
     >
-      <AudienceDeck cards={cards} />
+      <AudienceDeck cards={cards} art={art} />
     </Section>
   );
 }
@@ -860,6 +877,7 @@ function ForStudents() {
       title={t("landing.students.title")}
       lead={t("landing.students.lead")}
       cards={t("landing.students.cards", { returnObjects: true }) as DeckCard[]}
+      art={STUDENT_DECK_ART}
       cta={t("landing.cta.createAccount")}
     />
   );
@@ -874,6 +892,7 @@ function ForEmployers() {
       title={t("landing.employers.title")}
       lead={t("landing.employers.lead")}
       cards={t("landing.employers.cards", { returnObjects: true }) as DeckCard[]}
+      art={EMPLOYER_DECK_ART}
       cta={t("landing.employers.cta")}
     />
   );

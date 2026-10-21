@@ -149,7 +149,9 @@
     "recap_failed": "Bayonni tuzib bo'lmadi. Bir daqiqadan so'ng urinib ko'ring.",
     "check_failed": "Savollarni tuzib bo'lmadi. Bir daqiqadan so'ng urinib ko'ring.",
     "no_questions": "Bu darsda savollar yo'q.",
-    "not_your_learner": "Siz bu o'quvchi bilan ishlamaysiz."
+    "not_your_learner": "Siz bu o'quvchi bilan ishlamaysiz.",
+    "course_no_skills": "Kurs o'rgatadigan kamida bitta ko'nikmani qo'shing.",
+    "course_is_external": "Bu kurs boshqa platformada o'tiladi."
   },
   "auth": {
     "verifyTitle": "Email manzilingizni tasdiqlang",
@@ -222,7 +224,8 @@
     "consentNotice": "Kabinet yaratish uchun roziligingiz kerak. Reja tuzish va vakansiyalar tanlash uchun profilingiz ma'lumotlarini — ism, tug'ilgan sana, ko'nikmalar va test natijalarini — saqlaymiz va qayta ishlaymiz. Ish beruvchi ma'lumotlaringizni faqat siz o'zingiz uning vakansiyasiga ariza berganingizda ko'radi.",
     "consentAgree": "Foydalanish shartlari, maxfiylik siyosati va shaxsiy ma'lumotlarimni qayta ishlashga roziman",
     "consentOptional": "Qo'shimcha — keyin sozlamalarda o'zgartirish mumkin",
-    "consentToContinue": "Davom etish uchun rozilikni belgilang"
+    "consentToContinue": "Davom etish uchun rozilikni belgilang",
+    "emailTaken": "Bu email bilan akkaunt allaqachon mavjud. Kiring yoki boshqa email kiriting."
   },
   "onboarding": {
     "title": "Profilingizni sozlaymiz",
@@ -472,7 +475,23 @@
     "tutorGroundedOn": "Manba: {{sources}}",
     "tutorNoSource": "Bu darsda javob berish uchun matn yo'q. Muallifdan konspekt yoki video matnini qo'shishni so'rang.",
     "tutorNoModel": "Model ulanmagan — javob berib bo'lmaydi.",
-    "tutorFailed": "Javob olinmadi. Yana urinib ko'ring."
+    "tutorFailed": "Javob olinmadi. Yana urinib ko'ring.",
+    "deliveryTitle": "Kurs qayerda o'tiladi",
+    "delivery_platform": "Platformada — darslar shu yerda",
+    "delivery_external": "Coursera'da — havola",
+    "deliveryLockedHint": "Kursda allaqachon darslar bor, shuning uchun u platformada qoladi. Coursera kursi uchun yangi kurs yarating.",
+    "externalUrl": "Kurs havolasi",
+    "externalUrlHint": "coursera.org'dagi kurs sahifasining manzili. Talaba tugma orqali o'sha yerga o'tadi.",
+    "externalSaveFirstHint": "Bu kursning darslari Coursera'da, bu yerga qo'shish shart emas. Kursni saqlang, keyin ko'nikmalarni tanlab, moderatsiyaga yuboring.",
+    "externalNoLessonsHint": "Bu kursning darslari Coursera'da o'tiladi. Bu yerda faqat tavsif, ko'nikmalar va havola saqlanadi.",
+    "skillsHint": "Ko'nikmalar orqali kurs ularga muhtoj talabalarga tavsiya qilinadi.",
+    "skillsRequiredHint": "Coursera kursi uchun majburiy: talabalar uni ko'nikmalar orqali topadi. Kamida bittasini qo'shing.",
+    "noSkillsYet": "Ko'nikmalar hali tanlanmagan.",
+    "materialVideoFile": "Kompyuterdagi video",
+    "materialVideoFileHint": "MP4 yoki WebM, 500 MB gacha. Yoki quyida havola qo'ying.",
+    "uploading": "Fayl yuklanmoqda — sahifani yopmang.",
+    "opensOn": "{{name}}'da ochish",
+    "externalHint": "Kurs {{name}} saytida, ingliz tilida o'tiladi. Yangi oynada ochiladi."
   },
   "tests": {
     "title": "Testlar",
@@ -624,7 +643,17 @@
     "provenSkills": "Tasdiqlangan ko'nikma",
     "passedTests": "Topshirilgan test",
     "verifiedSkills": "Tasdiqlangan ko'nikmalar",
-    "noVerifiedSkills": "Hali tasdiqlangan ko'nikma yo'q. Ko'nikmani tasdiqlash uchun test topshiring."
+    "noVerifiedSkills": "Hali tasdiqlangan ko'nikma yo'q. Ko'nikmani tasdiqlash uchun test topshiring.",
+    "name": "Nomi",
+    "chooseHint": "Ikki yo‘l: o‘zingiz yozasiz yoki yordamchi yozadi — u matnni ko‘nikmalaringiz, tajribangiz va tugatgan kurslaringizdan yig‘adi.",
+    "writeMyself": "O‘zim yozaman",
+    "writeMyselfHint": "Sarlavha va «O‘zim haqimda» — o‘z so‘zlaringiz bilan.",
+    "writeWithAI": "Yordamchi yozsin",
+    "writeWithAIHint": "Ko‘nikma, tajriba va kurslaringiz asosida. Matnni keyin tahrirlash mumkin.",
+    "drafting": "Yig‘ilmoqda…",
+    "draftFrom": "Qoralama profilingizdan yig‘ildi: ko‘nikmalar — {{skills}}, kurslar — {{courses}}, tajriba joylari — {{experience}}. Tekshirib, o‘zingizga moslang.",
+    "draftEmpty": "Profilda hali yozadigan narsa yo‘q. Ko‘nikma yoki tajriba qo‘shing, kurs tugating — shunda yordamchi matn yig‘adi. Hozircha o‘zingiz yozishingiz mumkin.",
+    "draftFailed": "Qoralama yig‘ilmadi. Qayta urinib ko‘ring yoki o‘zingiz yozing."
   },
   "jobs": {
     "title": "Vakansiyalar",
@@ -976,6 +1005,27 @@
     "safetyAction": {
       "BLOCKED": "Bloklandi",
       "ESCALATED": "Mutaxassisga"
+    },
+    "externalUrl": "Kurs havolasi",
+    "allCourses": "Barcha kurslar",
+    "allCoursesHint": "Platformadagi har bir kurs: kim qo'shgan, holati va ichida nima bor.",
+    "courseSearch": "Kurs nomi, kompaniya yoki muallif emaili",
+    "course": "Kurs",
+    "company": "Kompaniya",
+    "author": "Muallif",
+    "status": "Holat",
+    "createdAt": "Qo'shilgan",
+    "origin": "Kursni kim qo'shgan",
+    "partner": "hamkor",
+    "platformCourse": "Platforma kursi",
+    "taxId": "STIR",
+    "moderatedBy": "Moderator",
+    "showingOf": "{{total}} tadan {{shown}} tasi ko'rsatildi. Qidiruvni aniqlashtiring.",
+    "companyStatus": {
+      "UNVERIFIED": "Tasdiqlanmagan",
+      "PENDING": "Tasdiqlash kutilmoqda",
+      "VERIFIED": "Tasdiqlangan",
+      "REJECTED": "Tasdiqlash rad etilgan"
     }
   },
   "settings": {
@@ -2031,6 +2081,51 @@
     "recordSkills": "Nima qila olasiz va bu nima bilan tasdiqlangan",
     "recordKnowledge": "Mavzular va toifalar bo'yicha natijalar",
     "recordExperience": "Ish, loyihalar va volontyorlik",
-    "recordCv": "Rezyume va portfolio"
+    "recordCv": "Rezyume va portfolio",
+    "avatarChange": "O‘zgartirish",
+    "avatarFailed": "Rasm yuklanmadi. Boshqa rasmni tanlang.",
+    "youthId": "Youth ID",
+    "youthIdHint": "Platformadagi raqamingiz. Ish beruvchilar uni arizalarda ko‘radi va u ochiq passportda turadi."
+  },
+  "adminUser": {
+    "account": "Akkaunt",
+    "profile": "Profil",
+    "company": "Kompaniya",
+    "status": "Holat",
+    "active": "Faol",
+    "inactive": "O‘chirilgan",
+    "joined": "Ro‘yxatdan o‘tgan",
+    "lastLogin": "Oxirgi kirish",
+    "billing": "Tarif",
+    "period": "Amal qiladi",
+    "consents": "Roziliklar",
+    "devices": "Qurilmalar",
+    "activity": "Oxirgi amallar",
+    "password": "Parol",
+    "passwordHint": "Saqlanmaydi. Bazada faqat Argon2id xeshi bor — u kiritilgan parolni tekshiradi, lekin parolni tiklab bera olmaydi. Kirishni tiklash uchun parolni tiklash havolasini yuboring.",
+    "verifiedOf": "{{total}} dan {{verified}} tasi tasdiqlangan",
+    "completedOf": "{{total}} dan {{done}} tasi tugatilgan",
+    "passedOf": "{{total}} dan {{done}} tasi topshirilgan",
+    "field": {
+      "full_name": "F.I.Sh.",
+      "youth_id": "Youth ID",
+      "birth_date": "Tug‘ilgan sana",
+      "age": "Yosh",
+      "is_minor": "Voyaga yetmagan",
+      "region": "Hudud",
+      "city": "Shahar",
+      "education_status": "Ta’lim",
+      "employment_status": "Bandlik",
+      "target_profession": "Maqsadli kasb",
+      "profile_completion": "Profil to‘ldirilgani, %",
+      "languages": "Tillar",
+      "avatar": "Rasm",
+      "display_name": "Nomi",
+      "legal_name": "Yuridik nomi",
+      "tax_id": "STIR",
+      "industry": "Soha",
+      "website": "Sayt",
+      "verification_status": "Tekshiruv holati"
+    }
   }
 }

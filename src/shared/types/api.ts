@@ -110,6 +110,12 @@ export interface User {
   date_joined: string;
   profile: StudentProfileStub | EmployerProfileStub | null;
   requires_guardian_approval: boolean;
+  /**
+   * Whether paid plans exist right now (backend BILLING_ENABLED). While false
+   * the platform is free outright: no "Plan" page, no plan card, no upgrade
+   * prompts.
+   */
+  billing_enabled: boolean;
 }
 
 export interface Skill {
@@ -337,6 +343,44 @@ export interface Course {
   modules?: CourseModule[];
   tests?: CourseTestStub[];
   moderation_note?: string;
+  created_at: string;
+  /**
+   * Where the course is taken when that is not here — a Coursera page. Such a
+   * course has no lessons on the platform and cannot be enrolled on; the
+   * learner is sent to this address. Empty for courses hosted here.
+   */
+  external_url: string;
+  /** "Coursera" when external_url points there; empty otherwise. */
+  external_platform: string;
+  /** Who put the course on the platform. Sent to admins only; null for everyone else. */
+  origin: CourseOrigin | null;
+}
+
+export interface CourseOrigin {
+  company: {
+    id: string;
+    name: string;
+    legal_name: string;
+    tax_id: string;
+    industry: string;
+    website: string;
+    verification_status: string;
+  } | null;
+  author: {
+    id: string;
+    name: string;
+    email: string;
+    phone: string | null;
+    role: Role;
+  } | null;
+  /** A content partner whose import created the course. */
+  partner: {
+    id: string;
+    name: string;
+    website: string;
+    contact_email: string;
+  } | null;
+  moderated_by: { id: string; name: string } | null;
 }
 
 export interface CourseModule {
@@ -366,7 +410,11 @@ export interface LessonStub {
  * to a link.
  */
 export interface LessonVideo {
-  provider: "youtube" | "vimeo" | "file";
+  /**
+   * `upload` is a video file the author uploaded; `url` is then the platform's
+   * own signed download link, played by a <video> element.
+   */
+  provider: "youtube" | "vimeo" | "file" | "upload";
   url: string;
   embed_url: string | null;
   video_id?: string;

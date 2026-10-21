@@ -17,6 +17,8 @@ import {
   Select,
 } from "@/shared/ui";
 import { PageHeader } from "@/shared/ui/PageHeader";
+
+import { CvIdentityBand } from "./CvIdentityBand";
 import type {
   Paginated,
   Profession,
@@ -47,6 +49,7 @@ const PHONE_PATTERN = /^\+?[0-9]{9,15}$/;
  */
 export default function ProfilePage() {
   const { t } = useTranslation();
+  const { user } = useAuth();
 
   const profile = useQuery({
     queryKey: ["me", "profile"],
@@ -58,6 +61,17 @@ export default function ProfilePage() {
 
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-6">
+      {/*
+        Who you are, before the form that edits it.
+
+        The same band the CV opens with — name, the earned verification mark,
+        the target role and the two figures that are actually proven. It was
+        only on the CV page, which meant the first thing a student saw on their
+        own profile was a column of empty inputs. Here it is also where the
+        picture is changed, because that is where the picture is.
+      */}
+      <CvIdentityBand editable />
+
       <PageHeader title={t("profile.title")} subtitle={t("profile.subtitle")} />
 
       {profile.isLoading ? (
@@ -65,10 +79,16 @@ export default function ProfilePage() {
       ) : profile.data ? (
         <>
           <PersonalCard profile={profile.data} />
-          <div className="grid gap-6 md:grid-cols-2">
-            <SubscriptionCard />
+          {/* The plan card only while there are plans; otherwise the
+              profession card takes the row on its own. */}
+          {user?.billing_enabled ? (
+            <div className="grid gap-6 md:grid-cols-2">
+              <SubscriptionCard />
+              <ProfessionCard profile={profile.data} />
+            </div>
+          ) : (
             <ProfessionCard profile={profile.data} />
-          </div>
+          )}
           <ProgressCard />
           <RecordCard />
         </>
@@ -198,6 +218,25 @@ function PersonalCard({ profile }: { profile: StudentProfile }) {
             <p className="text-xs text-ink-500">{t("profile.emailHint")}</p>
           </div>
         </div>
+
+        {/* The Youth ID, where the rest of the identity is.
+            It was a figure on the identity band, which is the one place it was
+            decoration: nobody reads their own ID off a header. It is quoted on
+            applications and on the public passport, so what it needs is to be
+            findable and copyable — hence a monospaced face and a plain row
+            among the other identity fields. Issued by the platform, so it is
+            shown rather than edited. */}
+        {profile.youth_id && (
+          <div className="flex flex-col gap-1.5">
+            <span className="text-sm font-medium text-ink-700">
+              {t("profile.youthId")}
+            </span>
+            <p className="rounded-(--radius-control) border border-dashed border-ink-300 px-3 py-2 font-mono text-sm text-ink-800 select-all">
+              {profile.youth_id}
+            </p>
+            <p className="text-xs text-ink-500">{t("profile.youthIdHint")}</p>
+          </div>
+        )}
 
         {save.isError && (
           <p role="alert" className="text-sm text-danger">
@@ -456,7 +495,9 @@ function Meter({
         <span className="text-sm text-ink-700">{label}</span>
         <span className="text-sm font-semibold tabular-nums text-ink-900">{value}%</span>
       </div>
-      <ProgressBar value={value} label={label} />
+      {/* The label is printed above with the figure; the bar takes it as a
+          name for assistive software rather than printing it again. */}
+      <ProgressBar value={value} ariaLabel={label} />
       {detail && <span className="text-xs text-ink-500">{detail}</span>}
     </div>
   );

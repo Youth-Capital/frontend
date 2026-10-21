@@ -143,3 +143,218 @@
     z-index: 20;
   }
 }
+
+/* ------------------------------------------------------------------ art --- */
+
+/*
+ * The drawings on the students' cards (DeckArt.tsx).
+ *
+ * Three colour roles, measured with contrast.py against the card they sit on.
+ * The line and the accent carry the drawing, so both clear 3:1 — the graphics
+ * threshold — everywhere:
+ *
+ *                     light (#FFF)   dark (#29233B)   card 01 (#C8B6FF)
+ *   --art-line        5.62           6.53             7.04  (on-brand)
+ *   --art-hot         3.66           11.67            3.04  (#A142A1, pinned)
+ *
+ * --art-soft is the line at low alpha: fills and halos only, never the only
+ * thing drawing a shape. brand-300 was the obvious pick and is 1.30:1 on the
+ * dark card — the shapes it filled simply vanished.
+ */
+.yc-deck-art {
+  --art-line: var(--color-brand-600);
+  --art-hot: var(--color-accent-solid);
+  --art-soft: color-mix(in oklab, var(--art-line) 14%, transparent);
+  /* The tick is drawn on the accent, so it takes the card's own ground. */
+  --art-on-hot: var(--color-surface);
+  --art-glow: transparent;
+
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  /* The hero's glow, for the dark theme only: on white a halo of dark violet
+     reads as blur, not light. */
+  filter: drop-shadow(0 0 5px var(--art-glow));
+}
+
+:root[data-theme="dark"] .yc-deck-art {
+  --art-glow: color-mix(in oklab, var(--art-line) 45%, transparent);
+}
+
+/*
+ * Card 01 is filled lavender, so the drawing takes the card's text colour.
+ *
+ * The accent is pinned rather than read from --color-accent-ink. The lead card
+ * is the same lavender in both themes (brand-fill and on-brand are not
+ * remapped), but accent-ink is: the dark theme turns it into #FFD6FF, which is
+ * 1.41:1 on this card — the compass needle and the top-ranked candidate simply
+ * disappeared. #A142A1 is the light-theme accent-ink, 3.04:1 on #C8B6FF.
+ */
+.yc-deck-lead .yc-deck-art {
+  --art-line: var(--color-on-brand);
+  --art-hot: #a142a1;
+  --art-soft: color-mix(in oklab, var(--color-on-brand) 12%, transparent);
+  --art-on-hot: var(--color-brand-fill);
+  --art-glow: transparent;
+}
+
+/* Every moving part turns about its own centre in drawing units. */
+.yc-deck-art :is(.art-needle, .art-badge, .art-doc, .art-spark, .art-dot, .art-planks) {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* Ambient: the points of light breathe, out of step with each other. Slow and
+   faint on purpose — it should make the hand feel alive, not ask for attention. */
+.yc-deck-art .art-sparks circle {
+  animation: art-twinkle 3.6s ease-in-out infinite;
+}
+.yc-deck-art .art-sparks circle:nth-child(2) { animation-delay: -0.9s; }
+.yc-deck-art .art-sparks circle:nth-child(3) { animation-delay: -1.8s; }
+.yc-deck-art .art-sparks circle:nth-child(4) { animation-delay: -2.7s; }
+
+@keyframes art-twinkle {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.15; }
+}
+
+/*
+ * Resting states. Each card rests on the "before" of its little story, so the
+ * movement below has somewhere to go — but every resting state is still a
+ * complete picture, because on a phone there is no hover to finish it.
+ */
+.yc-deck-art .art-needle {
+  transform: rotate(-32deg);
+  transition: transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.yc-deck-art .art-planks {
+  opacity: 0;
+  transform: translateY(5px);
+  transition: opacity 240ms ease-out, transform 420ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.yc-deck-art .art-planks-ghost {
+  transition: opacity 200ms ease-out;
+}
+.yc-deck-art .art-tick {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+.yc-deck-art .art-badge,
+.yc-deck-art .art-doc,
+.yc-deck-art .art-spark {
+  transition: transform 420ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.yc-deck-art .art-ring {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 34;
+  transition: stroke-dashoffset 800ms cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+/*
+ * The payoff, on hover and on keyboard focus alike: the needle finds the arch,
+ * the bridge is finished, the test is passed, the résumé lifts, the match
+ * fills, the assistant answers. Hover is gated so it cannot stick on touch.
+ */
+@media (hover: hover) {
+  .yc-deck-card:hover .art-needle { transform: rotate(40deg); }
+  .yc-deck-card:hover .art-planks { opacity: 1; transform: none; }
+  .yc-deck-card:hover .art-planks-ghost { opacity: 0; }
+  .yc-deck-card:hover .art-badge { transform: scale(1.12); }
+  .yc-deck-card:hover .art-tick { animation: art-draw 520ms ease-out; }
+  .yc-deck-card:hover .art-doc { transform: translate(-2px, -7px) rotate(-2deg); }
+  .yc-deck-card:hover .art-ring { stroke-dashoffset: 6; }
+  .yc-deck-card:hover .art-spark { transform: rotate(90deg) scale(1.15); }
+  .yc-deck-card:hover .art-dot { animation: art-typing 900ms ease-in-out infinite; }
+}
+.yc-deck-card:focus-visible .art-needle { transform: rotate(40deg); }
+.yc-deck-card:focus-visible .art-planks { opacity: 1; transform: none; }
+.yc-deck-card:focus-visible .art-planks-ghost { opacity: 0; }
+.yc-deck-card:focus-visible .art-badge { transform: scale(1.12); }
+.yc-deck-card:focus-visible .art-tick { animation: art-draw 520ms ease-out; }
+.yc-deck-card:focus-visible .art-doc { transform: translate(-2px, -7px) rotate(-2deg); }
+.yc-deck-card:focus-visible .art-ring { stroke-dashoffset: 6; }
+.yc-deck-card:focus-visible .art-spark { transform: rotate(90deg) scale(1.15); }
+.yc-deck-card:focus-visible .art-dot { animation: art-typing 900ms ease-in-out infinite; }
+
+.yc-deck-art .art-dot-2 { animation-delay: 150ms; }
+.yc-deck-art .art-dot-3 { animation-delay: 300ms; }
+
+@keyframes art-draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes art-typing {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-5px); }
+}
+
+/*
+ * In the fan, the next card covers the right quarter of this one: 3.25rem of
+ * a card at most 13rem wide. A drawing using the full width lost exactly the
+ * part that finishes its story — the arch the compass points at, the flag
+ * across the gap, the job the match leads to. So in the fan the drawing keeps
+ * to the part of the card that shows. The last card has nothing over it and
+ * keeps the full width. A lifted card keeps the narrow drawing too: resizing it
+ * on hover would move the layout under the pointer.
+ */
+@media (min-width: 1024px) {
+  .yc-deck-card:not(:last-child) .yc-deck-art {
+    width: 78%;
+  }
+}
+
+/* -------------------------------------------------- employers' art motion --- */
+
+.yc-deck-art :is(.art-rank path, .art-bars rect, .art-drop, .art-pencil, .art-envelope) {
+  transform-box: fill-box;
+}
+/* Bars grow from their base: rank bars from the left, chart bars from the axis. */
+.yc-deck-art .art-rank path { transform-origin: left center; }
+.yc-deck-art .art-bars rect { transform-origin: center bottom; }
+.yc-deck-art .art-pencil,
+.yc-deck-art .art-envelope {
+  transform-origin: center;
+  transition: transform 420ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+/* The third answer is still blank at rest — two of three marked is itself the
+   picture of a test in progress — and gets its tick on hover. */
+.yc-deck-art .art-tick-late {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 420ms ease-out 120ms;
+}
+
+@media (hover: hover) {
+  .yc-deck-card:hover .art-rank path { animation: art-grow-x 620ms cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+  .yc-deck-card:hover .art-rank path:nth-child(2) { animation-delay: 80ms; }
+  .yc-deck-card:hover .art-rank path:nth-child(3) { animation-delay: 160ms; }
+  .yc-deck-card:hover .art-bars rect { animation: art-grow-y 620ms cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+  .yc-deck-card:hover .art-bars rect:nth-child(2) { animation-delay: 70ms; }
+  .yc-deck-card:hover .art-bars rect:nth-child(3) { animation-delay: 140ms; }
+  .yc-deck-card:hover .art-bars rect:nth-child(4) { animation-delay: 210ms; }
+  .yc-deck-card:hover .art-drop { animation: art-fall 560ms cubic-bezier(0.34, 1.56, 0.64, 1); }
+  .yc-deck-card:hover .art-tick-late { stroke-dashoffset: 0; }
+  .yc-deck-card:hover .art-pencil { transform: translate(-6px, 4px) rotate(-6deg); }
+  .yc-deck-card:hover .art-envelope { transform: translate(-3px, -8px) rotate(-4deg); }
+}
+.yc-deck-card:focus-visible .art-rank path { animation: art-grow-x 620ms cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+.yc-deck-card:focus-visible .art-bars rect { animation: art-grow-y 620ms cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+.yc-deck-card:focus-visible .art-drop { animation: art-fall 560ms cubic-bezier(0.34, 1.56, 0.64, 1); }
+.yc-deck-card:focus-visible .art-tick-late { stroke-dashoffset: 0; }
+.yc-deck-card:focus-visible .art-pencil { transform: translate(-6px, 4px) rotate(-6deg); }
+.yc-deck-card:focus-visible .art-envelope { transform: translate(-3px, -8px) rotate(-4deg); }
+
+@keyframes art-grow-x {
+  from { transform: scaleX(0.2); }
+  to { transform: scaleX(1); }
+}
+@keyframes art-grow-y {
+  from { transform: scaleY(0.25); }
+  to { transform: scaleY(1); }
+}
+@keyframes art-fall {
+  from { transform: translateY(-40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}

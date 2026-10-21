@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import { api, toApiError } from "@/shared/api/client";
+import { formatFileSize } from "@/shared/lib/format";
 import { LessonVideo } from "@/features/student/LessonVideo";
 import {
   Button,
@@ -10,6 +11,7 @@ import {
   CardHeader,
   CardSkeleton,
   Input,
+  ProgressBar,
   Textarea,
   Tile,
   type TileHue,
@@ -27,8 +29,9 @@ import type { CourseMaterial, MaterialKind, Paginated } from "@/shared/types/api
  *
  * Five kinds, and the difference is not cosmetic:
  *
- *   VIDEO  a YouTube or Vimeo link, embedded in the lesson. The server checks
- *          it and builds the embed address itself; the author's raw link never
+ *   VIDEO  an MP4/WebM file from the author's computer, or a YouTube or Vimeo
+ *          link, played in the lesson. For a link the server checks it and
+ *          builds the embed address itself; the author's raw link never
  *          reaches an iframe. A link it cannot embed is refused rather than
  *          quietly stored as an ordinary link, because an author who picked
  *          "video" is expecting a player.
@@ -89,19 +92,21 @@ const ACCEPT: Partial<Record<MaterialKind, string>> = {
   FILE: ".pdf",
   IMAGE: ".jpg,.jpeg,.png,.webp",
   BOOK: ".pdf,.epub",
+  // The two formats every browser plays. A .mov would upload and then show a
+  // learner a black box, so the picker does not offer it.
+  VIDEO: ".mp4,.m4v,.webm,video/mp4,video/webm",
 };
 
 /**
  * What each kind is made of.
  *
- * BOOK is the only "both", and that is the point of it. It began as a link
- * only, which is right for a citation — "Clean Code, chapter 3" — and simply
- * wrong for an author who has the PDF on their desktop and no way to attach
- * it. So the file comes first and the link stays as the honest fallback for a
- * book nobody can upload.
+ * BOOK and VIDEO are "both", and that is the point of them. Each began as a
+ * link only, which is right for a citation or a YouTube talk and simply wrong
+ * for an author who has the PDF or the recording on their laptop and no way
+ * to attach it. So the file comes first and the link stays beside it.
  */
 const KIND_INPUT: Record<MaterialKind, "file" | "url" | "both"> = {
-  VIDEO: "url",
+  VIDEO: "both",
   IMAGE: "file",
   FILE: "file",
   BOOK: "both",
@@ -219,8 +224,10 @@ export async function postMaterial(
   draft: Omit<DraftMaterial, "key" | "previewUrl">,
   courseId: string,
   lessonId?: string,
+  /** Percent sent, 0-100 — a lesson video takes long enough to need one. */
+  onProgress?: (percent: number) => void,
 ) {
-  // By whether there IS a file, not by the kind — a BOOK is either.
+  // By whether there IS a file, not by the kind — a BOOK or a VIDEO is either.
   if (draft.file) {
     const body = new FormData();
     body.append("course", courseId);
@@ -229,7 +236,13 @@ export async function postMaterial(
     body.append("title", draft.title);
     if (draft.description) body.append("description", draft.description);
     body.append("file", draft.file);
-    await api.post("/learning/materials/", body);
+    await api.post("/learning/materials/", body, {
+      onUploadProgress: (event) => {
+        if (onProgress && event.total) {
+          onProgress(Math.round((event.loaded * 100) / event.total));
+        }
+      },
+    });
     return;
   }
   await api.post("/learning/materials/", {
@@ -298,7 +311,11 @@ function MaterialForm({
   // Only after the field has been left, so the warning does not appear while
   // someone is still halfway through typing the address.
   const badVideo =
-    kind === "VIDEO" && touchedUrl && url.trim() !== "" && !looksEmbeddable(url);
+    kind === "VIDEO" &&
+    chosen.length === 0 &&
+    touchedUrl &&
+    url.trim() !== "" &&
+    !looksEmbeddable(url);
 
   const reset = () => {
     setTitle("");
@@ -390,7 +407,9 @@ function MaterialForm({
                 ? "courses.materialImage"
                 : kind === "BOOK"
                   ? "courses.materialBookFile"
-                  : "courses.materialFile",
+                  : kind === "VIDEO"
+                    ? "courses.materialVideoFile"
+                    : "courses.materialFile",
             )}
           </label>
           <input
@@ -410,7 +429,9 @@ function MaterialForm({
                 ? "courses.materialImageHint"
                 : kind === "BOOK"
                   ? "courses.materialBookFileHint"
-                  : "courses.materialFileHint",
+                  : kind === "VIDEO"
+                    ? "courses.materialVideoFileHint"
+                    : "courses.materialFileHint",
             )}
           </p>
           {chosen.length > 1 && (
@@ -440,9 +461,9 @@ function MaterialForm({
           }
           error={badVideo ? t("courses.material_video_not_embeddable") : undefined}
           value={url}
-          /* A book with a file does not need a link as well, and offering an
-             enabled box for one invites filling in both. */
-          disabled={kind === "BOOK" && chosen.length > 0}
+          /* A book or video with a file does not need a link as well, and
+             offering an enabled box for one invites filling in both. */
+          disabled={input === "both" && chosen.length > 0}
           onBlur={() => setTouchedUrl(true)}
           onChange={(event) => setUrl(event.target.value)}
         />
@@ -500,6 +521,8 @@ export function MaterialsEditor({
 
   const scoped = Boolean(lessonId);
   const [error, setError] = useState("");
+  /** Percent of the file currently going up, or null when nothing is. */
+  const [progress, setProgress] = useState<number | null>(null);
   const queryKey = ["course-materials", courseId, lessonId ?? "all"];
 
   const materials = useQuery({
@@ -524,9 +547,11 @@ export function MaterialsEditor({
      */
     mutationFn: async (drafts: Omit<DraftMaterial, "key" | "previewUrl">[]) => {
       for (const draft of drafts) {
-        await postMaterial(draft, courseId, lessonId);
+        setProgress(draft.file ? 0 : null);
+        await postMaterial(draft, courseId, lessonId, setProgress);
       }
     },
+    onSettled: () => setProgress(null),
     onSuccess: () => {
       setError("");
       refresh();
@@ -580,6 +605,15 @@ export function MaterialsEditor({
         onSubmit={(drafts) => add.mutate(drafts)}
         onKindChange={() => setError("")}
       />
+
+      {/* A lecture is hundreds of megabytes. Without a number the button just
+          spins for minutes and looks stuck. */}
+      {progress !== null && (
+        <div className="mt-3" role="status" aria-live="polite">
+          <ProgressBar value={progress} showLabel size="sm" tone="brand" />
+          <p className="mt-1 text-xs text-ink-500">{t("courses.uploading")}</p>
+        </div>
+      )}
     </Card>
   );
 }
@@ -819,7 +853,7 @@ function RowHead({
           )}
           {size != null && (
             <span className="text-xs tabular-nums text-ink-400">
-              {Math.max(1, Math.round(size / 1024))} KB
+              {formatFileSize(size)}
             </span>
           )}
           {note && (

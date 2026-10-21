@@ -7,15 +7,16 @@ import { StreakCard } from "./StreakCard";
 import { api } from "@/shared/api/client";
 import { CapitalBloom, CapitalUnlockList } from "@/shared/ui/CapitalBloom";
 import { PERIOD_DEFAULT } from "./PlanPeriod";
-import { matchTone, resolveTaskTitle } from "@/shared/lib/format";
+import { resolveTaskTitle } from "@/shared/lib/format";
 
 import { JourneyBand } from "./journey/JourneyBand";
 import {
-  Badge,
   Button,
   Card,
   CardHeader,
   CardSkeleton,
+  DataList,
+  DataRow,
   EmptyState,
   ErrorState,
   ProgressBar,
@@ -152,63 +153,59 @@ export default function DashboardPage() {
               }
             />
           ) : (
-            <ul className="flex flex-col gap-2">
+            /* One line per task: what it is, what kind and how long under it,
+               and the row itself as the way in. The kind and the overdue state
+               used to be two chips and the way in a repeated "open" link, so
+               five tasks put fifteen coloured objects on the screen to say
+               three things. Overdue is now a dot — the one thing on the row
+               that differs between rows is the one thing wearing colour. */
+            <DataList>
               {data.today_tasks.map((task) => (
-                <li
+                <DataRow
                   key={task.id}
-                  className="flex items-start gap-3 rounded-xl border border-ink-200 p-3"
-                >
-                  <button
-                    type="button"
-                    onClick={() => completeTask.mutate(task.id)}
-                    disabled={completeTask.isPending}
-                    className="relative mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-ink-300 transition-colors hover:border-success hover:bg-success-soft before:absolute before:-inset-3.5 before:content-['']"
-                    aria-label={t("plan.markDone")}
-                  >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M5 13l4 4L19 7"
-                        stroke="currentColor"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="text-transparent hover:text-success"
-                      />
-                    </svg>
-                  </button>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-ink-800">
-                      {/* The stored title is already the full key with its
-                          skill appended after "::", so prefixing "plan.task."
-                          again produced a key that resolves to nothing and
-                          falls back to the raw string. */}
-                      {resolveTaskTitle(task.title, t)}
-                    </p>
-                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-ink-500">
-                      <Badge
-                        tone={task.priority === "HIGH" ? "warning" : "neutral"}
-                      >
-                        {t(`plan.type.${task.type}`)}
-                      </Badge>
-                      {task.is_overdue && (
-                        <Badge tone="danger">{t("plan.overdue")}</Badge>
-                      )}
-                      <span>
-                        {t("plan.estimate", { count: task.estimated_minutes })}
-                      </span>
-                    </div>
-                  </div>
-                  {task.ref_type === "Course" && task.ref_id && (
-                    <Link
-                      to={`/student/courses/${task.ref_id}`}
-                      className="-my-3 shrink-0 py-3 text-sm font-medium text-brand-600 hover:text-brand-700"
+                  title={
+                    /* The stored title is already the full key with its skill
+                       appended after "::", so prefixing "plan.task." again
+                       produced a key that resolves to nothing and falls back
+                       to the raw string. */
+                    resolveTaskTitle(task.title, t)
+                  }
+                  mark={task.is_overdue ? "danger" : undefined}
+                  meta={[
+                    t(`plan.type.${task.type}`),
+                    task.is_overdue ? t("plan.overdue") : null,
+                    t("plan.estimate", { count: task.estimated_minutes }),
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                  to={
+                    task.ref_type === "Course" && task.ref_id
+                      ? `/student/courses/${task.ref_id}`
+                      : undefined
+                  }
+                  leading={
+                    <button
+                      type="button"
+                      onClick={() => completeTask.mutate(task.id)}
+                      disabled={completeTask.isPending}
+                      className="group/check relative flex h-5 w-5 items-center justify-center rounded-full border border-ink-300 transition-colors duration-150 before:absolute before:-inset-3 before:content-[''] fine:hover:border-success fine:hover:bg-success-soft"
+                      aria-label={t("plan.markDone")}
                     >
-                      {t("plan.openLinked")}
-                    </Link>
-                  )}
-                </li>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                        <path
+                          d="M5 13l4 4L19 7"
+                          stroke="currentColor"
+                          strokeWidth="3"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="text-transparent group-hover/check:text-success"
+                        />
+                      </svg>
+                    </button>
+                  }
+                />
               ))}
-            </ul>
+            </DataList>
           )}
 
           {data.plan && (
@@ -275,60 +272,41 @@ export default function DashboardPage() {
           {data.recommendations.length === 0 ? (
             <EmptyState title={t("dashboard.recommendationsEmpty")} />
           ) : (
-            <ul className="flex flex-col gap-2">
+            /* The score was a coloured pill whose hue changed with the number,
+               which spent three semantic colours on a figure that already says
+               its own size. It is now the row's value: right-aligned, tabular,
+               so a column of them can be read down. */
+            <DataList>
               {data.recommendations.map((recommendation) => (
-                <li
+                <DataRow
                   key={recommendation.id}
-                  className="rounded-xl border border-ink-200 p-3"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="line-clamp-2 text-sm font-medium text-ink-800">
-                        {recommendation.title}
-                      </p>
-                      <p className="mt-0.5 text-xs text-ink-500">
-                        {t(`assistant.note.${recommendation.reason_code}`, {
-                          ...recommendation.reason_data,
-                          skills: Array.isArray(recommendation.reason_data.skills)
-                            ? (recommendation.reason_data.skills as string[]).join(
-                                ", ",
-                              )
-                            : recommendation.reason_data.skills,
-                          matched: Array.isArray(recommendation.reason_data.matched)
-                            ? (
-                                recommendation.reason_data.matched as string[]
-                              ).join(", ")
-                            : "—",
-                          missing: Array.isArray(recommendation.reason_data.missing)
-                            ? (
-                                recommendation.reason_data.missing as string[]
-                              ).join(", ")
-                            : "—",
-                          defaultValue: "",
-                        })}
-                      </p>
-                    </div>
-                    <Badge tone={matchTone(recommendation.score)}>
-                      {recommendation.score}%
-                    </Badge>
-                  </div>
-                  {recommendation.ref_id &&
+                  title={recommendation.title}
+                  meta={t(`assistant.note.${recommendation.reason_code}`, {
+                    ...recommendation.reason_data,
+                    skills: Array.isArray(recommendation.reason_data.skills)
+                      ? (recommendation.reason_data.skills as string[]).join(", ")
+                      : recommendation.reason_data.skills,
+                    matched: Array.isArray(recommendation.reason_data.matched)
+                      ? (recommendation.reason_data.matched as string[]).join(", ")
+                      : "—",
+                    missing: Array.isArray(recommendation.reason_data.missing)
+                      ? (recommendation.reason_data.missing as string[]).join(", ")
+                      : "—",
+                    defaultValue: "",
+                  })}
+                  value={`${recommendation.score}%`}
+                  to={
+                    recommendation.ref_id &&
                     (recommendation.type === "COURSE" ||
-                      recommendation.type === "VACANCY") && (
-                      <Link
-                        to={
-                          recommendation.type === "COURSE"
-                            ? `/student/courses/${recommendation.ref_id}`
-                            : `/student/jobs/${recommendation.ref_id}`
-                        }
-                        className="mt-2 inline-block text-xs font-medium text-brand-600 hover:text-brand-700"
-                      >
-                        {t("plan.openLinked")}
-                      </Link>
-                    )}
-                </li>
+                      recommendation.type === "VACANCY")
+                      ? recommendation.type === "COURSE"
+                        ? `/student/courses/${recommendation.ref_id}`
+                        : `/student/jobs/${recommendation.ref_id}`
+                      : undefined
+                  }
+                />
               ))}
-            </ul>
+            </DataList>
           )}
         </Card>
       </div>

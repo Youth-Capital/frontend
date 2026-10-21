@@ -142,7 +142,17 @@
    * periwinkle hue walked down until it cleared 3:1 on the page (3.06) and on
    * a card (3.23).
    */
-  --color-brand-edge: #9880E1;
+  /*
+   * Walked down from #9880E1 when the backdrop gained its orbs.
+   *
+   * A control needs a 3:1 boundary or it has no edge, and that is measured
+   * against what the control actually sits on. The old value cleared it on the
+   * old panel ground (3.06) and measured 2.72 on the new one — so the edge of
+   * every button quietly stopped being an edge. Same hue, same family, walked
+   * down the lightness axis until it cleared with a margin rather than by two
+   * hundredths: 3.13 on the panel, 3.52 on the page.
+   */
+  --color-brand-edge: #8E73DE;
   /* The ink that sits on a pastel fill. Deep, low-chroma, same hue family. */
   --color-on-brand: #372863;
 
@@ -378,28 +388,90 @@
     background-image:
       radial-gradient(
         58% 44% at 0% 0%,
-        color-mix(in oklab, var(--aurora-1) var(--aurora-strength), transparent),
+        color-mix(in oklab, var(--wash-1) var(--aurora-strength), transparent),
         transparent 70%
       ),
       radial-gradient(
         52% 40% at 100% 2%,
-        color-mix(in oklab, var(--aurora-5) var(--aurora-strength), transparent),
+        color-mix(in oklab, var(--wash-5) var(--aurora-strength), transparent),
         transparent 68%
       ),
       radial-gradient(
         60% 46% at 96% 96%,
-        color-mix(in oklab, var(--aurora-2) var(--aurora-strength), transparent),
+        color-mix(in oklab, var(--wash-2) var(--aurora-strength), transparent),
         transparent 70%
       ),
       radial-gradient(
         56% 42% at 4% 100%,
-        color-mix(in oklab, var(--aurora-3) var(--aurora-strength), transparent),
+        color-mix(in oklab, var(--wash-3) var(--aurora-strength), transparent),
         transparent 70%
       ),
       radial-gradient(
         44% 34% at 50% 58%,
-        color-mix(in oklab, var(--aurora-4) var(--aurora-mid), transparent),
+        color-mix(in oklab, var(--wash-4) var(--aurora-mid), transparent),
         transparent 72%
+      );
+  }
+
+  /*
+   * The orbs — the second half of the backdrop.
+   *
+   * The corner washes above give the page its colour; these give the glass
+   * something to frost. A frosted panel over an even field looks like a white
+   * card, because blur has nothing to blur. An edge passing behind the panel
+   * is what the eye reads as "this is in front of something", so the orbs are
+   * deliberately large, soft and few, and they sit where panels will cross
+   * them rather than tidily in the corners.
+   *
+   * Each one is lit: a brighter stop offset inside the circle, the way a ball
+   * takes light from one side. A flat radial of one colour reads as a smudge.
+   *
+   * Fixed, like the washes, so they stay put while content scrolls over them.
+   * One extra painted layer, no filters: `filter: blur()` on a viewport-sized
+   * element costs a full-screen repaint on every scroll on a mid-range phone,
+   * and a gradient is already soft.
+   */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+      /* top left, behind the header and the start of the sidebar */
+      radial-gradient(
+        circle 24rem at 10% -2%,
+        color-mix(in oklab, var(--orb-1) var(--orb-alpha), transparent) 0%,
+        color-mix(in oklab, var(--orb-1) calc(var(--orb-alpha) - 18%), transparent) 46%,
+        transparent 72%
+      ),
+      /* right, crossing the top of the content column */
+      radial-gradient(
+        circle 28rem at 98% 8%,
+        color-mix(in oklab, var(--orb-3) var(--orb-alpha), transparent) 0%,
+        color-mix(in oklab, var(--orb-3) calc(var(--orb-alpha) - 20%), transparent) 44%,
+        transparent 70%
+      ),
+      /* the one that passes behind the middle of the content */
+      radial-gradient(
+        circle 20rem at 62% 46%,
+        color-mix(in oklab, var(--orb-4) calc(var(--orb-alpha) - 14%), transparent) 0%,
+        color-mix(in oklab, var(--orb-4) calc(var(--orb-alpha) - 34%), transparent) 48%,
+        transparent 74%
+      ),
+      /* bottom left, under the sidebar */
+      radial-gradient(
+        circle 22rem at -2% 92%,
+        color-mix(in oklab, var(--orb-2) var(--orb-alpha), transparent) 0%,
+        color-mix(in oklab, var(--orb-2) calc(var(--orb-alpha) - 20%), transparent) 46%,
+        transparent 72%
+      ),
+      /* bottom right, behind the lower cards */
+      radial-gradient(
+        circle 26rem at 92% 98%,
+        color-mix(in oklab, var(--orb-4) var(--orb-alpha), transparent) 0%,
+        color-mix(in oklab, var(--orb-4) calc(var(--orb-alpha) - 20%), transparent) 44%,
+        transparent 70%
       );
   }
 

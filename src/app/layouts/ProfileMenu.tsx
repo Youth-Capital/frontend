@@ -99,7 +99,10 @@ export function ProfileMenu() {
   if (!user) return null;
 
   const record = RECORD[user.role] ?? [];
-  const account = ACCOUNT[user.role] ?? [];
+  // The "Plan" entry only exists while paid plans do.
+  const account = (ACCOUNT[user.role] ?? []).filter(
+    (item) => user.billing_enabled || !item.to.endsWith("/billing"),
+  );
   const initial = (user.display_name ?? "?").charAt(0).toUpperCase();
 
   return (

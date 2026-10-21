@@ -69,7 +69,10 @@ const EmployerTestsPage = lazy(() => import("@/features/employer/TestsPage"));
 
 const AdminDashboard = lazy(() => import("@/features/admin/DashboardPage"));
 const UsersPage = lazy(() => import("@/features/admin/UsersPage"));
+const AdminUserDetailPage = lazy(() => import("@/features/admin/UserDetailPage"));
 const ModerationPage = lazy(() => import("@/features/admin/ModerationPage"));
+const AdminCoursesPage = lazy(() => import("@/features/admin/CoursesPage"));
+const AdminCourseDetailPage = lazy(() => import("@/features/admin/CourseDetailPage"));
 const TaxonomyPage = lazy(() => import("@/features/admin/TaxonomyPage"));
 const ProfessionsPage = lazy(() => import("@/features/admin/ProfessionsPage"));
 const AdminAnalyticsPage = lazy(() => import("@/features/admin/AnalyticsPage"));
@@ -264,7 +267,10 @@ export const router = createBrowserRouter([
       { index: true, element: <Navigate to="dashboard" replace /> },
       { path: "dashboard", element: <Lazy><AdminDashboard /></Lazy> },
       { path: "users", element: <Lazy><UsersPage /></Lazy> },
+      { path: "users/:userId", element: <Lazy><AdminUserDetailPage /></Lazy> },
       { path: "moderation", element: <Lazy><ModerationPage /></Lazy> },
+      { path: "courses", element: <Lazy><AdminCoursesPage /></Lazy> },
+      { path: "courses/:courseId", element: <Lazy><AdminCourseDetailPage /></Lazy> },
       { path: "taxonomy", element: <Lazy><TaxonomyPage /></Lazy> },
       { path: "professions", element: <Lazy><ProfessionsPage /></Lazy> },
       { path: "analytics", element: <Lazy><AdminAnalyticsPage /></Lazy> },

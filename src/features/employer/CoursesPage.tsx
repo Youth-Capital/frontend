@@ -104,8 +104,20 @@ export default function CoursesPage() {
             )}
 
             <div className="mt-3 text-xs text-ink-500">
-              {course.enrollment_count} {t("employer.students").toLowerCase()} ·{" "}
-              {course.completion_rate}% {t("employer.completions").toLowerCase()}
+              {course.external_url ? (
+                // Taken elsewhere: no enrolments or completions to count here.
+                <Badge tone="brand">
+                  {t("courses.opensOn", {
+                    name: course.external_platform || course.provider_name,
+                  })}{" "}
+                  ↗
+                </Badge>
+              ) : (
+                <>
+                  {course.enrollment_count} {t("employer.students").toLowerCase()} ·{" "}
+                  {course.completion_rate}% {t("employer.completions").toLowerCase()}
+                </>
+              )}
             </div>
 
             <div className="mt-auto flex gap-2 pt-4">

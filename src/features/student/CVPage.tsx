@@ -3,7 +3,9 @@ import { PageHeader } from "@/shared/ui/PageHeader";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { api } from "@/shared/api/client";
+import { Link } from "react-router-dom";
+
+import { api, httpStatus } from "@/shared/api/client";
 import {
   Badge,
   Button,
@@ -47,6 +49,28 @@ interface Suggestion {
   data?: Record<string, unknown>;
 }
 
+/**
+ * A first draft of the opening, and the rows it was written from.
+ *
+ * `available` is false when the profile has nothing to write about, which is a
+ * different answer from "the assistant is unavailable" and reads differently
+ * to the student.
+ */
+interface CvDraft {
+  available: boolean;
+  reason: string;
+  headline: string;
+  summary: string;
+  source?: "model" | "platform";
+  evidence: {
+    skills: { name: string; level: number; verified: boolean }[];
+    experience: { title: string; months: number }[];
+    courses: { title: string; provider: string }[];
+    certificates: string[];
+    projects: { title: string }[];
+  };
+}
+
 export default function CVPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -57,6 +81,10 @@ export default function CVPage() {
   const [title, setTitle] = useState("My CV");
   const [headline, setHeadline] = useState("");
   const [summary, setSummary] = useState("");
+  /** Which half of the modal is showing: the choice, or the form. */
+  const [step, setStep] = useState<"choose" | "form">("choose");
+  /** What a drafted CV was written from, shown above the fields it filled. */
+  const [draftNote, setDraftNote] = useState<string | null>(null);
 
   const cvs = useQuery({
     queryKey: ["cvs"],
@@ -116,10 +144,51 @@ export default function CVPage() {
       await api.post("/cv/documents/", { title, headline, summary });
     },
     onSuccess: () => {
-      setCreateOpen(false);
+      closeCreate();
       void queryClient.invalidateQueries({ queryKey: ["cvs"] });
     },
   });
+
+  /**
+   * Ask the assistant for a first draft.
+   *
+   * It is written from the student's own skills, experience and finished
+   * courses, and it lands in the same fields they would have typed into —
+   * nothing is saved until they press create. An empty profile is told so
+   * plainly rather than answered with two empty sentences.
+   */
+  const draftCv = useMutation({
+    mutationFn: async () => {
+      const { data } = await api.post<CvDraft>("/cv/documents/draft/", {});
+      return data;
+    },
+    onSuccess: (draft) => {
+      if (draft.available) {
+        setHeadline(draft.headline);
+        setSummary(draft.summary);
+        const e = draft.evidence;
+        setDraftNote(
+          t("cv.draftFrom", {
+            skills: e.skills.length,
+            courses: e.courses.length,
+            experience: e.experience.length,
+          }),
+        );
+      } else {
+        setDraftNote(t("cv.draftEmpty"));
+      }
+      setStep("form");
+    },
+  });
+
+  const closeCreate = () => {
+    setCreateOpen(false);
+    // The next time it opens it asks again, rather than reopening on whichever
+    // half the last visit ended on.
+    setStep("choose");
+    setDraftNote(null);
+    draftCv.reset();
+  };
 
   const updatePassport = useMutation({
     mutationFn: async (payload: Record<string, unknown>) => {
@@ -406,40 +475,116 @@ export default function CVPage() {
 
       <Modal
         open={createOpen}
-        onClose={() => setCreateOpen(false)}
+        onClose={closeCreate}
         title={t("cv.create")}
         footer={
-          <>
-            <Button variant="secondary" onClick={() => setCreateOpen(false)}>
+          step === "choose" ? (
+            <Button variant="secondary" onClick={closeCreate}>
               {t("common.cancel")}
             </Button>
-            <Button onClick={() => createCv.mutate()} loading={createCv.isPending}>
-              {t("common.create")}
-            </Button>
-          </>
+          ) : (
+            <>
+              <Button variant="secondary" onClick={closeCreate}>
+                {t("common.cancel")}
+              </Button>
+              <Button onClick={() => createCv.mutate()} loading={createCv.isPending}>
+                {t("common.create")}
+              </Button>
+            </>
+          )
         }
       >
-        <div className="flex flex-col gap-4">
-          <Input
-            id="cv-title"
-            label={t("common.create")}
-            value={title}
-            onChange={(event) => setTitle(event.target.value)}
-          />
-          <Input
-            id="cv-headline"
-            label={t("cv.headline")}
-            value={headline}
-            onChange={(event) => setHeadline(event.target.value)}
-          />
-          <Textarea
-            id="cv-summary"
-            label={t("cv.summary")}
-            value={summary}
-            onChange={(event) => setSummary(event.target.value)}
-          />
-          <p className="text-xs text-ink-500">{t("cv.sectionsHint")}</p>
-        </div>
+        {step === "choose" ? (
+          /*
+            Two ways in, asked once.
+
+            The assistant writes from the record the platform already holds, so
+            the choice is really "my words or my record's words" — and it is
+            worth asking rather than hiding behind a wand icon, because a
+            student who has not filled in a profile should be told that first.
+          */
+          <div className="flex flex-col gap-3">
+            <p className="text-sm text-ink-600">{t("cv.chooseHint")}</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => setStep("form")}
+                className="glass-lift rounded-(--radius-card) border border-ink-200 p-4 text-left transition-colors fine:hover:border-brand-edge"
+              >
+                <span className="block font-medium text-ink-900">
+                  {t("cv.writeMyself")}
+                </span>
+                <span className="mt-1 block text-xs text-ink-500">
+                  {t("cv.writeMyselfHint")}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => draftCv.mutate()}
+                disabled={draftCv.isPending}
+                className="glass-lift rounded-(--radius-card) border border-ink-200 p-4 text-left transition-colors fine:hover:border-brand-edge disabled:opacity-60"
+              >
+                <span className="block font-medium text-ink-900">
+                  {draftCv.isPending ? t("cv.drafting") : t("cv.writeWithAI")}
+                </span>
+                <span className="mt-1 block text-xs text-ink-500">
+                  {t("cv.writeWithAIHint")}
+                </span>
+              </button>
+            </div>
+            {draftCv.isError &&
+              /*
+                A plan refusal is not a failure, and saying "could not draft it"
+                when the answer is "your plan does not include this" sends the
+                student to retry something that will refuse again. The status
+                decides the sentence; writing it yourself stays available
+                either way.
+              */
+              (httpStatus(draftCv.error) === 402 ? (
+                <p className="text-sm text-ink-600">
+                  {t("billing.upgradeToUnlock")}{" "}
+                  <Link
+                    to="/student/billing"
+                    className="font-medium text-brand-700 hover:underline"
+                  >
+                    {t("profile.managePlan")}
+                  </Link>
+                </p>
+              ) : (
+                <p className="text-sm text-danger">{t("cv.draftFailed")}</p>
+              ))}
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4">
+            {draftNote && (
+              /* Which rows put these sentences here — a student reading a
+                 paragraph about themselves should be able to check it. */
+              <p className="rounded-(--radius-control) bg-brand-50 p-3 text-xs text-ink-600">
+                {draftNote}
+              </p>
+            )}
+            <Input
+              id="cv-title"
+              label={t("cv.name")}
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+            />
+            <Input
+              id="cv-headline"
+              label={t("cv.headline")}
+              value={headline}
+              onChange={(event) => setHeadline(event.target.value)}
+            />
+            <Textarea
+              id="cv-summary"
+              label={t("cv.summary")}
+              value={summary}
+              onChange={(event) => setSummary(event.target.value)}
+            />
+            <p className="text-xs text-ink-500">{t("cv.sectionsHint")}</p>
+          </div>
+        )}
       </Modal>
     </div>
   );

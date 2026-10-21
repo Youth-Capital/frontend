@@ -7,6 +7,7 @@
  */
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import {
   forwardRef,
   useEffect,
@@ -73,6 +74,43 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   fullWidth?: boolean;
 }
 
+/**
+ * The button's look, for the rare element that must look like a button but is
+ * a link — one that leaves the site, say, where a <button> would be wrong.
+ */
+export function buttonClassName({
+  variant = "primary",
+  size = "md",
+  fullWidth,
+  className,
+}: {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  fullWidth?: boolean;
+  className?: string;
+} = {}) {
+  return clsx(
+    "inline-flex items-center justify-center rounded-full font-medium",
+    /*
+     * Press had no state of its own: hover and active looked identical, so
+     * a click gave no acknowledgement until the request came back. The dip
+     * is a transform rather than a colour or a size change — transform and
+     * opacity are the two properties that do not force layout, which is
+     * what keeps this smooth on a mid-range phone.
+     *
+     * 140ms sits in the micro-feedback range; anything slower reads as lag
+     * on a control that is meant to feel immediate.
+     */
+    "transition-[color,background-color,border-color,transform] duration-140 ease-out",
+    "active:scale-[0.98] disabled:active:scale-100",
+    "disabled:cursor-not-allowed",
+    BUTTON_VARIANTS[variant],
+    BUTTON_SIZES[size],
+    fullWidth && "w-full",
+    className,
+  );
+}
+
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   {
     variant = "primary",
@@ -91,26 +129,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     <button
       ref={ref}
       disabled={disabled || loading}
-      className={clsx(
-        "inline-flex items-center justify-center rounded-full font-medium",
-        /*
-         * Press had no state of its own: hover and active looked identical, so
-         * a click gave no acknowledgement until the request came back. The dip
-         * is a transform rather than a colour or a size change — transform and
-         * opacity are the two properties that do not force layout, which is
-         * what keeps this smooth on a mid-range phone.
-         *
-         * 140ms sits in the micro-feedback range; anything slower reads as lag
-         * on a control that is meant to feel immediate.
-         */
-        "transition-[color,background-color,border-color,transform] duration-140 ease-out",
-        "active:scale-[0.98] disabled:active:scale-100",
-        "disabled:cursor-not-allowed",
-        BUTTON_VARIANTS[variant],
-        BUTTON_SIZES[size],
-        fullWidth && "w-full",
-        className,
-      )}
+      className={buttonClassName({ variant, size, fullWidth, className })}
       {...rest}
     >
       {loading ? <Spinner size={size === "lg" ? 20 : 16} /> : icon}
@@ -375,6 +394,215 @@ export function Badge({
   );
 }
 
+/* ------------------------------------------------------------ SectionLabel */
+
+/**
+ * The quiet heading above a group of rows.
+ *
+ * A card used to open with a bold sentence and a chip or two, which made every
+ * group inside it look like a card of its own. This says the same thing in the
+ * smallest voice that still reads: uppercase, letterspaced, muted. The eye
+ * finds it when it is looking for structure and passes over it when it is
+ * reading content, which is the whole job of a label.
+ *
+ * A count rides with the label rather than in a coloured pill. Three counts in
+ * three different hues — green, amber, pink — was three semantics for what is
+ * one scale, and the colour was doing nothing the number did not already say.
+ */
+export function SectionLabel({
+  children,
+  count,
+  action,
+  className,
+}: {
+  children: ReactNode;
+  count?: number;
+  action?: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={clsx(
+        "mb-3 flex items-baseline justify-between gap-4",
+        className,
+      )}
+    >
+      <h3 className="text-xs font-semibold tracking-[0.08em] text-ink-500 uppercase">
+        {children}
+        {count !== undefined && (
+          <span className="ml-2 font-normal text-ink-500 tabular-nums">
+            {count}
+          </span>
+        )}
+      </h3>
+      {action && <div className="shrink-0 text-sm">{action}</div>}
+    </div>
+  );
+}
+
+/* ----------------------------------------------------------------- DataRow */
+
+/** A row's state, shown as a mark rather than as a coloured box. */
+export type RowMark = "brand" | "success" | "warning" | "danger" | "info";
+
+const ROW_MARKS: Record<RowMark, string> = {
+  brand: "bg-brand-fill",
+  success: "bg-success",
+  warning: "bg-warning",
+  danger: "bg-danger",
+  info: "bg-info",
+};
+
+/**
+ * One line of content inside a panel: title, a quiet line under it, a value.
+ *
+ * Rows used to be bordered, filled, rounded boxes, so a card of five of them
+ * was six surfaces deep and the eye counted edges instead of reading. Here the
+ * separation is space, the value sits in its own right-aligned column in
+ * tabular figures so a column of them lines up, and the only ink spent on
+ * state is a 6px dot.
+ *
+ * `to` or `href` makes the whole row the target. It does that by stretching the
+ * title's own link across the row with a pseudo-element rather than by wrapping
+ * the row in an anchor: a row often carries a button of its own — a checkbox, a
+ * menu — and an interactive element inside a link is invalid markup that a
+ * keyboard cannot reach and a screen reader announces as one confused control.
+ * Anything interactive passed in `leading` or `trailing` is given a stacking
+ * context above the stretched area, so it stays clickable and separately
+ * focusable.
+ */
+export function DataRow({
+  title,
+  meta,
+  value,
+  valueMeta,
+  mark,
+  to,
+  href,
+  leading,
+  trailing,
+  className,
+}: {
+  title: ReactNode;
+  /** The quiet line under the title. Dot-separate the parts. */
+  meta?: ReactNode;
+  /** The figure, right-aligned and tabular. */
+  value?: ReactNode;
+  /** A smaller line under the value. */
+  valueMeta?: ReactNode;
+  mark?: RowMark;
+  to?: string;
+  href?: string;
+  leading?: ReactNode;
+  trailing?: ReactNode;
+  className?: string;
+}) {
+  const target = to ?? href;
+  const titleContent = (
+    <span className="block truncate font-medium text-ink-800">{title}</span>
+  );
+
+  return (
+    <div
+      className={clsx(
+        "group relative -mx-2 flex items-start gap-3 rounded-(--radius-control) px-2 py-2.5",
+        // Hover is for pointers only: on a touch screen it latches after a tap
+        // and the row stays lit until something else is touched.
+        target && "fine:hover:bg-ink-100/70 transition-colors duration-150",
+        className,
+      )}
+    >
+      {leading && (
+        <div className="relative z-10 mt-0.5 shrink-0">{leading}</div>
+      )}
+
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          {mark && (
+            <span
+              aria-hidden
+              className={clsx(
+                "h-1.5 w-1.5 shrink-0 rounded-full",
+                ROW_MARKS[mark],
+              )}
+            />
+          )}
+          {target ? (
+            to ? (
+              <Link
+                to={to}
+                className="min-w-0 flex-1 after:absolute after:inset-0 after:content-['']"
+              >
+                {titleContent}
+              </Link>
+            ) : (
+              <a
+                href={href}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="min-w-0 flex-1 after:absolute after:inset-0 after:content-['']"
+              >
+                {titleContent}
+              </a>
+            )
+          ) : (
+            <span className="min-w-0 flex-1">{titleContent}</span>
+          )}
+        </div>
+        {meta && (
+          <p className="mt-0.5 truncate text-xs text-ink-500">{meta}</p>
+        )}
+      </div>
+
+      {(value !== undefined || valueMeta) && (
+        <div className="shrink-0 pl-2 text-right">
+          {value !== undefined && (
+            <span className="block text-sm font-medium text-ink-800 tabular-nums">
+              {value}
+            </span>
+          )}
+          {valueMeta && (
+            <span className="mt-0.5 block text-xs text-ink-500 tabular-nums">
+              {valueMeta}
+            </span>
+          )}
+        </div>
+      )}
+
+      {trailing && <div className="relative z-10 shrink-0">{trailing}</div>}
+    </div>
+  );
+}
+
+/**
+ * A group of rows.
+ *
+ * `divided` draws one hairline between rows for a list that is a table in
+ * everything but markup — a column of figures reads better with them and a
+ * list of headlines reads worse, so it is a decision rather than a default.
+ */
+export function DataList({
+  children,
+  divided = false,
+  className,
+}: {
+  children: ReactNode;
+  divided?: boolean;
+  className?: string;
+}) {
+  return (
+    <div
+      className={clsx(
+        "flex flex-col",
+        divided && "divide-y divide-ink-200/60",
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
 /* -------------------------------------------------------------------- Tile */
 
 /**
@@ -454,12 +682,22 @@ export function ProgressBar({
   showLabel = false,
   size = "md",
   label,
+  ariaLabel,
 }: {
   value: number;
   tone?: BadgeTone;
   showLabel?: boolean;
   size?: "sm" | "md" | "lg";
+  /** Printed above the bar, and used as its accessible name. */
   label?: string;
+  /**
+   * The accessible name when the caller prints its own label.
+   *
+   * Without this the choice was between a bar a screen reader announces as
+   * "progressbar, 95%" — of what? — and a caller that prints the label twice,
+   * which is what the profile page was doing.
+   */
+  ariaLabel?: string;
 }) {
   const clamped = Math.max(0, Math.min(100, Math.round(value)));
   const fill: Record<BadgeTone, string> = {
@@ -490,7 +728,7 @@ export function ProgressBar({
         aria-valuenow={clamped}
         aria-valuemin={0}
         aria-valuemax={100}
-        aria-label={label}
+        aria-label={label ?? ariaLabel}
       >
         <div
           className={clsx("h-full rounded-full transition-[width] duration-500", fill[tone])}

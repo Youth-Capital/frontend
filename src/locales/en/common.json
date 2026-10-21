@@ -149,7 +149,9 @@
     "recap_failed": "The recap could not be generated. Try again in a minute.",
     "check_failed": "The questions could not be generated. Try again in a minute.",
     "no_questions": "This lesson has no questions.",
-    "not_your_learner": "You do not work with this learner."
+    "not_your_learner": "You do not work with this learner.",
+    "course_no_skills": "Add at least one skill this course teaches.",
+    "course_is_external": "This course is taken on another platform."
   },
   "auth": {
     "verifyTitle": "Verify your email",
@@ -222,7 +224,8 @@
     "consentNotice": "To create your account we need your consent. We store and process your profile data — name, date of birth, skills and test results — to build your development plan and match you with vacancies. An employer sees your details only if you apply to one of their vacancies yourself.",
     "consentAgree": "I agree to the terms of service, the privacy policy and the processing of my personal data",
     "consentOptional": "Optional — you can change these later in settings",
-    "consentToContinue": "Tick the consent to continue"
+    "consentToContinue": "Tick the consent to continue",
+    "emailTaken": "An account with this email already exists. Sign in, or use another email."
   },
   "onboarding": {
     "title": "Let's set up your profile",
@@ -472,7 +475,23 @@
     "tutorGroundedOn": "From: {{sources}}",
     "tutorNoSource": "This lesson has no text to answer from yet. Ask the author to add notes or a video transcript.",
     "tutorNoModel": "No model is connected, so this cannot be answered.",
-    "tutorFailed": "The answer didn't come through. Try again."
+    "tutorFailed": "The answer didn't come through. Try again.",
+    "deliveryTitle": "Where the course is taken",
+    "delivery_platform": "On the platform — lessons here",
+    "delivery_external": "On Coursera — a link",
+    "deliveryLockedHint": "This course already has lessons, so it stays on the platform. Create a new course for a Coursera one.",
+    "externalUrl": "Course link",
+    "externalUrlHint": "The course page address on coursera.org. The learner's button opens it.",
+    "externalSaveFirstHint": "This course's lessons are on Coursera, so there is nothing to add here. Save it, then pick its skills and submit it for review.",
+    "externalNoLessonsHint": "This course's lessons are taken on Coursera. Only its description, skills and link are kept here.",
+    "skillsHint": "Skills are how the course is recommended to learners who are missing them.",
+    "skillsRequiredHint": "Required for a Coursera course: skills are how learners find it. Add at least one.",
+    "noSkillsYet": "No skills picked yet.",
+    "materialVideoFile": "Video from your computer",
+    "materialVideoFileHint": "MP4 or WebM, up to 500 MB. Or paste a link below.",
+    "uploading": "Uploading — keep this page open.",
+    "opensOn": "Open on {{name}}",
+    "externalHint": "This course is taken on {{name}}, in English. It opens in a new tab."
   },
   "tests": {
     "title": "Tests",
@@ -624,7 +643,17 @@
     "provenSkills": "Verified skills",
     "passedTests": "Tests passed",
     "verifiedSkills": "Verified skills",
-    "noVerifiedSkills": "Nothing verified yet. Pass a test to confirm a skill."
+    "noVerifiedSkills": "Nothing verified yet. Pass a test to confirm a skill.",
+    "name": "Name",
+    "chooseHint": "Two ways: write it yourself, or let the assistant draft it from your skills, experience and finished courses.",
+    "writeMyself": "I'll write it",
+    "writeMyselfHint": "The headline and the summary, in your own words.",
+    "writeWithAI": "Let the assistant draft it",
+    "writeWithAIHint": "From your skills, experience and courses. You can edit every word.",
+    "drafting": "Drafting…",
+    "draftFrom": "Drafted from your profile: {{skills}} skills, {{courses}} courses, {{experience}} roles. Check it and make it yours.",
+    "draftEmpty": "There is nothing in your profile to write about yet. Add a skill or some experience, finish a course — then the assistant can draft it. You can still write it yourself.",
+    "draftFailed": "Could not draft it. Try again, or write it yourself."
   },
   "jobs": {
     "title": "Jobs",
@@ -976,6 +1005,27 @@
     "safetyAction": {
       "BLOCKED": "Blocked",
       "ESCALATED": "Referred on"
+    },
+    "externalUrl": "Course link",
+    "allCourses": "All courses",
+    "allCoursesHint": "Every course on the platform: who added it, its status and what is inside.",
+    "courseSearch": "Course title, company or author email",
+    "course": "Course",
+    "company": "Company",
+    "author": "Author",
+    "status": "Status",
+    "createdAt": "Added",
+    "origin": "Who added this course",
+    "partner": "partner",
+    "platformCourse": "Platform course",
+    "taxId": "Tax ID",
+    "moderatedBy": "Moderator",
+    "showingOf": "Showing {{shown}} of {{total}}. Narrow the search.",
+    "companyStatus": {
+      "UNVERIFIED": "Not verified",
+      "PENDING": "Awaiting verification",
+      "VERIFIED": "Verified",
+      "REJECTED": "Verification rejected"
     }
   },
   "settings": {
@@ -2031,6 +2081,51 @@
     "recordSkills": "What you can do and what proves it",
     "recordKnowledge": "Results by topic and category",
     "recordExperience": "Work, projects and volunteering",
-    "recordCv": "CV and portfolio"
+    "recordCv": "CV and portfolio",
+    "avatarChange": "Change",
+    "avatarFailed": "Could not upload the picture. Try another image.",
+    "youthId": "Youth ID",
+    "youthIdHint": "Your number on the platform. Employers see it on applications, and it appears on your public passport."
+  },
+  "adminUser": {
+    "account": "Account",
+    "profile": "Profile",
+    "company": "Company",
+    "status": "Status",
+    "active": "Active",
+    "inactive": "Deactivated",
+    "joined": "Joined",
+    "lastLogin": "Last sign-in",
+    "billing": "Plan",
+    "period": "Valid until",
+    "consents": "Consents",
+    "devices": "Devices",
+    "activity": "Recent actions",
+    "password": "Password",
+    "passwordHint": "Not stored. The database holds an Argon2id hash only — it can confirm a password typed at sign-in and cannot produce one. To restore access, send a reset link.",
+    "verifiedOf": "{{verified}} of {{total}} verified",
+    "completedOf": "{{done}} of {{total}} completed",
+    "passedOf": "{{done}} of {{total}} passed",
+    "field": {
+      "full_name": "Full name",
+      "youth_id": "Youth ID",
+      "birth_date": "Date of birth",
+      "age": "Age",
+      "is_minor": "Minor",
+      "region": "Region",
+      "city": "City",
+      "education_status": "Education",
+      "employment_status": "Employment",
+      "target_profession": "Target profession",
+      "profile_completion": "Profile completion, %",
+      "languages": "Languages",
+      "avatar": "Photo",
+      "display_name": "Name",
+      "legal_name": "Legal name",
+      "tax_id": "Tax ID",
+      "industry": "Industry",
+      "website": "Website",
+      "verification_status": "Verification"
+    }
   }
 }

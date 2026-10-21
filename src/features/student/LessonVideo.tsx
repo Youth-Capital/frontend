@@ -25,6 +25,28 @@ export function LessonVideo({ video }: { video: Video }) {
   const { t } = useTranslation();
   const [playing, setPlaying] = useState(false);
 
+  if (video.provider === "upload") {
+    // A file the author uploaded, played from the platform's own signed link —
+    // an address the server wrote, never user input. `preload="metadata"`
+    // fetches only enough to show the length and first frame, so opening the
+    // lesson does not start downloading a lecture on a phone plan.
+    return (
+      <div className="mx-auto mb-4 aspect-video w-full max-w-[106svh] overflow-hidden rounded-(--radius-card) bg-ink-900">
+        <video
+          src={video.url}
+          controls
+          preload="metadata"
+          playsInline
+          controlsList="nodownload"
+          className="h-full w-full"
+          title={t("courses.videoTitle")}
+        >
+          <a href={video.url}>{t("courses.openVideo")}</a>
+        </video>
+      </div>
+    );
+  }
+
   if (!video.embed_url) {
     // Not something we will frame: a plain, honest link out.
     return (

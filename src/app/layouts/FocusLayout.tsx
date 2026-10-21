@@ -10,6 +10,7 @@ import { ThemeSwitcher } from "@/shared/ui/ThemeSwitcher";
 import { ProfileMenu } from "./ProfileMenu";
 import { Logo } from "@/shared/ui/Logo";
 import { SkipLink } from "@/shared/ui/SkipLink";
+import { useScrollToTop } from "@/shared/hooks/useScrollToTop";
 
 /**
  * A screen with nothing to click away to.
@@ -26,6 +27,8 @@ import { SkipLink } from "@/shared/ui/SkipLink";
  * the course is inside the page, next to the lesson it belongs to.
  */
 export function FocusLayout() {
+  useScrollToTop();
+
   const { t } = useTranslation();
   const { user } = useAuth();
   const home = user ? HOME_BY_ROLE[user.role] : "/";

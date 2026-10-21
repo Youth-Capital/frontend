@@ -6,6 +6,7 @@ const NAV: NavItem[] = [
   { to: "/admin/dashboard", labelKey: "nav.dashboard", icon: icons.dashboard },
   { to: "/admin/analytics", labelKey: "nav.analytics", icon: icons.analytics },
   { to: "/admin/moderation", labelKey: "nav.moderation", icon: icons.moderation },
+  { to: "/admin/courses", labelKey: "nav.courses", icon: icons.courses },
   { to: "/admin/users", labelKey: "nav.users", icon: icons.users },
   { to: "/admin/taxonomy", labelKey: "nav.taxonomy", icon: icons.taxonomy },
   { to: "/admin/professions", labelKey: "nav.professions", icon: icons.career },

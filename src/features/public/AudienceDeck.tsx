@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 import "@/shared/styles/deck.css";
 
@@ -25,8 +25,11 @@ export interface DeckCard {
  *
  * One card is open at a time. Two open cards in a fan overlap each other's
  * text, and the point of turning one over is to read it.
+ *
+ * `art`, when given, fills the top of each face — the part that used to be
+ * empty colour above two words. Index for index with `cards`.
  */
-export function AudienceDeck({ cards }: { cards: DeckCard[] }) {
+export function AudienceDeck({ cards, art }: { cards: DeckCard[]; art?: ReactNode[] }) {
   const [open, setOpen] = useState<number | null>(null);
 
   /*
@@ -69,9 +72,17 @@ export function AudienceDeck({ cards }: { cards: DeckCard[] }) {
           >
             <span className="yc-deck-inner block">
               <span
-                className={`${faceBase} ${faceTone} justify-end gap-2`}
+                className={`${faceBase} ${faceTone} justify-end gap-2 ${
+                  isLead ? "yc-deck-lead" : ""
+                }`}
                 aria-hidden={isOpen}
               >
+                {art?.[index] && (
+                  // my-auto splits the slack above and below, so the picture
+                  // sits in the middle of the empty part of the card and the
+                  // number and title stay where they were.
+                  <span className="my-auto block">{art[index]}</span>
+                )}
                 <span
                   className={`font-display text-sm tabular-nums ${
                     isLead ? "text-on-colour/70" : "text-accent-ink"

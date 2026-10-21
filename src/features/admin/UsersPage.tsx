@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PageHeader } from "@/shared/ui/PageHeader";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 
 import { api } from "@/shared/api/client";
 import { useApiError } from "@/shared/hooks/useApiError";
@@ -130,10 +131,19 @@ export default function UsersPage() {
               {users.data?.map((user) => (
                 <tr key={user.id} className={user.is_active ? "" : "opacity-60"}>
                   <Td>
+                    {/* The name opens the whole record. The row carries a role
+                        menu and a deactivate button of its own, so the link is
+                        on the name rather than wrapped around the row: a link
+                        containing buttons is markup a keyboard cannot use. */}
                     <div className="min-w-0">
-                      <p className="font-medium text-ink-800">{user.display_name}</p>
+                      <Link
+                        to={`/admin/users/${user.id}`}
+                        className="font-medium text-ink-800 underline-offset-4 hover:underline"
+                      >
+                        {user.display_name}
+                      </Link>
                       <p className="text-xs text-ink-500">{user.email}</p>
-                      <p className="text-xs text-ink-400">
+                      <p className="text-xs text-ink-500">
                         {formatDate(user.date_joined, i18n.resolvedLanguage)}
                       </p>
                     </div>

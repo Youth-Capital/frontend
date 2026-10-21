@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
 
 import { api, httpStatus } from "@/shared/api/client";
+import { LessonMaterials } from "@/features/student/LessonMaterials";
 import { LessonVideo } from "@/features/student/LessonVideo";
 import { PageHeader } from "@/shared/ui/PageHeader";
 import {
@@ -15,7 +16,7 @@ import {
   ProgressBar,
   StatCard,
 } from "@/shared/ui";
-import type { Course, Lesson } from "@/shared/types/api";
+import type { Course, CourseMaterial, Lesson, Paginated } from "@/shared/types/api";
 
 interface CourseAnalytics {
   enrolled: number;
@@ -38,8 +39,19 @@ interface CourseAnalytics {
  * The lesson body is fetched only when a lesson is opened. A course is a
  * dozen lessons, and loading all of them to show a list of titles would make
  * the page slow at exactly the size where it starts being useful.
+ *
+ * The admin portal opens the same page for any course on the platform, with
+ * `backTo` pointing at its own list and `renderTop` adding who sent the course
+ * and the moderation buttons above it. One page, so the moderator sees exactly
+ * what the company sees.
  */
-export default function EmployerCourseDetailPage() {
+export default function EmployerCourseDetailPage({
+  backTo = "/employer/courses",
+  renderTop,
+}: {
+  backTo?: string;
+  renderTop?: (course: Course) => ReactNode;
+} = {}) {
   const { courseId } = useParams<{ courseId: string }>();
   const { t } = useTranslation();
   const [openLesson, setOpenLesson] = useState<string | null>(null);
@@ -73,9 +85,22 @@ export default function EmployerCourseDetailPage() {
     enabled: Boolean(openLesson),
   });
 
+  // Materials attached to the course as a whole rather than to one lesson —
+  // a reading list, a syllabus. Lesson-level ones arrive with the lesson.
+  const courseMaterials = useQuery({
+    queryKey: ["course-materials", courseId],
+    queryFn: async () => {
+      const { data } = await api.get<Paginated<CourseMaterial>>(
+        `/learning/materials/?course=${courseId}&page_size=100`,
+      );
+      return data.results.filter((item) => item.lesson === null);
+    },
+    enabled: Boolean(courseId),
+  });
+
   const back = (
     <Link
-      to="/employer/courses"
+      to={backTo}
       className="text-sm text-brand-600 hover:text-brand-700"
     >
       ← {t("nav.courses")}
@@ -129,6 +154,27 @@ export default function EmployerCourseDetailPage() {
         }
       />
 
+      {renderTop?.(data)}
+
+      {data.external_url && (
+        <Card>
+          <CardHeader
+            title={t("courses.opensOn", {
+              name: data.external_platform || data.provider_name,
+            })}
+            subtitle={t("courses.externalNoLessonsHint")}
+          />
+          <a
+            href={data.external_url}
+            target="_blank"
+            rel="noreferrer noopener"
+            className="break-all text-sm text-brand-700 hover:underline"
+          >
+            {data.external_url} ↗
+          </a>
+        </Card>
+      )}
+
       {/* The figures, alongside the course rather than instead of it. */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
@@ -143,11 +189,14 @@ export default function EmployerCourseDetailPage() {
           label={t("employer.averageScore")}
           value={`${analytics.data?.average_test_score ?? 0}%`}
         />
-        {/* What the author is most likely here to check. */}
-        <StatCard
-          label={t("courses.lessonsWithVideo")}
-          value={`${withVideo}/${lessons.length}`}
-        />
+        {/* What the author is most likely here to check — unless the lessons
+            are on another platform, where there is nothing here to count. */}
+        {!data.external_url && (
+          <StatCard
+            label={t("courses.lessonsWithVideo")}
+            value={`${withVideo}/${lessons.length}`}
+          />
+        )}
       </div>
 
       {analytics.data && analytics.data.enrolled > 0 && (
@@ -229,15 +278,39 @@ export default function EmployerCourseDetailPage() {
                                 {t("courses.noVideoHint")}
                               </p>
                             )}
+                            {lesson.data.video_url && (
+                              <p className="mt-2 break-all text-xs text-ink-500">
+                                {t("courses.videoLink")}:{" "}
+                                <a
+                                  href={lesson.data.video_url}
+                                  target="_blank"
+                                  rel="noreferrer noopener"
+                                  className="text-brand-700 hover:underline"
+                                >
+                                  {lesson.data.video_url}
+                                </a>
+                              </p>
+                            )}
                             {lesson.data.content ? (
-                              <p className="whitespace-pre-line text-sm leading-relaxed text-ink-700">
+                              <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-ink-700">
                                 {lesson.data.content}
                               </p>
                             ) : (
-                              <p className="text-sm text-ink-500">
+                              <p className="mt-3 text-sm text-ink-500">
                                 {t("courses.noLessonText")}
                               </p>
                             )}
+                            {lesson.data.transcript && (
+                              <details className="mt-3">
+                                <summary className="cursor-pointer text-sm font-medium text-ink-700">
+                                  {t("courses.transcript")}
+                                </summary>
+                                <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-ink-600">
+                                  {lesson.data.transcript}
+                                </p>
+                              </details>
+                            )}
+                            <LessonMaterials materials={lesson.data.materials} />
                           </>
                         )}
                       </div>
@@ -249,6 +322,10 @@ export default function EmployerCourseDetailPage() {
           </Card>
         ))}
       </div>
+
+      {(courseMaterials.data?.length ?? 0) > 0 && (
+        <LessonMaterials materials={courseMaterials.data ?? []} />
+      )}
 
       {(data.tests?.length ?? 0) > 0 && (
         <Card>

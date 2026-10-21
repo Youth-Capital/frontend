@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PageHeader } from "@/shared/ui/PageHeader";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 
 import { api } from "@/shared/api/client";
 import { useApiError } from "@/shared/hooks/useApiError";
@@ -228,8 +229,23 @@ export default function ModerationPage() {
             <Card key={course.id}>
               <div className="flex flex-col gap-3 lg:flex-row lg:justify-between">
                 <div className="min-w-0">
-                  <h3 className="font-semibold text-ink-900">{course.title}</h3>
-                  <p className="text-sm text-ink-600">{course.provider_name}</p>
+                  <h3 className="font-semibold text-ink-900">
+                    <Link
+                      to={`/admin/courses/${course.id}`}
+                      className="hover:text-brand-700 hover:underline"
+                    >
+                      {course.title}
+                    </Link>
+                  </h3>
+                  <p className="text-sm text-ink-600">
+                    {course.provider_name}
+                    {course.origin?.author && (
+                      <span className="text-ink-500">
+                        {" "}
+                        · {course.origin.author.name} ({course.origin.author.email})
+                      </span>
+                    )}
+                  </p>
                   <p className="mt-2 line-clamp-3 text-sm text-ink-500">
                     {course.summary}
                   </p>

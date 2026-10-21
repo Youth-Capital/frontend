@@ -11,6 +11,7 @@ import { ProfileMenu } from "./ProfileMenu";
 import { ThemeSwitcher } from "@/shared/ui/ThemeSwitcher";
 import { LogoMark } from "@/shared/ui/Logo";
 import { SkipLink } from "@/shared/ui/SkipLink";
+import { useScrollToTop } from "@/shared/hooks/useScrollToTop";
 
 export interface NavItem {
   to: string;
@@ -26,6 +27,8 @@ interface Props {
 }
 
 export function AppShell({ navItems, portalLabel, accent = "brand" }: Props) {
+  useScrollToTop();
+
   const { t } = useTranslation();
   const { user } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);

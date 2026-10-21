@@ -159,6 +159,24 @@ export const httpStatus = (error: unknown): number | undefined =>
 
 /** Normalise any failure into the backend's error envelope. */
 export const toApiError = (error: unknown): ApiError["error"] => {
+  /*
+   * Already converted. AuthContext's login and register rethrow the result of
+   * this function, and the pages then pass what they caught through it again.
+   * Without this branch the second pass did not recognise its own output and
+   * answered "Something went wrong." — so every failed sign-up and sign-in,
+   * whether the email was taken, the password too short or the account locked,
+   * showed the same useless English sentence.
+   */
+  if (
+    error !== null &&
+    typeof error === "object" &&
+    !axios.isAxiosError(error) &&
+    typeof (error as { code?: unknown }).code === "string" &&
+    typeof (error as { message?: unknown }).message === "string"
+  ) {
+    const converted = error as ApiError["error"];
+    return { ...converted, details: converted.details ?? {} };
+  }
   if (axios.isAxiosError(error)) {
     const payload = (error.response?.data as ApiError | undefined)?.error;
     if (payload) return payload;
