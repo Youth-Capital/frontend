@@ -8,7 +8,7 @@ import { LanguageSwitcher } from "@/shared/ui/LanguageSwitcher";
 import { ThemeSwitcher } from "@/shared/ui/ThemeSwitcher";
 import type { Plan } from "@/shared/types/api";
 
-import { Lattice, Portal } from "@/shared/ui/geometry";
+import { Lattice } from "@/shared/ui/geometry";
 
 import { StagePath } from "./StagePath";
 import "@/shared/styles/deep.css";
@@ -73,12 +73,8 @@ export default function LandingPage() {
       <main id="main">
         <Hero />
         <JourneySection />
-        <WhatIsIt />
         <ForStudents />
         <ForEmployers />
-        <Learning />
-        <Assessment />
-        <Intelligence />
         {anyPlans.data && (
           <Pricing
             plans={plans.data ?? []}
@@ -331,46 +327,6 @@ function Section({
         {children && <div className="mt-10">{children}</div>}
       </div>
     </section>
-  );
-}
-
-/**
- * One of the three cards, with room for an illustration above it.
- *
- * The artwork is optional on purpose. It lives in `public/illustrations/` and
- * is dropped in by hand, so the card has to read correctly before the file
- * exists and keep reading correctly if one is ever removed — a broken-image
- * icon on the landing page would be worse than no picture at all. `onError`
- * is what makes that true rather than merely intended.
- */
-function Feature({
-  title,
-  body,
-  art,
-}: {
-  title: string;
-  body: string;
-  /** File name inside /illustrations, without a leading slash. */
-  art?: string;
-}) {
-  const [artFailed, setArtFailed] = useState(false);
-
-  return (
-    <div className="card overflow-hidden">
-      {art && !artFailed && (
-        <img
-          src={`/illustrations/${art}`}
-          alt=""
-          loading="lazy"
-          onError={() => setArtFailed(true)}
-          className="aspect-[16/10] w-full bg-brand-50 object-cover"
-        />
-      )}
-      <div className="p-5">
-        <h3 className="font-semibold text-ink-900">{title}</h3>
-        <p className="mt-1.5 text-sm text-ink-600">{body}</p>
-      </div>
-    </div>
   );
 }
 
@@ -734,100 +690,6 @@ function JourneySection() {
   );
 }
 
-/** Which picture belongs to which panel, and which side it sits on. */
-/**
- * Why this is not a course marketplace, in three columns.
- *
- * A row rather than three alternating illustrated panels. The illustrations
- * were pattern work — beautiful, and saying nothing about the argument beside
- * them; three of them down the page turned a claim into a brochure. What is
- * left is the claim itself, set as a document: numbered, ruled, and read left
- * to right in one pass.
- *
- * The rules between columns are what make it read as official rather than as
- * a card grid. Cards with shadows are a product page; ruled columns are a
- * printed page, and this is a state youth programme describing how it works.
- *
- * Each column is headed by the same arch drawn with one more ring than the
- * column before it: one, two, three. That is this section's own sentence —
- * "each strengthens the next" — made visible, because three identical boxes
- * can only ever say "here are three things".
- *
- * This is deliberately not the pattern artwork that used to sit here. That was
- * ornament: handsome, and silent about the argument beside it. This is the
- * platform's real construction from `geometry.tsx`, a two-centred arch whose
- * apex falls at span·√3/2, and what carries the meaning is the count — which
- * a reader can check against the number next to it.
- */
-function WhatIsIt() {
-  const { t } = useTranslation();
-
-  return (
-    <Section
-      tone="surface"
-      eyebrow={t("landing.panels.eyebrow")}
-      title={t("landing.panels.title")}
-      lead={t("landing.panels.lead")}
-    >
-      <div className="grid gap-5 lg:grid-cols-3">
-        {[0, 1, 2].map((index) => (
-          <article
-            key={index}
-            className="card yc-card flex flex-col overflow-hidden"
-            // The stagger is now only in time, not in position: the arches
-            // still draw left to right, but the cards line up. A rising row
-            // was a nice idea and a bad one — with three different content
-            // lengths it read as three misaligned blocks rather than as a
-            // progression.
-            style={{ ["--yc-stagger" as string]: `${index * 220}ms` }}
-          >
-            {/* The header: a deep band carrying the numeral inside the arch. */}
-            <div
-              className="relative flex items-center justify-center px-6 py-8"
-              style={{ background: "var(--color-deep)" }}
-            >
-              <Portal
-                rings={index + 1}
-                size={104}
-                strokeWidth={2}
-                // Amber on this ground measures 8.9:1, so the mark carries at
-                // a two-pixel stroke without thickening it into a shape.
-                className="yc-arch text-accent"
-              />
-              <span className="absolute bottom-[22%] font-display text-3xl leading-none tabular-nums text-white">
-                {index + 1}
-              </span>
-            </div>
-
-            <div className="flex flex-1 flex-col p-6 lg:p-7">
-              <h3 className="font-display text-xl font-semibold leading-snug text-ink-900">
-                {t(`landing.panels.${index}.title`)}
-              </h3>
-              <p className="mt-3 text-[0.9375rem] leading-[1.7] text-ink-600">
-                {t(`landing.panels.${index}.body`)}
-              </p>
-
-              {/* Outcomes, each opened by a short amber rule. */}
-              <ul className="mt-auto flex flex-col gap-2.5 pt-6 text-[0.9375rem] leading-snug text-ink-700">
-                {[0, 1, 2].map((point) => (
-                  <li key={point} className="flex items-start gap-3">
-                    <span
-                      aria-hidden
-                      className="mt-2.5 h-0.5 w-4 shrink-0 rounded-full"
-                      style={{ background: "var(--color-accent-solid)" }}
-                    />
-                    {t(`landing.panels.${index}.points.${point}`)}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </article>
-        ))}
-      </div>
-    </Section>
-  );
-}
-
 function AudiencePanel({
   eyebrow,
   title,
@@ -895,128 +757,6 @@ function ForEmployers() {
       art={EMPLOYER_DECK_ART}
       cta={t("landing.employers.cta")}
     />
-  );
-}
-
-function Learning() {
-  const { t } = useTranslation();
-  return (
-    <Section
-      eyebrow={t("landing.learning.eyebrow")}
-      title={t("landing.learning.title")}
-      lead={t("landing.learning.lead")}
-    >
-      <div className="grid gap-4 md:grid-cols-3">
-        <Feature title={t("landing.learning.one.title")} body={t("landing.learning.one.body")} />
-        <Feature title={t("landing.learning.two.title")} body={t("landing.learning.two.body")} />
-        <Feature title={t("landing.learning.three.title")} body={t("landing.learning.three.body")} />
-      </div>
-    </Section>
-  );
-}
-
-function Assessment() {
-  const { t } = useTranslation();
-
-  /* Evidence weights are the actual constants the matching engine uses. Shown
-     because "verified" meaning something specific is the product's core claim. */
-  const EVIDENCE: [string, number][] = [
-    ["self", 35],
-    ["course", 65],
-    ["experience", 70],
-    ["test", 90],
-    ["employer", 100],
-  ];
-
-  /*
-   * The one section on a dark ground, and the only full-bleed break in the
-   * scroll.
-   *
-   * Every other section is an eyebrow, a title and a grid on the page colour.
-   * Ten of those in a row is what made the page monotonous, and the answer is
-   * not more ornament on each — it is one place where the page changes state.
-   * This is the section that earns it: the published weights are the product's
-   * hardest claim, and the numbers are what a sceptical reader came to check.
-   */
-  return (
-    <section className="deep py-16 sm:py-20">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <p
-          className="text-xs font-semibold uppercase tracking-[0.14em]"
-          style={{ color: "var(--band-warm-ink)" }}
-        >
-          {t("landing.assessment.eyebrow")}
-        </p>
-        <h2 className="mt-2 max-w-3xl font-display text-3xl font-semibold text-balance sm:text-4xl">
-          {t("landing.assessment.title")}
-        </h2>
-        <p className="mt-3 max-w-2xl text-lg" style={{ color: "var(--band-muted)" }}>
-          {t("landing.assessment.lead")}
-        </p>
-
-        <ol className="mt-10 flex flex-col">
-          {EVIDENCE.map(([source, weight]) => (
-            <li
-              key={source}
-              className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t py-4"
-              style={{ borderColor: "color-mix(in oklab, var(--band-dim) 30%, transparent)" }}
-            >
-              {/* The figure first and large: on this ground the weights are the
-                  thing being read, and a row that opens with its number is a
-                  table of evidence rather than a list of features. */}
-              <span
-                className="w-16 shrink-0 font-display text-2xl tabular-nums leading-none"
-                style={{ color: "var(--band-warm-ink)" }}
-              >
-                {(weight / 100).toFixed(2)}
-              </span>
-              <span className="min-w-40 flex-1 text-base font-semibold">
-                {t(`landing.assessment.source.${source}`)}
-              </span>
-              <span
-                aria-hidden
-                className="h-1 w-full rounded-full"
-                style={{
-                  background: `linear-gradient(90deg, var(--band-warm) ${weight}%, color-mix(in oklab, var(--band-dim) 28%, transparent) ${weight}%)`,
-                }}
-              />
-            </li>
-          ))}
-        </ol>
-      </div>
-    </section>
-  );
-}
-
-function Intelligence() {
-  const { t } = useTranslation();
-  return (
-    <Section
-      eyebrow={t("landing.ai.eyebrow")}
-      title={t("landing.ai.title")}
-      lead={t("landing.ai.lead")}
-    >
-      <div className="grid gap-4 md:grid-cols-2">
-        <Feature title={t("landing.ai.recommend.title")} body={t("landing.ai.recommend.body")} />
-        <Feature title={t("landing.ai.matching.title")} body={t("landing.ai.matching.body")} />
-      </div>
-
-      <div className="card mt-6 p-5">
-        <p className="text-xs font-semibold uppercase tracking-wide text-ink-500">
-          {t("landing.ai.explain.title")}
-        </p>
-        <ul className="mt-3 flex flex-col gap-1.5 text-sm text-ink-700">
-          {(t("landing.ai.explain.reasons", { returnObjects: true }) as string[]).map(
-            (reason) => (
-              <li key={reason} className="flex gap-2">
-                <span aria-hidden className="text-brand-600">·</span>
-                <span>{reason}</span>
-              </li>
-            ),
-          )}
-        </ul>
-      </div>
-    </Section>
   );
 }
 
