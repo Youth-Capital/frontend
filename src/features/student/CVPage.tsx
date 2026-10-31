@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
 import { api, httpStatus } from "@/shared/api/client";
+import { downloadFile } from "@/shared/lib/download";
 import {
   Badge,
   Button,
@@ -139,13 +140,38 @@ export default function CVPage() {
     enabled: tab === "passport",
   });
 
+  /**
+   * Fetch one CV as a PDF and hand it to the browser.
+   *
+   * Kept as a mutation rather than a query because it is an action with a
+   * result the cache has no use for, and because the button needs its pending
+   * state: building the document takes a moment, and a button that looks inert
+   * gets pressed twice.
+   */
+  const exportCv = useMutation({
+    mutationFn: async (id: string) => {
+      await downloadFile(`/cv/documents/${id}/export/`, "CV.pdf");
+    },
+  });
+
   const createCv = useMutation({
     mutationFn: async () => {
-      await api.post("/cv/documents/", { title, headline, summary });
+      const { data } = await api.post<CVDocument>("/cv/documents/", {
+        title,
+        headline,
+        summary,
+      });
+      return data;
     },
-    onSuccess: () => {
+    onSuccess: (created) => {
       closeCreate();
+      setActiveId(created.id);
       void queryClient.invalidateQueries({ queryKey: ["cvs"] });
+      // Creating a CV ends with a file, because that is what the next step —
+      // an application form — asks for. The document stays on the platform
+      // either way; this just saves a second trip through the list to fetch
+      // the thing the student came for.
+      exportCv.mutate(created.id);
     },
   });
 
@@ -307,24 +333,36 @@ export default function CVPage() {
                   <CardSkeleton rows={8} />
                 ) : preview.data ? (
                   <Card>
-                    <div className="border-b border-ink-200 pb-4">
-                      <h2 className="text-xl font-semibold text-ink-900">
-                        {preview.data.personal.full_name}
-                      </h2>
-                      {preview.data.personal.headline && (
-                        <p className="text-sm text-ink-600">
-                          {preview.data.personal.headline}
+                    <div className="flex flex-wrap items-start justify-between gap-3 border-b border-ink-200 pb-4">
+                      <div className="min-w-0">
+                        <h2 className="text-xl font-semibold text-ink-900">
+                          {preview.data.personal.full_name}
+                        </h2>
+                        {preview.data.personal.headline && (
+                          <p className="text-sm text-ink-600">
+                            {preview.data.personal.headline}
+                          </p>
+                        )}
+                        <p className="mt-1 text-xs text-ink-500">
+                          {[
+                            preview.data.personal.city,
+                            preview.data.personal.region,
+                            preview.data.contacts?.email,
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")}
                         </p>
-                      )}
-                      <p className="mt-1 text-xs text-ink-500">
-                        {[
-                          preview.data.personal.city,
-                          preview.data.personal.region,
-                          preview.data.contacts?.email,
-                        ]
-                          .filter(Boolean)
-                          .join(" · ")}
-                      </p>
+                      </div>
+                      {/* The whole point of the page: the version of this that
+                          can be attached to an application. */}
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        loading={exportCv.isPending}
+                        onClick={() => selected && exportCv.mutate(selected)}
+                      >
+                        {t("cv.download")}
+                      </Button>
                     </div>
 
                     {preview.data.summary && (
