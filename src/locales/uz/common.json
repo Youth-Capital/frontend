@@ -599,6 +599,8 @@
     }
   },
   "cv": {
+    "language": "Rezyume tili",
+    "languageHint": "Bo‘lim sarlavhalari va yordamchi matni shu tilda bo‘ladi.",
     "download": "PDF yuklab olish",
     "title": "CV va portfolio",
     "subtitle": "Profilingizdan yig'iladi — hech qachon eskirmaydi",

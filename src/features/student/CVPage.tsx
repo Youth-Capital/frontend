@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 
 import { api, httpStatus } from "@/shared/api/client";
 import { downloadFile } from "@/shared/lib/download";
+import { SUPPORTED_LANGUAGES, type LanguageCode } from "@/shared/i18n";
 import {
   Badge,
   Button,
@@ -73,8 +74,10 @@ interface CvDraft {
 }
 
 export default function CVPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
+
+  const interfaceLanguage = (i18n.resolvedLanguage ?? "uz") as LanguageCode;
 
   const [tab, setTab] = useState<Tab>("cv");
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -82,6 +85,17 @@ export default function CVPage() {
   const [title, setTitle] = useState("My CV");
   const [headline, setHeadline] = useState("");
   const [summary, setSummary] = useState("");
+  /**
+   * Which language the document itself is written in.
+   *
+   * Not the same thing as the language of the interface, and the two parting
+   * company is exactly what went wrong before this existed: the field defaults
+   * to Uzbek on the server, so a student working in Russian got a Russian CV
+   * with Uzbek section headings. It is asked before either way in, because it
+   * decides what the assistant writes as well as what the headings say — after
+   * the draft is written is too late to ask.
+   */
+  const [cvLanguage, setCvLanguage] = useState<LanguageCode>(interfaceLanguage);
   /** Which half of the modal is showing: the choice, or the form. */
   const [step, setStep] = useState<"choose" | "form">("choose");
   /** What a drafted CV was written from, shown above the fields it filled. */
@@ -160,6 +174,7 @@ export default function CVPage() {
         title,
         headline,
         summary,
+        language: cvLanguage,
       });
       return data;
     },
@@ -185,7 +200,11 @@ export default function CVPage() {
    */
   const draftCv = useMutation({
     mutationFn: async () => {
-      const { data } = await api.post<CvDraft>("/cv/documents/draft/", {});
+      // The assistant writes in the language the document was asked for, not
+      // in whichever one the account happens to be set to.
+      const { data } = await api.post<CvDraft>("/cv/documents/draft/", {
+        language: cvLanguage,
+      });
       return data;
     },
     onSuccess: (draft) => {
@@ -210,8 +229,10 @@ export default function CVPage() {
   const closeCreate = () => {
     setCreateOpen(false);
     // The next time it opens it asks again, rather than reopening on whichever
-    // half the last visit ended on.
+    // half the last visit ended on — the language included, which goes back to
+    // the one the student is reading the site in.
     setStep("choose");
+    setCvLanguage(interfaceLanguage);
     setDraftNote(null);
     draftCv.reset();
   };
@@ -344,9 +365,13 @@ export default function CVPage() {
                           </p>
                         )}
                         <p className="mt-1 text-xs text-ink-500">
+                          {/* One place, not two — the same rule the PDF
+                              follows. The city is the student's own wording
+                              and the region is a taxonomy row, so showing both
+                              printed "Toshkent · город Ташкент". */}
                           {[
-                            preview.data.personal.city,
-                            preview.data.personal.region,
+                            preview.data.personal.city ||
+                              preview.data.personal.region,
                             preview.data.contacts?.email,
                           ]
                             .filter(Boolean)
@@ -541,7 +566,52 @@ export default function CVPage() {
             worth asking rather than hiding behind a wand icon, because a
             student who has not filled in a profile should be told that first.
           */
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-4">
+            {/*
+              Asked before the two ways in, because it governs both: it decides
+              the language the assistant drafts in and the one the headings are
+              printed in, and neither can be changed after the fact without
+              rewriting the document.
+
+              A real radio group rather than toggle buttons. Three mutually
+              exclusive options is what radios are, and the native ones bring
+              arrow-key movement and a single tab stop with them; the input is
+              only visually hidden, so the focus ring is carried by the label
+              it is the peer of.
+            */}
+            {/* The fieldset stays a block. A <legend> is laid out by the
+                browser rather than by the parent's display, and inside a flex
+                container the engines disagree about where it lands. */}
+            <fieldset>
+              <legend className="text-sm font-medium text-ink-800">
+                {t("cv.language")}
+              </legend>
+              <p className="mt-1 text-xs text-ink-500">{t("cv.languageHint")}</p>
+              <div className="mt-2 flex w-fit items-center gap-0.5 rounded-(--radius-control) border border-ink-200 p-0.5">
+                {SUPPORTED_LANGUAGES.map((language) => (
+                  <label key={language.code} className="cursor-pointer">
+                    <input
+                      type="radio"
+                      name="cv-language"
+                      value={language.code}
+                      checked={cvLanguage === language.code}
+                      onChange={() => setCvLanguage(language.code)}
+                      className="peer sr-only"
+                    />
+                    <span
+                      className={`block rounded-[calc(var(--radius-control)-2px)] px-3 py-1.5 text-sm coarse:flex coarse:h-11 coarse:min-w-11 coarse:items-center coarse:justify-center peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand-600 ${
+                        cvLanguage === language.code
+                          ? "bg-brand-fill font-semibold text-on-colour"
+                          : "font-medium text-ink-600 fine:hover:bg-ink-100"
+                      }`}
+                    >
+                      {language.label}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+
             <p className="text-sm text-ink-600">{t("cv.chooseHint")}</p>
             <div className="grid gap-3 sm:grid-cols-2">
               <button

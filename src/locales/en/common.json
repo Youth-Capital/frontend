@@ -599,6 +599,8 @@
     }
   },
   "cv": {
+    "language": "CV language",
+    "languageHint": "Section headings and the assistant's text will be in this language.",
     "download": "Download PDF",
     "title": "CV & Portfolio",
     "subtitle": "Built from your profile — never out of date",
