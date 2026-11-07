@@ -157,14 +157,17 @@ export function AppShell({ navItems, portalLabel, accent = "brand" }: Props) {
               <LogoMark size={23} />
             </div>
             {/*
-              * "Youth Capital" needs 90px. On a 360px screen the bar has 91
-              * left once the menu button, the bell and the avatar have taken
-              * theirs, so it fits from there up — but at 320 it has 52, and a
-              * name cut to "Youth Ca…" reads as a bug rather than as a name.
-              * Below that width the mark carries the identity on its own,
-              * which is what a mark is for. It stays the same link either way.
+              * "Yoshlar Kapitali" needs 101px, measured off the rendered bar
+              * rather than counted off the characters. The name before it
+              * needed 90, and the breakpoint moved with it: once the menu
+              * button, the bell and the avatar have taken theirs, a screen of
+              * width W leaves W − 269, so 375 is the first that holds this
+              * name and 360 is 10px short of it. At 320 there are 52, and a
+              * name cut to "Yoshlar Kapi…" reads as a bug rather than as a
+              * name. Below the breakpoint the mark carries the identity on
+              * its own, which is what a mark is for. Same link either way.
               */}
-            <div className="hidden min-w-0 min-[360px]:block">
+            <div className="hidden min-w-0 min-[375px]:block">
               <p className="truncate text-sm font-semibold leading-tight text-ink-900">
                 {t("app.name")}
               </p>

@@ -1,70 +1,38 @@
 /**
- * The mark: three round-topped arches on one baseline, each taller than the last.
+ * The mark: a figure with both arms raised, standing in the open ring of a C.
  *
- * Built to the approved board (`design/logo/2-rising.png`), measured off it
- * rather than reinterpreted. Two earlier deviations are the reason this file
- * was rewritten: the arches had been drawn with the site's pointed
- * two-centred profile, and their widths grew as fast as their heights. Both
- * were defensible on their own and both made the mark stop looking like the
- * thing that was signed off.
+ * Taken from the supplied artwork rather than reinterpreted. The source is a
+ * bitmap, so every number here was measured off it: the outline of each piece
+ * was walked, rolled free of the one-pixel staircase a rasteriser leaves, and
+ * thinned to the points that carry the shape. The head is the exception — it
+ * fitted a circle to within 1.3px of 2,700 boundary samples, so it is written
+ * as a circle, which stays round at every size instead of being a polygon
+ * pretending to be one.
  *
- * What the board actually does:
+ * The pieces are separate on purpose. The C is cut in three places where the
+ * figure passes in front of it, and those cuts are part of the drawing: they
+ * are what lets a single colour read as two objects, one standing before the
+ * other. Drawing them as real gaps rather than as a knockout stroke means the
+ * mark carries no background of its own and sits on any ground — the role
+ * tiles, the dim auth panel, a dark header — without a halo.
  *
- *   - the top of each arch is a plain semicircle, radius = half the width;
- *   - widths barely grow — 1 : 1.08 : 1.32 — so the rise reads as height,
- *     not as three shapes fanning out;
- *   - heights step 1 : 1.72 : 2.38;
- *   - the gaps are tight, about a fifth of an arch's width;
- *   - one baseline runs under all three at the same stroke weight;
- *   - the first arch is filled, the two behind it are open.
- *
- * They stand on one line — everybody starts from the same ground — and they
- * rise. One span crossed, two still ahead.
- *
- * The whole mark is one colour. The board painted the leading arch amber and
- * that shipped for a while; it is now the mark's own colour, filled. The
- * difference between crossed and ahead is carried by fill against outline —
- * by form — and form needs no contrast solving, so the mark reads the same on
- * every ground it is dropped on: the role tiles in the sidebar, the dim band
- * on the auth panel, the brand-100 avatar in the chat. A second hue would have
- * had to be measured against each of those separately.
+ * One colour throughout, taken from `currentColor`. That is what makes the
+ * same file work as violet on white and as pale lilac on the deep band: the
+ * mark follows the text around it, the way the supplied artwork does.
  */
 
 const BOX = 100;
 
-/** The shared ground, and the weight everything is drawn at. */
-const BASE_Y = 88;
-const STROKE = 6;
+/** The C, in the three arcs the figure leaves of it. */
+const RING =
+  "M76.29 28.91C76.43 28.96 76.68 28.89 77.07 29.25C77.47 29.61 78.04 30.49 78.64 31.08C79.24 31.66 79.53 31.35 80.69 32.76C81.85 34.18 84.35 37.49 85.6 39.57C86.86 41.64 87.61 43.7 88.24 45.22C88.88 46.73 89.14 47.64 89.39 48.65C89.65 49.66 89.83 50.74 89.79 51.29C89.74 51.83 91.82 51.83 89.1 51.94C86.39 52.05 76.29 52.03 73.5 51.92C70.72 51.82 73.02 52.11 72.38 51.31C71.75 50.51 70.75 48.46 69.68 47.14C68.62 45.82 66.6 44.31 65.99 43.4C65.39 42.48 65.01 43.31 66.07 41.67C67.12 40.03 70.96 35.4 72.31 33.55C73.66 31.71 73.53 31.37 74.18 30.6C74.84 29.83 75.89 29.21 76.24 28.92C76.59 28.64 76.15 28.86 76.29 28.91ZM25 32.6C25.12 32.69 25.33 32.65 25.71 33.13C26.1 33.61 26.13 33.97 27.3 35.45C28.48 36.94 31.76 40.73 32.77 42.04C33.77 43.35 33.27 42.93 33.33 43.3C33.39 43.66 33.59 43.73 33.13 44.25C32.68 44.77 31.55 45.29 30.62 46.4C29.7 47.52 28.36 49.53 27.59 50.95C26.82 52.37 26.38 53.73 25.98 54.92C25.59 56.11 25.34 56.59 25.22 58.06C25.09 59.52 25.09 62.15 25.22 63.71C25.35 65.28 25.51 66.11 25.97 67.47C26.42 68.83 27.11 70.43 27.96 71.87C28.8 73.31 29.83 74.82 31.04 76.1C32.25 77.37 33.92 78.64 35.21 79.51C36.5 80.37 38.12 80.93 38.78 81.31C39.44 81.68 39.09 79.09 39.17 81.75C39.24 84.4 39.28 94.57 39.24 97.23C39.2 99.89 39.34 97.61 38.93 97.7C38.52 97.78 37.35 97.78 36.78 97.72C36.21 97.66 36.66 97.82 35.5 97.31C34.33 96.8 31.62 95.65 29.79 94.64C27.96 93.64 25.93 92.36 24.51 91.25C23.09 90.15 21.93 88.62 21.25 88C20.56 87.38 21.05 88.23 20.4 87.52C19.75 86.81 18.31 85.06 17.36 83.73C16.41 82.4 15.47 80.9 14.7 79.56C13.94 78.22 13.41 77.28 12.78 75.7C12.14 74.11 11.28 71.31 10.9 70.05C10.52 68.79 10.59 68.81 10.52 68.14C10.46 67.48 10.58 66.53 10.52 66.05C10.45 65.57 10.21 66.68 10.15 65.25C10.09 63.83 10.09 58.91 10.15 57.51C10.21 56.1 10.45 57.23 10.51 56.82C10.57 56.41 10.45 55.61 10.52 55.04C10.59 54.48 10.54 54.65 10.91 53.45C11.29 52.25 12.15 49.49 12.78 47.86C13.41 46.22 13.88 45.15 14.7 43.63C15.53 42.1 16.53 40.29 17.73 38.72C18.92 37.14 20.91 35.15 21.88 34.19C22.84 33.23 23 33.23 23.52 32.97C24.03 32.71 24.7 32.68 24.95 32.61C25.2 32.55 24.87 32.51 25 32.6ZM73.79 68.37C76.4 68.34 86.76 68.23 89.42 68.27C92.09 68.3 89.73 68.26 89.79 68.58C89.85 68.89 89.97 69.34 89.78 70.16C89.59 70.98 89.34 71.85 88.64 73.48C87.94 75.12 86.71 78.02 85.57 79.98C84.43 81.95 82.72 84.05 81.8 85.26C80.88 86.47 80.81 86.51 80.06 87.26C79.32 88.01 78.6 88.69 77.33 89.73C76.05 90.77 74.25 92.37 72.42 93.5C70.59 94.64 67.81 95.85 66.34 96.55C64.88 97.25 64.43 97.44 63.65 97.7C62.87 97.95 62.2 98.03 61.69 98.09C61.17 98.14 60.82 98.14 60.53 98.02C60.25 97.9 60.06 100.07 59.98 97.36C59.89 94.64 59.96 84.42 60.03 81.75C60.11 79.07 59.71 81.67 60.42 81.31C61.12 80.95 63.2 80.14 64.25 79.58C65.29 79.02 65.71 78.78 66.69 77.94C67.66 77.1 68.92 76.1 70.1 74.51C71.27 72.92 73.13 69.42 73.75 68.4C74.36 67.37 71.17 68.39 73.79 68.37Z";
 
-/**
- * Centre, half-width and the height of the top above the baseline.
- *
- * Widths 22 / 24 / 29 with 5 between them, heights 32 / 55 / 76: the board's
- * own ratios, scaled into the box with room for the stroke on every side.
- */
-const ARCHES = [
-  { cx: 18.5, half: 11, height: 32 },
-  { cx: 46.5, half: 12, height: 55 },
-  { cx: 78, half: 14.5, height: 76 },
-] as const;
+/** Arms and body, one closed outline. */
+const FIGURE =
+  "M13.98 1.57C14.07 1.59 13.96 0.81 14.44 1.69C14.92 2.57 16 5.36 16.86 6.87C17.71 8.38 18.79 9.71 19.55 10.73C20.32 11.75 20.98 12.53 21.44 13C21.91 13.46 21.35 12.66 22.34 13.53C23.34 14.39 25.85 16.98 27.4 18.21C28.95 19.44 29.68 19.83 31.63 20.91C33.58 21.98 36.72 23.77 39.12 24.65C41.53 25.53 43.96 25.94 46.06 26.2C48.16 26.46 50.64 26.25 51.72 26.19C52.81 26.14 52.19 25.91 52.58 25.84C52.97 25.78 53.51 25.92 54.06 25.8C54.61 25.68 55.41 25.23 55.9 25.11C56.4 24.98 55.89 25.45 57.01 25.06C58.14 24.68 61.01 23.57 62.66 22.81C64.31 22.05 65.37 21.45 66.89 20.5C68.41 19.55 70.74 17.9 71.8 17.1C72.85 16.3 72.77 16.04 73.22 15.7C73.67 15.35 74.16 15.32 74.51 15.03C74.86 14.74 74.97 14.28 75.33 13.94C75.69 13.6 76.09 13.61 76.65 13C77.2 12.38 78.07 10.92 78.65 10.25C79.24 9.59 79.74 9.55 80.16 9.01C80.58 8.48 80.85 7.52 81.16 7.04C81.46 6.56 81.49 7.03 81.98 6.13C82.46 5.23 83.64 2.41 84.05 1.65C84.46 0.88 84.28 1.48 84.43 1.55C84.57 1.61 84.95 1.2 84.92 2.04C84.89 2.88 84.61 5.01 84.24 6.58C83.88 8.16 83.36 9.74 82.73 11.49C82.11 13.24 81.18 15.52 80.49 17.08C79.8 18.65 79.78 18.94 78.59 20.89C77.4 22.83 74.85 26.63 73.36 28.75C71.86 30.87 70.47 32.56 69.62 33.6C68.77 34.63 69.36 33.55 68.26 34.97C67.16 36.38 64.15 40.44 63.01 42.09C61.88 43.74 62.09 43.38 61.45 44.84C60.81 46.31 59.82 48.84 59.19 50.86C58.57 52.88 57.94 49.1 57.69 56.95C57.44 64.8 57.83 90.88 57.69 97.97C57.54 105.06 57.35 99.2 56.81 99.47C56.26 99.74 54.96 99.5 54.43 99.57C53.9 99.65 54.98 99.88 53.63 99.94C52.28 100 47.65 100 46.31 99.94C44.97 99.88 46.05 99.65 45.57 99.58C45.09 99.52 43.98 99.63 43.42 99.56C42.86 99.5 42.5 99.39 42.19 99.17C41.89 98.96 41.7 105.42 41.58 98.26C41.47 91.1 41.58 63.37 41.51 56.21C41.44 49.05 41.29 56 41.16 55.29C41.03 54.58 41.07 53.22 40.75 51.97C40.42 50.72 39.75 49.02 39.23 47.8C38.71 46.57 38.88 46.45 37.62 44.62C36.37 42.79 33.08 38.52 31.68 36.81C30.27 35.1 30.19 35.5 29.21 34.34C28.22 33.17 26.64 30.85 25.77 29.8C24.91 28.75 24.86 29.19 24 28.01C23.14 26.83 21.74 24.74 20.61 22.73C19.48 20.73 18.05 17.8 17.23 15.98C16.41 14.15 16.1 13.12 15.71 11.8C15.33 10.48 15.16 8.92 14.92 8.06C14.67 7.2 14.41 7.19 14.24 6.64C14.06 6.08 13.96 5.51 13.85 4.74C13.74 3.96 13.58 2.5 13.59 1.98C13.6 1.45 13.86 1.67 13.92 1.6C13.99 1.53 13.89 1.56 13.98 1.57Z";
 
-/**
- * Legs up from the baseline, a semicircle over the top, then back down.
- *
- * Closed, so the leading arch can be filled — the fill is what survives at
- * 18px, where an outline of this weight starts to close up.
- */
-function archPath(cx: number, half: number, height: number) {
-  //: The semicircle's centre sits one radius below the top of the arch.
-  const springing = BASE_Y - height + half;
-
-  return (
-    `M ${cx - half} ${BASE_Y} ` +
-    `V ${springing} ` +
-    `A ${half} ${half} 0 0 1 ${cx + half} ${springing} ` +
-    `V ${BASE_Y} Z`
-  );
-}
+/** Measured, not eyeballed: a circle fit to the drawn head. */
+const HEAD = { cx: 48.86, cy: 11.7, r: 12.14 } as const;
 
 export function LogoMark({
   size = 32,
@@ -73,60 +41,34 @@ export function LogoMark({
   size?: number;
   className?: string;
 }) {
-  const [first, ...rest] = ARCHES;
-
   return (
     <svg
       width={size}
       height={size}
       viewBox={`0 0 ${BOX} ${BOX}`}
-      fill="none"
+      fill="currentColor"
       aria-hidden
       className={className}
     >
-      <g
-        stroke="currentColor"
-        strokeWidth={STROKE}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        {/* The ground, run between the outermost legs so the caps line up. */}
-        <path
-          d={`M ${ARCHES[0].cx - ARCHES[0].half} ${BASE_Y} H ${
-            ARCHES[2].cx + ARCHES[2].half
-          }`}
-        />
-
-        {/* Crossed. */}
-        <path d={archPath(first.cx, first.half, first.height)} fill="currentColor" />
-
-        {/* Still ahead. */}
-        {rest.map((arch) => (
-          <path key={arch.cx} d={archPath(arch.cx, arch.half, arch.height)} />
-        ))}
-      </g>
+      <path d={RING} />
+      <circle cx={HEAD.cx} cy={HEAD.cy} r={HEAD.r} />
+      <path d={FIGURE} />
     </svg>
   );
 }
 
 /**
- * The mark in its tile, as it appears in a header.
+ * The mark as it appears in a lockup, beside the name.
  *
- * The tile is the brand violet, written as a literal rather than taken from
- * `brand-600`: that ramp inverts under `[data-theme="dark"]` and the tile
- * would turn pale lilac while the mark stayed white, taking the whole thing to
- * 2.34:1 — under the 3:1 a mark answers to. A brand ground is not a step on a
- * ramp; it holds its value the way a cover does.
+ * It used to be set in a filled tile, which the old three-arch mark needed:
+ * that mark was a line drawing and a ground gave it something to be drawn on.
+ * This one is a solid shape and carries itself, so the tile is gone — the
+ * supplied artwork has none either.
  *
- * It is the periwinkle now, and the mark on it is the dark ink rather than
- * white — the same flip the buttons made. A mark answers to 3:1 and this pair
- * measures 7.04:1, so the tile has room to spare, which matters here: the
- * logo is rendered at 20px in a header and at 96px on the sign-in panel, and
- * a mark that only just clears at one size does not clear at the other.
+ * The colour is the brand violet by way of the token, so it remaps with the
+ * theme: #7052C9 on the light page, #B2A1E5 on the dark one, which is the
+ * pairing the artwork itself was delivered in.
  */
-const TILE_BG = "#C8B6FF";
-const TILE_INK = "#372863";
-
 export function Logo({
   size = 40,
   className,
@@ -135,14 +77,9 @@ export function Logo({
   className?: string;
 }) {
   return (
-    <span
-      className={[
-        "flex shrink-0 items-center justify-center rounded-xl",
-        className ?? "",
-      ].join(" ")}
-      style={{ width: size, height: size, background: TILE_BG, color: TILE_INK }}
-    >
-      <LogoMark size={Math.round(size * 0.72)} />
-    </span>
+    <LogoMark
+      size={size}
+      className={["shrink-0 text-brand-600", className ?? ""].join(" ")}
+    />
   );
 }
