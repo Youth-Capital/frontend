@@ -271,19 +271,48 @@ export const Select = forwardRef<
       required={required}
       htmlFor={id}
     >
-      <select
-        ref={ref}
-        id={id}
-        aria-invalid={Boolean(error)}
-        className={clsx(
-          CONTROL_CLASS,
-          error ? "border-danger" : "border-ink-300",
-          className,
-        )}
-        {...rest}
-      >
-        {children}
-      </select>
+      {/*
+        The chevron is drawn here rather than left to the browser.
+
+        A native select paints its own arrow hard against the right edge, with
+        no padding of its own and in the platform's grey — so on a rounded,
+        tinted control it sat almost on the border and read as a different
+        piece of software showing through. `appearance-none` takes it off and
+        this one takes its place: inset from the edge like every other glyph in
+        the interface, in the ink the rest of the control is drawn in.
+
+        The select keeps its own padding clear of the chevron, and the chevron
+        is `pointer-events-none`, so clicking it still opens the list — it is a
+        picture of a control, not a second control.
+      */}
+      <div className="relative">
+        <select
+          ref={ref}
+          id={id}
+          aria-invalid={Boolean(error)}
+          className={clsx(
+            CONTROL_CLASS,
+            "appearance-none pr-10",
+            error ? "border-danger" : "border-ink-300",
+            className,
+          )}
+          {...rest}
+        >
+          {children}
+        </select>
+        <svg
+          aria-hidden
+          viewBox="0 0 20 20"
+          className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-500"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.75}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M6 8l4 4 4-4" />
+        </svg>
+      </div>
     </FieldShell>
   );
 });

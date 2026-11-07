@@ -280,6 +280,8 @@
     }
   },
   "career": {
+    "catalogueEmpty": "Kasblar ro‘yxati hozircha bo‘sh",
+    "catalogueEmptyHint": "Tanlash uchun hech narsa yo‘q: kasblar ro‘yxati hali to‘ldirilmagan. Qo‘llab-quvvatlash xizmatiga yozing — usiz reja ham, kurslar ham tanlanmaydi.",
     "title": "Karyera yo'li",
     "subtitle": "Nima bor, nima yetishmaydi, keyin nima qilish kerak",
     "readiness": "«{{profession}}» kasbiga tayyorlik",
@@ -1032,6 +1034,11 @@
     }
   },
   "settings": {
+    "deleteAccount": "Hisobni o‘chirish",
+    "deleteAccountHint": "Hisobni butunlay yopish. Buni ortga qaytarib bo‘lmaydi.",
+    "deleteAccountConfirmTitle": "Hisob o‘chirilsinmi?",
+    "deleteAccountConfirm": "Butunlay o‘chirish",
+    "deleteAccountWhat": "Rezyumelaringiz, fayllari bilan portfolio, ta’lim va tajriba o‘chiriladi. Ism, shahar va surat tozalanadi, pochta manzili bo‘shatiladi, kirish yopiladi. Buni qaytarib bo‘lmaydi. Parol bilan tasdiqlang.",
     "title": "Sozlamalar",
     "account": "Hisob",
     "language": "Interfeys tili",
@@ -1586,6 +1593,7 @@
     }
   },
   "intake": {
+    "noChoices": "Javob berish uchun variant yo‘q: bu savol uchun ro‘yxat hali to‘ldirilmagan. O‘tkazib yuboring — keyinroq qaytasiz.",
     "title": "Tanishuv",
     "greeting": "Salom! Sizga mos yo'l topish uchun bir nechta savol beraman. Ko'pini o'tkazib yuborish mumkin — keyin ham to'ldirasiz.",
     "progress": "{{answered}} / {{total}} savol",

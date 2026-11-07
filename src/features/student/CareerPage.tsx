@@ -115,23 +115,42 @@ export default function CareerPage() {
       />
 
       <Card>
-        <Select
-          id="target-profession"
-          label={t("career.selectProfession")}
-          value={targetId ?? ""}
-          onChange={(event) => setTarget.mutate(event.target.value)}
-          disabled={setTarget.isPending}
-        >
-          <option value="">{t("common.notSpecified")}</option>
-          {professions.data?.map((profession) => (
-            <option key={profession.id} value={profession.id}>
-              {profession.name}
-            </option>
-          ))}
-        </Select>
+        {/*
+          A catalogue with nothing in it is said out loud.
+
+          The professions come from reference data the platform is seeded with,
+          and when that seeding has not been run the query answers an empty
+          list. The select then showed a single "Not specified" and nothing
+          else: the page asked for a choice, offered none, and gave the reader
+          no way to tell whether they had misread it or the product was broken.
+          Saying which it is costs one line and ends the guessing.
+        */}
+        {!professions.isLoading && (professions.data?.length ?? 0) === 0 ? (
+          <div className="flex flex-col gap-1">
+            <p className="text-sm font-medium text-ink-800">
+              {t("career.catalogueEmpty")}
+            </p>
+            <p className="text-sm text-ink-600">{t("career.catalogueEmptyHint")}</p>
+          </div>
+        ) : (
+          <Select
+            id="target-profession"
+            label={t("career.selectProfession")}
+            value={targetId ?? ""}
+            onChange={(event) => setTarget.mutate(event.target.value)}
+            disabled={setTarget.isPending || professions.isLoading}
+          >
+            <option value="">{t("common.notSpecified")}</option>
+            {professions.data?.map((profession) => (
+              <option key={profession.id} value={profession.id}>
+                {profession.name}
+              </option>
+            ))}
+          </Select>
+        )}
       </Card>
 
-      {!targetId && (
+      {!targetId && (professions.data?.length ?? 0) > 0 && (
         <EmptyState
           title={t("career.selectProfession")}
           description={t("onboarding.targetProfessionHint")}

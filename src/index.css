@@ -535,15 +535,37 @@
     box-shadow: 0 0 0 5px color-mix(in oklab, var(--color-surface) 78%, transparent);
   }
 
+  /*
+   * The scrollbar reads as a scrollbar.
+   *
+   * The thumb used to ride on a transparent track, which left a grey rounded
+   * pill floating against the page with nothing to explain it — on a screen
+   * that barely scrolls it looks like a stray piece of interface rather than
+   * something you can drag. A faint groove behind it is the whole fix: the
+   * eye reads bar-in-channel instantly and stops asking what it is.
+   *
+   * The thumb is tinted with the page's own ink rather than a flat grey, and
+   * sits at an alpha that stays visible without competing with the content it
+   * is beside. It darkens on hover, because it is draggable and should say so.
+   */
   ::-webkit-scrollbar {
     width: 10px;
     height: 10px;
   }
-  ::-webkit-scrollbar-thumb {
-    @apply rounded-full bg-ink-300;
-  }
   ::-webkit-scrollbar-track {
-    @apply bg-transparent;
+    background: color-mix(in oklab, var(--color-ink-900) 6%, transparent);
+  }
+  ::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+    background-color: color-mix(in oklab, var(--color-ink-900) 26%, transparent);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: color-mix(in oklab, var(--color-ink-900) 40%, transparent);
+  }
+  ::-webkit-scrollbar-corner {
+    background: transparent;
   }
 }
 

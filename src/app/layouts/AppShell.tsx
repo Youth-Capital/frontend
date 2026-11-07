@@ -102,9 +102,16 @@ export function AppShell({ navItems, portalLabel, accent = "brand" }: Props) {
    *   header inset       0.75rem   top-3 / mt-3
    *   header height      3.5rem    h-14
    *   header bottom      4.25rem   where the mobile scrim starts
-   *   gap under the bar  0.75rem
-   *   rail top           5rem      top-20, desktop rail and mobile drawer
-   *   rail bottom inset  0.75rem   so the rail is 100dvh − 5.75rem tall
+   *   gap under the bar  1.25rem
+   *   rail top           5.5rem    desktop rail and mobile drawer
+   *   rail bottom inset  0.75rem   so the rail is 100dvh − 6.25rem tall
+   *
+   * The gap under the bar was 0.75rem and is now 1.25rem. Measured, the old
+   * one left 10px between the foot of the header and the head of the drawer —
+   * and at that distance two panels this size, both carrying a card radius
+   * and both flush to the same left margin, stopped reading as two things.
+   * They are separate surfaces doing separate jobs, and the eye needs to be
+   * told so before it reads either of them.
    *
    * The inset is deliberately not responsive — only the horizontal margin
    * opens up on wider screens. A breakpoint-dependent top would need a
@@ -202,7 +209,7 @@ export function AppShell({ navItems, portalLabel, accent = "brand" }: Props) {
             nav's own scroll is cut by the corners instead of running past
             them. Its left margin matches the bar's at this breakpoint, which
             is the only one it is ever shown at. */}
-        <aside className="glass-bar sticky top-20 ml-6 hidden h-[calc(100dvh-5.75rem)] w-60 shrink-0 overflow-hidden rounded-(--radius-card) shadow-sm lg:block">
+        <aside className="glass-bar sticky top-[5.5rem] ml-6 hidden h-[calc(100dvh-6.25rem)] w-60 shrink-0 overflow-hidden rounded-(--radius-card) shadow-sm lg:block">
           {sidebar}
         </aside>
 
@@ -220,7 +227,7 @@ export function AppShell({ navItems, portalLabel, accent = "brand" }: Props) {
                 It is `fixed`, so it is placed against the screen rather than
                 against the padded wrapper and has to carry the insets itself —
                 otherwise its last nav item sits under the home indicator. */}
-            <aside className="glass-raised fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom))] left-[calc(0.75rem+env(safe-area-inset-left))] top-[calc(5rem+env(safe-area-inset-top))] z-30 w-64 overflow-hidden rounded-(--radius-card) lg:hidden">
+            <aside className="glass-raised fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom))] left-[calc(0.75rem+env(safe-area-inset-left))] top-[calc(5.5rem+env(safe-area-inset-top))] z-30 w-64 overflow-hidden rounded-(--radius-card) lg:hidden">
               {sidebar}
             </aside>
           </>

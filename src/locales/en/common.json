@@ -280,6 +280,8 @@
     }
   },
   "career": {
+    "catalogueEmpty": "The profession catalogue is empty",
+    "catalogueEmptyHint": "There is nothing to choose from yet: the list of professions has not been filled in. Contact support — without it no plan can be built and no courses matched.",
     "title": "Career path",
     "subtitle": "What you have, what is missing, what to do next",
     "readiness": "Readiness for {{profession}}",
@@ -1032,6 +1034,11 @@
     }
   },
   "settings": {
+    "deleteAccount": "Delete account",
+    "deleteAccountHint": "Close your account for good. This cannot be undone.",
+    "deleteAccountConfirmTitle": "Delete your account?",
+    "deleteAccountConfirm": "Delete permanently",
+    "deleteAccountWhat": "Your CVs, your portfolio and its files, your education and your experience will be removed. Your name, city and photo will be cleared, your email address released and sign-in closed. None of this can be undone. Confirm with your password.",
     "title": "Settings",
     "account": "Account",
     "language": "Interface language",
@@ -1586,6 +1593,7 @@
     }
   },
   "intake": {
+    "noChoices": "There is nothing to answer with yet: the list behind this question has not been filled in. Skip it and come back later.",
     "title": "Getting to know you",
     "greeting": "Hello! A few questions so we can find the right path for you. Most are skippable — you can fill them in later.",
     "progress": "{{answered}} of {{total}} questions",

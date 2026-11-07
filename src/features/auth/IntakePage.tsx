@@ -180,6 +180,16 @@ function AnswerControl({
     case "SINGLE":
       return (
         <div className="flex flex-wrap gap-2">
+          {/*
+            Some of these questions take their choices from reference data —
+            the professions table, for one — and an unseeded platform answers
+            with none. What reached the screen then was a question with a
+            single "Skip" under it and nothing to skip past, which reads as a
+            broken step rather than as an empty catalogue. It now says which.
+          */}
+          {question.choices.length === 0 && (
+            <p className="w-full text-sm text-ink-600">{t("intake.noChoices")}</p>
+          )}
           {question.choices.map((choice) => (
             <button
               key={choice.value}

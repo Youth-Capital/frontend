@@ -8,7 +8,7 @@ import { api } from "@/shared/api/client";
 import { useAuth } from "@/shared/auth/AuthContext";
 import { useApiError } from "@/shared/hooks/useApiError";
 import { SUPPORTED_LANGUAGES } from "@/shared/i18n";
-import { Badge, Button, Card, CardHeader, Input } from "@/shared/ui";
+import { Badge, Button, Card, CardHeader, Input, Modal } from "@/shared/ui";
 import { AssistantPreferences } from "./AssistantPreferences";
 
 const REQUIRED_CONSENTS = new Set(["TERMS", "PRIVACY", "DATA_PROCESSING"]);
@@ -40,6 +40,8 @@ export default function SettingsPage() {
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
 
@@ -85,6 +87,26 @@ export default function SettingsPage() {
       // Changing the password blacklists every session, including this one.
       await logout();
       navigate("/auth/login", { replace: true });
+    },
+    onError: (caught) => setError(describeError(caught)),
+  });
+
+  /**
+   * Close the account for good.
+   *
+   * Its own password field rather than the one above it: the change-password
+   * form is a different intent, and borrowing its value would mean a password
+   * typed to change a password could end up closing the account instead.
+   */
+  const deleteAccount = useMutation({
+    mutationFn: async () => {
+      await api.post("/auth/me/delete/", { current_password: deletePassword });
+    },
+    onSuccess: async () => {
+      setDeleteOpen(false);
+      // Every session is revoked server-side; this clears the client's.
+      await logout();
+      navigate("/", { replace: true });
     },
     onError: (caught) => setError(describeError(caught)),
   });
@@ -209,6 +231,55 @@ export default function SettingsPage() {
           </Button>
         </div>
       </Card>
+
+
+      {/*
+        The one irreversible control on the page, and it is kept apart from
+        everything above it. A destructive action placed in the same rhythm as
+        a language switch gets pressed in the same rhythm as a language switch.
+      */}
+      <Card className="border-danger/40">
+        <CardHeader
+          title={t("settings.deleteAccount")}
+          subtitle={t("settings.deleteAccountHint")}
+        />
+        <Button variant="danger" onClick={() => setDeleteOpen(true)}>
+          {t("settings.deleteAccount")}
+        </Button>
+      </Card>
+
+      <Modal
+        open={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
+        title={t("settings.deleteAccountConfirmTitle")}
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setDeleteOpen(false)}>
+              {t("common.cancel")}
+            </Button>
+            <Button
+              variant="danger"
+              onClick={() => deleteAccount.mutate()}
+              loading={deleteAccount.isPending}
+              disabled={!deletePassword}
+            >
+              {t("settings.deleteAccountConfirm")}
+            </Button>
+          </>
+        }
+      >
+        <div className="flex flex-col gap-3">
+          <p className="text-sm text-ink-700">{t("settings.deleteAccountWhat")}</p>
+          <Input
+            id="delete-password"
+            type="password"
+            autoComplete="current-password"
+            label={t("auth.currentPassword")}
+            value={deletePassword}
+            onChange={(event) => setDeletePassword(event.target.value)}
+          />
+        </div>
+      </Modal>
 
       {error && (
         <div role="alert" className="rounded-xl bg-danger-soft px-3 py-2 text-sm text-danger">
