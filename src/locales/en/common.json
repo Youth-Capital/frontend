@@ -153,6 +153,15 @@
     "course_no_skills": "Add at least one skill this course teaches.",
     "course_is_external": "This course is taken on another platform."
   },
+  "adminSetup": {
+      "title": "Create an administrator",
+      "subtitle": "The first and only administrator account. Choose the address and password yourself — they are not seen or stored anywhere else.",
+      "passwordHint": "At least 10 characters. Do not reuse a password you have used elsewhere.",
+      "repeat": "Repeat the password",
+      "mismatch": "The passwords do not match",
+      "submit": "Create administrator",
+      "noToken": "The link is incomplete: it carries no setup key. Open it in full, including the part after “?token=”."
+  },
   "auth": {
     "verifyTitle": "Verify your email",
     "verifySubtitle": "Confirm that {{email}} belongs to you before continuing.",

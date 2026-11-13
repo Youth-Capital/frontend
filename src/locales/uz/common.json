@@ -153,6 +153,15 @@
     "course_no_skills": "Kurs o'rgatadigan kamida bitta ko'nikmani qo'shing.",
     "course_is_external": "Bu kurs boshqa platformada o'tiladi."
   },
+  "adminSetup": {
+      "title": "Administrator yaratish",
+      "subtitle": "Birinchi va yagona administrator hisobi. Login va parolni o‘zingiz tanlaysiz — men ularni ko‘rmayman va hech qayerga saqlamayman.",
+      "passwordHint": "Kamida 10 belgi. Boshqa joyda ishlatgan parolingizni qo‘ymang.",
+      "repeat": "Parolni takrorlang",
+      "mismatch": "Parollar mos kelmadi",
+      "submit": "Administrator yaratish",
+      "noToken": "Havola to‘liq emas: unda sozlash kaliti yo‘q. «?token=» dan keyingi qismi bilan birga oching."
+  },
   "auth": {
     "verifyTitle": "Email manzilingizni tasdiqlang",
     "verifySubtitle": "Davom etishdan oldin {{email}} sizga tegishli ekanini tasdiqlang.",

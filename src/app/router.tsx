@@ -18,6 +18,7 @@ const LoginPage = lazy(() => import("@/features/auth/LoginPage"));
 const RegisterPage = lazy(() => import("@/features/auth/RegisterPage"));
 const VerifyEmailPage = lazy(() => import("@/features/auth/VerifyEmailPage"));
 const ResetPasswordPage = lazy(() => import("@/features/auth/ResetPasswordPage"));
+const AdminSetupPage = lazy(() => import("@/features/auth/AdminSetupPage"));
 const OnboardingPage = lazy(() => import("@/features/auth/OnboardingPage"));
 const IntakePage = lazy(() => import("@/features/auth/IntakePage"));
 
@@ -117,6 +118,9 @@ export const router = createBrowserRouter([
       { path: "register", element: <Lazy><RegisterPage /></Lazy> },
       { path: "verify-email", element: <Lazy><VerifyEmailPage /></Lazy> },
       { path: "reset-password", element: <Lazy><ResetPasswordPage /></Lazy> },
+      // Unlisted on purpose: useless without the token the server holds,
+      // and refused outright once an administrator exists.
+      { path: "admin-setup", element: <Lazy><AdminSetupPage /></Lazy> },
     ],
   },
 
