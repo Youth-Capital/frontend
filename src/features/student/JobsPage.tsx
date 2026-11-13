@@ -15,9 +15,15 @@ import {
   Select,
   Tabs,
 } from "@/shared/ui";
-import type { Paginated, Region, Vacancy } from "@/shared/types/api";
+import type {
+  ExternalVacancy,
+  Paginated,
+  Region,
+  Vacancy,
+} from "@/shared/types/api";
+import { ExternalVacancyCard } from "./ExternalVacancyCard";
 
-type Tab = "matched" | "all" | "saved";
+type Tab = "matched" | "all" | "saved" | "external";
 
 export default function JobsPage() {
   const { t } = useTranslation();
@@ -52,6 +58,25 @@ export default function JobsPage() {
       return data.results;
     },
     enabled: tab !== "saved",
+  });
+
+  /**
+   * Part-time work posted on other boards.
+   *
+   * A separate list, not mixed into the one above it: nothing here can be
+   * applied to from this platform, there is no match score to sort by, and
+   * the only action is a link away. Putting them in the same list would have
+   * meant cards that look identical and behave differently.
+   */
+  const external = useQuery({
+    queryKey: ["external-vacancies"],
+    queryFn: async () => {
+      const { data } = await api.get<Paginated<ExternalVacancy>>(
+        "/jobs/external/?page_size=100",
+      );
+      return data.results;
+    },
+    enabled: tab === "external",
   });
 
   const saved = useQuery({
@@ -99,10 +124,11 @@ export default function JobsPage() {
           { key: "matched", label: t("jobs.matched") },
           { key: "all", label: t("jobs.catalog") },
           { key: "saved", label: t("jobs.saved") },
+          { key: "external", label: t("jobs.external.tab") },
         ]}
       />
 
-      {tab !== "saved" && (
+      {tab !== "saved" && tab !== "external" && (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Input
             id="job-search"
@@ -149,10 +175,27 @@ export default function JobsPage() {
         </div>
       )}
 
-      {loading && <CardSkeleton rows={6} />}
-      {!loading && rows.length === 0 && <EmptyState title={t("jobs.empty")} />}
+      {tab === "external" && (
+        <>
+          <p className="text-sm text-ink-600">{t("jobs.external.hint")}</p>
+          {external.isLoading && <CardSkeleton rows={6} />}
+          {!external.isLoading && (external.data?.length ?? 0) === 0 && (
+            <EmptyState title={t("jobs.external.empty")} />
+          )}
+          <div className="grid gap-3 md:grid-cols-2">
+            {external.data?.map((item) => (
+              <ExternalVacancyCard key={item.id} vacancy={item} />
+            ))}
+          </div>
+        </>
+      )}
 
-      {rows.length > 0 && (
+      {tab !== "external" && loading && <CardSkeleton rows={6} />}
+      {tab !== "external" && !loading && rows.length === 0 && (
+        <EmptyState title={t("jobs.empty")} />
+      )}
+
+      {tab !== "external" && rows.length > 0 && (
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
           <div className="flex flex-col gap-3">
             {rows.map((vacancy) => (

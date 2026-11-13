@@ -661,6 +661,15 @@
     "draftFailed": "Could not draft it. Try again, or write it yourself."
   },
   "jobs": {
+    "external": {
+        "tab": "From other boards",
+        "hint": "Part-time work found on outside sites and checked by hand. You apply there — opening a card takes you to the original listing.",
+        "empty": "Nothing has been added yet",
+        "fit_FITS": "Fits",
+        "fit_CAVEATS": "With caveats",
+        "openOn": "Open on {{source}}",
+        "collectedOn": "Checked {{date}}"
+  },
     "title": "Jobs",
     "subtitle": "Vacancies ranked by how well they actually fit you",
     "catalog": "All vacancies",

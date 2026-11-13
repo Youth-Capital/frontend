@@ -1288,3 +1288,19 @@ export interface CompanyState {
   recent_test_takers: { count: number; days: number } | null;
   hired: { count: number; profession: string } | null;
 }
+
+/** A vacancy posted on another board, which the platform only links out to. */
+export interface ExternalVacancy {
+  id: string;
+  source: "OLX" | "CLOZ" | "HABR" | "TELEGRAM";
+  source_label: string;
+  external_url: string;
+  title: string;
+  company: string;
+  city: string;
+  schedule: string;
+  pay: string;
+  fit: "FITS" | "CAVEATS";
+  note: string;
+  collected_on: string;
+}

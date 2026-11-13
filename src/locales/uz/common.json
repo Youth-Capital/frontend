@@ -661,6 +661,15 @@
     "draftFailed": "Qoralama yig‘ilmadi. Qayta urinib ko‘ring yoki o‘zingiz yozing."
   },
   "jobs": {
+    "external": {
+        "tab": "Boshqa saytlardan",
+        "hint": "Tashqi saytlarda topilgan va qo‘lda tekshirilgan qo‘shimcha ish. Ariza o‘sha yerda topshiriladi — bosilganda asl e’lon ochiladi.",
+        "empty": "Hozircha hech narsa qo‘shilmagan",
+        "fit_FITS": "To‘g‘ri keladi",
+        "fit_CAVEATS": "Shartlari bor",
+        "openOn": "{{source}} saytida ochish",
+        "collectedOn": "{{date}} da tekshirilgan"
+  },
     "title": "Vakansiyalar",
     "subtitle": "Sizga qanchalik mos kelishi bo'yicha saralangan",
     "catalog": "Barcha vakansiyalar",
